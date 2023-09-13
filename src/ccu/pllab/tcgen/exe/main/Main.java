@@ -45,6 +45,7 @@ public class Main {
 	 * 1.
 	 * VM argument :
 	 * you need to set ECLiPSe directory address
+	 * and follow rule:
 	 * -ea -Declipse.directory=Dir address
 	 * Example:
 	 * -ea -Declipse.directory=C:\ECLiPSe_6.1

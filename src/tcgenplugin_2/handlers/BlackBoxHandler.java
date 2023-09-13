@@ -91,7 +91,7 @@ public class BlackBoxHandler extends AbstractHandler {
 			e1.printStackTrace();
 		}
 				
-		System.out.println("baba當前使用editor檔案名稱"+CurrentEditorName);
+		System.out.println("當前使用editor檔案名稱"+CurrentEditorName);
 //		try {
 //			
 //			System.out.println(sysoComm.getParameter("com.eclipse-tips.commands.CoverageCriteriaParameter").getName());

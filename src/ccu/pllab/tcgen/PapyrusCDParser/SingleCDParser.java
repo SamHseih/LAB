@@ -1,6 +1,6 @@
 /*
- * 20180331 暺�∩撰
- * ���Papyrus蝜芾ˊ���������
+ * 20180331 黎怡伶
+ * 取得用Papyrus繪製成的類別圖資訊
  */
 
 
@@ -35,13 +35,13 @@ import org.w3c.dom.Element;
 
 public class SingleCDParser {
 
-	private ArrayList<Document> ref = null;  // �靘��閮�������隞����
-	private ArrayList<ClassInfo> classList ; // �靘銝餉��
-	private ArrayList<UserDefinedType> ref_typelist; // �靘��隞摰儔憿
+	private ArrayList<Document> ref = null;  // 用來放其自訂型别需參考的其他類別圖
+	private ArrayList<ClassInfo> classList ; // 用來放主要
+	private ArrayList<UserDefinedType> ref_typelist; // 用來記錄其他自定義類別
 	private String packageName=null;
 	
 	// constructor ===========================================================================
-	// �銝����
+	// 單一圖
 	public SingleCDParser() {
 		// this.cd = cd ;
 		// init(cd);
@@ -50,11 +50,11 @@ public class SingleCDParser {
 	
 	
 	
-	// 憭������ method =======================================================================
+	// 外部拿取資料 method =======================================================================
 	// Get package name
 	
 	public String getPkgName() {
-		return this.packageName;   // XML�蝭�暺�
+		return this.packageName;   // XML根節點
 	}
 	
 	
@@ -62,33 +62,33 @@ public class SingleCDParser {
 	public ArrayList<ClassInfo> getClassList() {
 		return classList;
 	}
-	// 憭������ method =======================================================================
+	// 外部拿取資料 method =======================================================================
 	
 	
 	
 	/*
-	 * 隞乩�Parse銝餉�����method
+	 * 以下為Parse主要及所需method
 	 * 
-	 * 1. 撠�����om璅寧�蝯�� : init(), initRef()
-	 * 2. ���蒂������ㄐ����� : Parse()
+	 * 1. 將類別圖轉成dom樹狀結構 : init(), initRef() 
+	 * 2. 分析並取得類別圖裡的資訊 : Parse()
 	 */ 
 	
 	// NO.1 =====================================================================================
-	// ��蜓閬�葫閰衣���������om
+	// 把主要要測試的類別的類別圖轉成dom
 	public Document init( File uml ) {
 		// TODO Auto-generated method stub
 		try {
 			Splitter split = new Splitter(uml);
 			File cd = split.split2CDuml();
 			
-			// 摰儔XML DOM parser閫���
+			// 定義XML DOM parser解析器
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			// 撱箇�OM document
+			// 建立DOM document
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			// 撘xml
+			// 引入xml
 			Document doc = dBuilder.parse(cd);
 			
-			// ���ml�������ormalize
+			// 針對xml文檔的元素做normalize
 		    doc.getDocumentElement().normalize();
 		    this.packageName=doc.getDocumentElement().getAttribute("name");
 		    return doc;
@@ -100,19 +100,19 @@ public class SingleCDParser {
 	} // init()
 	
 	/*
-	// ������ml��ist 頧�om
+	// 把參考用的uml圖list 轉成dom
 	private void initRef( ArrayList<File> rList ) {
 		try {
 			this.ref = new ArrayList<Document>();
 			
-			// 摰儔XML DOM parser閫���
+			// 定義XML DOM parser解析器
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			// 撱箇�OM document
+			// 建立DOM document DocumentBuilder
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			
 			for(int i = 0 ; i < rList.size() ; i++ ) {
-			    doc = dBuilder.parse(rList.get(i));       // 撘xml
-			    doc.getDocumentElement().normalize();   // ���ml�������ormalize
+			    doc = dBuilder.parse(rList.get(i));       // 引入xml
+			    doc.getDocumentElement().normalize();   // 針對xml文檔的元素做normalize
 			    this.ref.add(doc) ;
 			} // for
 		    
@@ -126,11 +126,11 @@ public class SingleCDParser {
 	
 	
 	// NO.2 =====================================================================================
-	// ����������lass�����
+	// 取得類別圖的所有class的資訊
 	public void Parse(Document doc) throws ParserConfigurationException, SAXException, IOException, TransformerException {
 		classList = new ArrayList<ClassInfo>() ;
 		
-		// ������lass
+		// 取得所有class
 		NodeList nList = doc.getElementsByTagName("packagedElement");
 		
 		for (int i = 0; i < nList.getLength(); i++) {
@@ -139,7 +139,7 @@ public class SingleCDParser {
 			ClassInfo c = new ClassInfo();
 			UserDefinedType this_class_type = null;
 			
-            Node node = nList.item(i);                // 蝚枰�lass
+            Node node = nList.item(i);                // // 第i個class
             if (node.getNodeType() == Node.ELEMENT_NODE) {  
                 Element e = (Element) node;
                 c.setName(e.getAttribute("name"));    // class name
@@ -182,29 +182,29 @@ public class SingleCDParser {
                 
                 
                 // ---------- Operation ----------
-                NodeList oList = e.getElementsByTagName("ownedOperation");   // ���迨class�����peration
+                NodeList oList = e.getElementsByTagName("ownedOperation");   // 取得此class的所有operation
                 if( oList.getLength() != 0 ) operation_List = new ArrayList<OperationInfo>() ;
                 
-                // ���迨class鋆∠���peration��ame, parameter, return type 
+                // 取得此class裡的各個operation的name, parameter, return type
                 for( int k = 0 ; k < oList.getLength() ; k++ ) {
                 	OperationInfo method = new OperationInfo();
                 	Element child = (Element) oList.item(k);
-                	method.setName(child.getAttribute("name"));     // ���ethod name
-                	method.setID(child.getAttribute("xmi:id"));     // ���ethod id
-                	method.setVisibility(getAttrVisibility(child)); // ���ethod visibility
-                	method.setClassName(c.getName());               // 閮剖��撅祇�
+                	method.setName(child.getAttribute("name"));     // 取得method name
+                	method.setID(child.getAttribute("xmi:id"));     // 取得method id
+                	method.setVisibility(getAttrVisibility(child)); // 取得method visibility
+                	method.setClassName(c.getName());               // 設定所屬類別
                 	
-                	NodeList parameter = child.getElementsByTagName("ownedParameter");  // �������(��return���)
+                	NodeList parameter = child.getElementsByTagName("ownedParameter");  // 取得所有參數(包括return的變數)
                 	System.out.println("CD Parser / Class Name: " + method.getName()+", ParaNum: " + parameter.getLength());
                 	
-                	// method 瘝�� , return type�void
+                	// method 沒有參數 , return type為void
                 	if(parameter.getLength()== 0 ) {
                 		System.out.println("CD Parser: No Arg.");
                 		VariableInfo rt = new VariableInfo(new VoidType(), "", "", "", c.getName());
                 		method.setReturnType(rt);
                 	} // if
                 	
-                	// ���ethod�������ame, type 隞亙�� return type
+                	// 取得method所有參數的name, type 以及 return type
                 	else {
                 	  ArrayList<VariableInfo> parameter_List = new ArrayList<VariableInfo>();
                       for( int p_i = 0 ; p_i < parameter.getLength() ; p_i++ ) {
@@ -230,9 +230,9 @@ public class SingleCDParser {
                       		p.setType(new ArrayType(p.getType(), p.getUpperValue()));
                       	}
                         	
-                      	  // ��
+                      	  // 參數
                       	  if ( ! eParameter.getAttribute("direction").equals("return"))
-                      		  parameter_List.add( p ) ;    // ��arameter���烽ist
+                      		  parameter_List.add( p ) ;    //把parameter加進list
                     	  
                     	  // return variable
                     	  else method.setReturnType( p );
@@ -240,10 +240,10 @@ public class SingleCDParser {
                       } // for
                       
                       
-                      if( parameter_List.size()!=0 )    // 銵函內method���
+                      if( parameter_List.size()!=0 )    // 表示method有參數
                     	  method.setParameter(parameter_List);
                       
-                      // �����void
+                      // 回傳型別為void
                       if(method.getReturnType()==null) {
                     	  System.out.println("VOID");
                     	  VariableInfo rt = new VariableInfo(new VoidType(), "", "", "", c.getName());
@@ -251,7 +251,7 @@ public class SingleCDParser {
                       }
                 	} // else
                 	
-                	operation_List.add( method ) ;    // ��peration���烽ist
+                	operation_List.add( method ) ;    // 把operation加進list
                 } // for
                 // ---------- Operation ----------
                 
@@ -260,7 +260,7 @@ public class SingleCDParser {
             } // if
         	
         	this_class_type.setClassInfo(c);
-            classList.add(c);   // ����������lassInfo���淆lass list
+            classList.add(c);   // 把一個取得資訊後的classInfo加進class list
 		} // for
 		
 	} // Parse()
@@ -268,9 +268,9 @@ public class SingleCDParser {
 	
 	
 	
-	// �Parse()銝剜�����ethod =================================================================
+	// �於Parse()中所用到的method =================================================================
 	
-	// ���roperty��ype: �撱箇���, ����, ����
+	// 取得property的type: 自建立的型別, 基本型別, 陣列
 	private String getVarType_Str(Element e) {
     	if(e.hasAttribute("type")) return e.getAttribute("type");
     	
@@ -283,31 +283,31 @@ public class SingleCDParser {
 	}
 	
 	
-	// ���roperty��ype: �撱箇���, ����, ����
+	// 取得property的type: 自建立的型別, 基本型別, 陣列
 	private VariableType getVarType(Element e, String classID, String className ) throws ParserConfigurationException, SAXException, IOException, TransformerException {
 		/*
-		// 2020/05 �����銝����Ⅳ鈭�
+		// 2020/05 可能都只用下面的程式碼了 if(e.hasAttribute("type")) return
     	if(e.hasAttribute("type")) return e.getAttribute("type");
     	*/
-		if(e.hasAttribute("type") ) {//�������   敺耨
+		if(e.hasAttribute("type") ) {// 同類別圖的 待修
 			if(Main.typeTable.containsType(e.getAttribute("type"), e.getAttribute("type")))
 			//if(BlackBoxLauncher.typeTable.containsType(e.getAttribute("type"), e.getAttribute("type")))
 				return Main.typeTable.get(e.getAttribute("type"), e.getAttribute("type"));
 				//return BlackBoxLauncher.typeTable.get(e.getAttribute("type"), e.getAttribute("type"));
-			//else return new UnDefinedType(e.getAttribute("type"));// ��霈���噶������ 敺耨�
+			//else return new UnDefinedType(e.getAttribute("type"));// 還未讀取便先用到的 待修改
 		}
 		
 		
-    	// 憒�蝙�憭��ype嚗�憭��ag�type����暺�鋆��mi:type����������摰儔��
+    	// 如果使用外部的type，會另外有個tag為type的子節點，由裏頭的xmi:type判別為基本型別或是自定義型別
     	Element et = (Element)e.getElementsByTagName("type").item(0);
 
 
-    	// ����(int, float, boolean, char, ..)
+    	// 基本型別(int, float, boolean, char, ..)
     	if(et.getAttribute("xmi:type").equals("uml:PrimitiveType")) {
         	String s = et.getAttribute("href");
         	s = s.substring(s.indexOf("#")+1, s.length());
         	
-        	/*�����array*/        	
+        	/* 判斷是否是array */        	
         	String low = "1", up = "1";
         	
         	if (e.getElementsByTagName("lowerValue").item(0) != null) {
@@ -328,20 +328,20 @@ public class SingleCDParser {
         		Main.typeTable.add(new_arrType);
         		return new_arrType;
         	}
-        	/*�����array*/
+        	/* 判斷是否是array */
         	
         	//else return BlackBoxLauncher.typeTable.get(s, s);
         	else return Main.typeTable.get(s, s);
     	} // if
     	
-    	// �摰儔�� (ArrayList, String, UserDefinedType)
+    	// 自定義型別 (ArrayList, String, UserDefinedType)
     	else {
         	String s = et.getAttribute("href");
         	s = s.substring(0, s.indexOf("."));
         	
         	VariableType tempType = null;
         	
-        	if(s.equals("ArrayList")) { // ArrayList��店閬憭�ㄐ���lement type
+        	if(s.equals("ArrayList")) { // ArrayList的話要另外抓裡面的element type
         		String comment_type = e.getElementsByTagName("ownedComment").item(0).getTextContent().trim();
         		System.out.println("CD Parser Test Type [ArrayList]: "+ comment_type);
         		// comment_type = comment_type.substring( comment_type.indexOf("<")+1,  comment_type.length()) ;
@@ -358,7 +358,7 @@ public class SingleCDParser {
         	} // else
 
         	
-        	/*�����array*/        	
+        	/* 判斷是否是array */        	
         	String low="1", up = "1";
         	
         	if (e.getElementsByTagName("lowerValue").item(0) != null) {
@@ -388,7 +388,7 @@ public class SingleCDParser {
 	
 	
 	
-	// �撱箄摰儔��rrayListType蝯��
+	// 創建自定義的ArrayListType結構
 	private ArrayListType createArrayListType( String s) throws ParserConfigurationException, SAXException, IOException, TransformerException {	
 		System.out.println("ArrayList String: " + s);
 		String type_str = null;
@@ -403,18 +403,18 @@ public class SingleCDParser {
 		if( Main.typeTable.containsType(element, element)) {
 			return new ArrayListType( Main.typeTable.get(element, element) );
 		}
-		else if( type_str != null && type_str.equals("ArrayList") )  // 憭雁 muti-D
+		else if( type_str != null && type_str.equals("ArrayList") )  // 多維 muti-D
 			return new ArrayListType( createArrayListType(element) );
 		else
 			return new ArrayListType( createUserDefinedType(element) );
 	} // createArrayListType()
 	
 	
-	// �撱箔蝙��摰儔��serDefinedType蝯��
+	// 創建使用者自定義的UserDefinedType結構
 	private UserDefinedType createUserDefinedType( String s ) throws ParserConfigurationException, SAXException, IOException, TransformerException {
-		//�spec鞈�冗���������蒂��PapyrusCDParser����
-		//敺lassInfo�鞈��
-		//�撱箇��蒂��
+		// 去spec資料夾找同名的類別圖，並傳入PapyrusCDParser分析
+		// 從ClassInfo拿資料
+		// 創建結構並回傳
 		Path CDumlPath = Paths.get(DataWriter.output_folder_path+"/spec/"+s+".uml");
 		File uml = CDumlPath.toFile();
 		Splitter split = new Splitter(uml);
@@ -423,7 +423,7 @@ public class SingleCDParser {
 		SingleCDParser parser = new SingleCDParser();
 		Document ref_doc = parser.init(cdUml);
 		NodeList nList = ref_doc.getElementsByTagName("packagedElement");
-		Node node = nList.item(0);                // �����lass (憒�撘萄����lass嚗�����
+		Node node = nList.item(0);                // 只有一個class (如果那張圖有多個class，之後這邊要改
         if (node.getNodeType() == Node.ELEMENT_NODE) {  
         	Element e = (Element) node;
         	String type_name = e.getAttribute("name");    // class name
@@ -443,14 +443,14 @@ public class SingleCDParser {
 	} // createUserDefinedType()
 	
 	
-	// ���isibility, ��閮剖�迨撅祆��, ��身���身���"public"
+	// 取得visibility, 若無設定此屬性, 則設為預設的"public"
 	private String getAttrVisibility(Element e) {
     	if(e.hasAttribute("visibility")) return e.getAttribute("visibility");
     	else return "public" ;
 	}
 	
 
-	// ������eturn��
+	// 判斷是否有return值
 	private boolean hasReturn(NodeList list) {
 		boolean result = false ;
 		for(int i = 0 ; i < list.getLength() ; i++) {
@@ -463,7 +463,7 @@ public class SingleCDParser {
 	}
 	
 	
-	// ���ype�array��roperty��ize(lowerValue & upperValue)
+	// 取得type為array的property的size(lowerValue & upperValue)
 	private String getSize(Element e) {
     	if(e.hasAttribute("type")) return e.getAttribute("type");
     	else {
@@ -508,10 +508,10 @@ public class SingleCDParser {
 			    }
 	}*/
 	/*
-	// 2020/05 隞乩�撘�銝�� -----------------------------------------------------------------------------------------------------------------------------------------
+	// 2020/05 以下函式可能不會用到 -----------------------------------------------------------------------------------------------------------------------------------------
 	
-	// 撠������撌勗遣蝡�lass��d�����, ��d���lass��ame
-	// 憒��������name敺���]                                   ****敺
+	//  將變數的型別與自己建立的class的id做對應, 把id改成class的name
+	// 如果型別是陣列要把在name後面加上[] ****待改
 	public void changeTypeStr() {
 		
 		for (int  i= 0 ; i < this.classList.size();i++){
@@ -521,7 +521,7 @@ public class SingleCDParser {
             	VariableInfo p = this.classList.get(i).getProperties().get(j);
             	p.setType(typeIDtoName(p.getType()));
             	
-            	// if(p.getSize() != null) p.setType(p.getType()+"[]"); // size��征������
+            	// if(p.getSize() != null) p.setType(p.getType()+"[]"); // size非空即為陣列 }
 		    } // for
             
 
@@ -535,7 +535,7 @@ public class SingleCDParser {
             		VariableInfo parameter = o.getParameter().get(para_i);
             		parameter.setType(typeIDtoName(parameter.getType()));
             		
-            		// if(parameter.getSize() != null) parameter.setType(parameter.getType()+"[]"); // size��征������
+            		// if(parameter.getSize() != null) parameter.setType(parameter.getType()+"[]"); // size非空即為陣列 }
                 } // for
             	
             	// return type
@@ -543,15 +543,15 @@ public class SingleCDParser {
             	if(o.getReturnType()!=null)
             	rt.setType(typeIDtoName(rt.getType()));
             	
-            	// *** if(o.getReturnType().getSize() != null) o.setType(p.getType()+"[]"); // size��征������
+            	// *** if(o.getReturnType().getSize() != null) o.setType(p.getType()+"[]"); // size非空即為陣列 }
             }//for operation
 		}
 	} // changeTypeStr()
 	
 	
-	// 憒��摰儔���, �憿��ㄐtype�隞卉lass ID��耦撘���
-	// ��隞亥�撠d頧��撠�����迂
-	// 鋡剃hangeTypeStr()��
+	// 如果是自定義的型別, 在類別圖裡type是以class ID的形式記錄
+	// 所以要去將id轉換成相對應的型別名稱
+	// 被changeTypeStr()呼叫
 	private String typeIDtoName( String type ) {
 		// System.out.println(classList.size());
 		String s = type ;
@@ -583,12 +583,12 @@ public class SingleCDParser {
 		
 	}
 	*/
-	// �Parse()銝剜�����ethod =================================================================
+	// 於Parse()中所用到的method =================================================================
 
 	
 	
 	
-	//    ��������
+	//    拿取資料範例
 	public String printParseClassInfo( ClassInfo c ) {
 		// TODO Auto-generated method stub
 		try {

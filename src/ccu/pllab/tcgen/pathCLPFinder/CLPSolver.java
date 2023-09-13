@@ -77,15 +77,16 @@ public class CLPSolver {
 		String Time_EclDirectPath = DataWriter.testCons_output_path.replace(className+"_BlackBox", "Time_BlackBox");
 		String Date_EclDirectPath = DataWriter.testCons_output_path.replace(className+"_BlackBox", "Date_BlackBox");
 		System.out.println(this.EclDirectPath);
-		System.out.println(Time_EclDirectPath );
-		System.out.println(Date_EclDirectPath );
+		//System.out.println(Time_EclDirectPath );
+		//System.out.println(Date_EclDirectPath );
+
 		File eclFile = new File(EclDirectPath + className + methodName + TestTypeSign + pathNum + ".ecl");
 		int testCaseID = 1;
-		System.out.println("[CLPSolver_84] before the try");
 		try {
-//			
+			
 			this.connectCLPSolver();
-			System.out.println("[CLPSolver_88] connnectCLPsolver");
+
+			/*
 			File tempF1= new File(Date_EclDirectPath+"DateDate.ecl");
 			File tempF2= new File(Date_EclDirectPath+"DateGetYear.ecl");
 			File tempF3= new File(Date_EclDirectPath+"DateGetMonth.ecl");
@@ -112,7 +113,7 @@ public class CLPSolver {
 			if( tempF10.exists() ) this.clp2data.compile(tempF10);
 			//File tempF11= new File("C:\\runtime-EclipseApplication\\Clock\\test constraints\\Clock_BlackBox_DCC\\ClockClock.ecl");
 			//this.clp2data.compile(tempF11);
-			
+			*/
 			this.clp2data.compile(eclFile);
 			
 			this.sol = this.clp2data.solvingCSP_term("test" + className + methodName, objPre, argPre, objPost, argPost, retVal, 5);
@@ -121,8 +122,7 @@ public class CLPSolver {
 			return true;
 		} catch (Exception e) {
 			eclFile.renameTo(new File(eclFile.getParentFile(), eclFile.getName()));
-			e.printStackTrace();
-			System.out.println("[CLPSolver_125] exception");
+			//e.printStackTrace();
 			return false;
 		}
 	}

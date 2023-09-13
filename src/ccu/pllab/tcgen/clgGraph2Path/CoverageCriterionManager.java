@@ -120,7 +120,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 		for (CLGEdge edge : graph.getAllBranches()) {
 			this.coverageCheckingTable.put(edge, 0);
 		}
-		System.out.println("[CCM_init] Main.criterion: " + Main.criterion);
+
 //		2020/2/10 以下為dup，目前不會用到
 		oriDUP = new ArrayList<DUP>();
 		if (Main.criterion.equals(Criterion.dcdup) || Main.criterion.equals(Criterion.dccdup)
@@ -157,7 +157,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 		for (CLGEdge edge : graph.getAllBranches()) {
 			this.coverageCheckingTable.put(edge, 0);
 		}
-		System.out.println("[CCM_init] criterion: " + criterion);
+
 		oriDUP = new ArrayList<DUP>();
 		if (criterion.equals("dcdup") || criterion.equals("dccdup") || criterion.equals("mccdup")) {
 			System.out.println("part 1 ");
@@ -318,6 +318,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 				pathObj.initPathID();
 				hasInitPathCount = true;
 			}
+			
 			pathObjInfo += "\n" + pathObj.toGetPathInfo() + "\n";
 			//在pathinfo文件中印出每條路徑在CLG中的限制式
 			String tempConStr = "";
@@ -393,16 +394,15 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 							}
 						}
 					}
-					System.out.println("[CCM_396] bounds?: " + Main.boundary_analysis + bound0_1 + bound1_0 + bound1_1 + bound4_0 + bound4_1 + bound4_2 + bound4_3 + bound4_4);
+
 					if (Main.boundary_analysis) {
 						boolean boundary = false;
 						boolean exit = false;
 //						應該沒用到，先註解
 //						int bound = 0;
 						boolean binarysearch = false;
-						System.out.println("[CCM_403] here: ");
+						
 						while ((boundaryPath = boundaryEnumerator.next()) != null) {
-							
 //							2020/3/3 constrain info.
 //							String tempConStr = "";
 							tempConStr = "";
@@ -420,8 +420,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 							boundary = true;
 							DataWriter.writeInfo(clpContent, graphClassName + graphMethodName + TestTypeSign + pathNo,
 									"ecl", DataWriter.testCons_output_path);
-							System.out.println("[CCM_422] here print B" + pathNo + ".ecl");
-							
 							if (false) {
 								/* black-box: clp solves twice. */
 								clpSolver.solving(graphClassName, graphMethodName, pathNo, 1, graphIsConstructor,
@@ -446,7 +444,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 											clpTranslator.setArrayCount(0);
 											clpTranslator.setIterateTimes(0);
 											clpContent = clpTranslator.genPathCLP(pathObj);
-											
 											DataWriter.writeInfo(clpContent,
 													graphClassName + graphMethodName + TestTypeSign + pathNo, "ecl",
 													DataWriter.testCons_output_path);
@@ -790,7 +787,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 							boundary = true;
 							DataWriter.writeInfo(clpContent, graphClassName + graphMethodName + TestTypeSign + pathNo,
 									"ecl", DataWriter.testCons_output_path);
-							System.out.println("[CCM_793] here writeinfo into B" + pathNo + ".ecl");
 							if (false) {
 								/* black-box: clp solves twice. */
 								clpSolver.solving(graphClassName, graphMethodName, pathNo, 1, graphIsConstructor,
@@ -818,7 +814,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 											DataWriter.writeInfo(clpContent,
 													graphClassName + graphMethodName + TestTypeSign + pathNo, "ecl",
 													DataWriter.testCons_output_path);
-											System.out.println("[CCM_821] !bound 0_1 here writeinfo into B" + pathNo + ".ecl");
 											if (clpSolver.solving(graphClassName, graphMethodName, pathNo, 1,
 													graphIsConstructor, graphRetType, "Obj_pre", "Arg_pre", "Obj_post",
 													"Arg_post", "RetVal")) {
@@ -839,7 +834,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 											DataWriter.writeInfo(clpContent,
 													graphClassName + graphMethodName + TestTypeSign + pathNo, "ecl",
 													DataWriter.testCons_output_path);
-											System.out.println("[CCM_842] !bound 1_0 here writeinfo into B" + pathNo + ".ecl");
 											if (clpSolver.solving(graphClassName, graphMethodName, pathNo, 1,
 													graphIsConstructor, graphRetType, "Obj_pre", "Arg_pre", "Obj_post",
 													"Arg_post", "RetVal")) {
@@ -860,7 +854,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 											DataWriter.writeInfo(clpContent,
 													graphClassName + graphMethodName + TestTypeSign + pathNo, "ecl",
 													DataWriter.testCons_output_path);
-											System.out.println("[CCM_863] !bound 1_1 here writeinfo into B" + pathNo + ".ecl");
 											if (clpSolver.solving(graphClassName, graphMethodName, pathNo, 1,
 													graphIsConstructor, graphRetType, "Obj_pre", "Arg_pre", "Obj_post",
 													"Arg_post", "RetVal")) {
@@ -881,7 +874,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 											DataWriter.writeInfo(clpContent,
 													graphClassName + graphMethodName + TestTypeSign + pathNo, "ecl",
 													DataWriter.testCons_output_path);
-											System.out.println("[CCM_884] !bound 4_0 here writeinfo into B" + pathNo + ".ecl");
 											if (clpSolver.solving(graphClassName, graphMethodName, pathNo, 1,
 													graphIsConstructor, graphRetType, "Obj_pre", "Arg_pre", "Obj_post",
 													"Arg_post", "RetVal")) {
@@ -902,7 +894,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 											DataWriter.writeInfo(clpContent,
 													graphClassName + graphMethodName + TestTypeSign + pathNo, "ecl",
 													DataWriter.testCons_output_path);
-											System.out.println("[CCM_905] !bound 4_1 here writeinfo into B" + pathNo + ".ecl");
 											if (clpSolver.solving(graphClassName, graphMethodName, pathNo, 1,
 													graphIsConstructor, graphRetType, "Obj_pre", "Arg_pre", "Obj_post",
 													"Arg_post", "RetVal")) {
@@ -923,7 +914,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 											DataWriter.writeInfo(clpContent,
 													graphClassName + graphMethodName + TestTypeSign + pathNo, "ecl",
 													DataWriter.testCons_output_path);
-											System.out.println("[CCM_926] !bound 4_2 here writeinfo into B" + pathNo + ".ecl");
 											if (clpSolver.solving(graphClassName, graphMethodName, pathNo, 1,
 													graphIsConstructor, graphRetType, "Obj_pre", "Arg_pre", "Obj_post",
 													"Arg_post", "RetVal")) {
@@ -944,7 +934,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 											DataWriter.writeInfo(clpContent,
 													graphClassName + graphMethodName + TestTypeSign + pathNo, "ecl",
 													DataWriter.testCons_output_path);
-											System.out.println("[CCM_947] !bound 4_3 here writeinfo into B" + pathNo + ".ecl");
 											if (clpSolver.solving(graphClassName, graphMethodName, pathNo, 1,
 													graphIsConstructor, graphRetType, "Obj_pre", "Arg_pre", "Obj_post",
 													"Arg_post", "RetVal")) {
@@ -965,7 +954,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 											DataWriter.writeInfo(clpContent,
 													graphClassName + graphMethodName + TestTypeSign + pathNo, "ecl",
 													DataWriter.testCons_output_path);
-											System.out.println("[CCM_968] !bound 4_4 here writeinfo into B" + pathNo + ".ecl");
 											if (clpSolver.solving(graphClassName, graphMethodName, pathNo, 1,
 													graphIsConstructor, graphRetType, "Obj_pre", "Arg_pre", "Obj_post",
 													"Arg_post", "RetVal")) {
@@ -1047,7 +1035,6 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 											DataWriter.writeInfo(clpContent,
 													graphClassName + graphMethodName + TestTypeSign + pathNo, "ecl",
 													DataWriter.testCons_output_path);
-											System.out.println("[CCM_1050] ??? here writeinfo into B" + pathNo + ".ecl");
 											if (clpSolver.solving(graphClassName, graphMethodName, pathNo, 1,
 													graphIsConstructor, graphRetType, "Obj_pre", "Arg_pre", "Obj_post",
 													"Arg_post", "RetVal")) {
@@ -1096,11 +1083,9 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 									DataWriter.writeInfo(clpContent,
 											graphClassName + graphMethodName + TestTypeSign + clpTranslator.getPathNumber(),
 											"ecl", DataWriter.testCons_output_path);
-									System.out.println("[CCM_1099] here write info into B" + clpTranslator.getPathNumber() + ".ecl");
-									//System.out.println("[CCM_1100] the stuff:" + clpContent);
 									if (clpSolver.solving(graphClassName, graphMethodName, pathNo, 1, graphIsConstructor,
 											graphRetType, "Obj_pre", "Arg_pre", "Obj_post", "Arg_post", "RetVal")) {
-										System.out.println("[CCM_1102] into the solver");
+
 										testDatas.add(clpSolver.getTestData());
 										pathObjInfo += "feasible\n";
 										isFeasible = true;
@@ -1123,10 +1108,8 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 											}
 										}
 										pathNo++;
-									}/*
-									else {
-										pathNo++;
-									}*/
+									}
+
 								}
 							}
 						}
@@ -1560,7 +1543,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 		 * e) { // TODO Auto-generated catch block e.printStackTrace(); }
 		 */
 		saveTDPathDUP += "\n\nfeasiblepathsize = " + feasible_path.size() + "\n"; //
-		System.out.println("feasiblepathsize = " + feasible_path.size());
+		//System.out.println("feasiblepathsize = " + feasible_path.size());
 		for (CLGPath p : feasible_path) {
 			System.out.println(p.toGetPathInfo());
 			List<CLGNode> new_path1 = clgPathEnumerator.filterConstraintNode(p.getPathNodes());

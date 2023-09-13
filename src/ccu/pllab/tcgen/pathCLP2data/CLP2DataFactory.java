@@ -9,10 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
-import com.parctechnologies.eclipse.EclipseEngine;
-import com.parctechnologies.eclipse.EclipseEngineOptions;
-import com.parctechnologies.eclipse.EclipseException;
-import com.parctechnologies.eclipse.EmbeddedEclipse;
+import com.parctechnologies.eclipse.*;
 
 public class CLP2DataFactory {
 	private static EclipseEngine instance = null;
@@ -33,9 +30,7 @@ public class CLP2DataFactory {
   
 	public static CLP2Data getEcl2DataInstance() throws EclipseException, IOException {
 		if (instance == null) {
-			File f = new File("C:\\TcgenTools\\ECLiPSe");
-			EclipseEngineOptions eclipseEngineOptions = new EclipseEngineOptions(f);
-			//EclipseEngineOptions eclipseEngineOptions = new EclipseEngineOptions();
+			EclipseEngineOptions eclipseEngineOptions = new EclipseEngineOptions();
 			eclipseEngineOptions.setUseQueues(false);
 			instance = EmbeddedEclipse.getInstance(eclipseEngineOptions);
 //			eclipseRPCInputStream(instance, Ecl2Data.class.getResourceAsStream("/imports/ccu_pllab_lib.ecl"));

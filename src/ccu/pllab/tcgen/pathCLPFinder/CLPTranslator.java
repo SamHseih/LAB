@@ -349,8 +349,7 @@ public class CLPTranslator {
 		uselength=0;
 		
 		this.genBodyName((CLGStartNode) this.startNode, this.body_count, path.getPathNodes());// List<CLGNode> path¥[ªº
-		System.out.println("[CLPT_genPathCLP_352] arg_pre:" + this.arg_pre );
-		System.out.println("[CLPT_genPathCLP_353] obj_pre:" + this.object_pre );
+		
 //		head -> dateNext_2([Year_pre,Month_pre,Day_pre],[],[Year,Month,Day],[],[Result],[Exception]):-
 		String head = this.getHeadInfo();
 		Main.head = head.substring(head.indexOf('('), head.indexOf(')') + 1);
@@ -790,7 +789,7 @@ public class CLPTranslator {
 		String object_post_content = "";
 		String arg_post_content = "";
 		String result_content = "";
-		
+
 		if (this.object_pre.size() > 0) {
 			for (String object : this.object_pre) {
 				String temp = object.replaceAll("_pre", "");
@@ -811,13 +810,9 @@ public class CLPTranslator {
 				}
 			}
 			if (object_pre_content != "") {
-				domainPredicate += "[" + object_pre_content.substring(1) + "]:: -32768..32767,\n";
+				domainPredicate += "[" + object_pre_content.substring(1) + "]:: 0..32767,\n";
 			}
 		}
-		
-		System.out.println("[CLPT_genDomain_818] arg_pre:" + this.arg_pre + " size " + arg_pre.size());
-		System.out.println("[CLPT_genDomain_819] main.symboltable.argument:" +  Main.symbolTable.getArgument() + " size " +  Main.symbolTable.getArgument().size());
-		
 		if (this.arg_pre.size() > 0) {
 			for (String object : this.arg_pre) {
 				String temp = object.replaceAll("_pre", "");
@@ -826,12 +821,13 @@ public class CLPTranslator {
 					if (variableToken.getVariableName().equals(temp)) {
 						if (!(variableToken.getType() instanceof ArrayType) && !(variableToken.getType() instanceof ArrayListType))
 							arg_pre_content += "," + object;
+							
 					}
 				}
 				
 			}
 			if (arg_pre_content != "") {
-				domainPredicate += "[" + arg_pre_content.substring(1) + "]:: -32768..32767,\n";
+				domainPredicate += "[" + arg_pre_content.substring(1) + "]:: 0..32767,\n";
 			}
 
 		}
@@ -856,7 +852,7 @@ public class CLPTranslator {
 				
 			}
 			if (object_post_content != "")
-				domainPredicate += "[" + object_post_content.substring(1) + "]:: -32768..32767,\n";
+				domainPredicate += "[" + object_post_content.substring(1) + "]:: 0..32767,\n";
 		}
 		if (this.arg_post.size() > 0) {
 			for (String object : this.arg_post) {
@@ -870,7 +866,7 @@ public class CLPTranslator {
 				
 			}
 			if (arg_post_content != "")
-				domainPredicate += "[" + arg_post_content.substring(1) + "]:: -32768..32767,\n";
+				domainPredicate += "[" + arg_post_content.substring(1) + "]:: 0..32767,\n";
 		}
 		/*for (String object : this.result) {
 			if (object.contains("Result_"))

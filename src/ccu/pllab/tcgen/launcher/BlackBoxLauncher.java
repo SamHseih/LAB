@@ -36,7 +36,6 @@ import ccu.pllab.tcgen.AbstractSyntaxTree.SymbolTable;
 import ccu.pllab.tcgen.AbstractType.TypeTable;
 import ccu.pllab.tcgen.AbstractType.UserDefinedType;
 import ccu.pllab.tcgen.DataWriter.DataWriter;
-import ccu.pllab.tcgen.exe.main.Main;
 import ccu.pllab.tcgen.transform.AST2CLG;
 import ccu.pllab.tcgen.transform.CLG2Path;
 import ccu.pllab.tcgen.transform.OCL2AST;
@@ -98,7 +97,7 @@ public class BlackBoxLauncher {
 			this.clgGraph = clgParser.getCLGGraph();
 			this.invCLG = clgParser.getInvCLG();
 			pmonitor.worked(10);
-			
+
 			
 //			CLG -> JUnit
 //			this.pathParser = new CLG2Path();
@@ -108,42 +107,11 @@ public class BlackBoxLauncher {
 			pmonitor.worked(10);
 			this.pathParser = new CLG2Path();
 			this.symbolTable = oclParser.getSymbolTable();
-			
-			//print all argument
-			//print all method
-			//print all attribute
-			//print all argument map
-			//print all attribute map
-			System.out.println(this.symbolTable.getClassName());
-			for(int i = 0;i<this.symbolTable.getArgument().size();i++) {
-				System.out.println("[BBL] argument:" + i + " : " + this.symbolTable.getArgument().get(i).getVariableName() + " with type : " + this.symbolTable.getArgument().get(i).getType().toString());
-			}
-			for(int i = 0;i<this.symbolTable.getMethod().size();i++) {
-				System.out.println("[BBL] method:" + i + " : " + this.symbolTable.getMethod().get(i).getMethodName() + " with return type : " + this.symbolTable.getMethod().get(i).getReturnType());
-				for(int j=0; j<this.symbolTable.getMethod().get(i).getArgument().size();j++) {
-					System.out.println("With argument " + j + " : " + this.symbolTable.getMethod().get(i).getArgument().get(j).getVariableName() + " with type : " + this.symbolTable.getMethod().get(i).getArgument().get(j).getType().toString());
-				}
-			}
-			for(int i = 0;i<this.symbolTable.getAttribute().size();i++) {
-				System.out.println("[BBL] attribute:" + i + " : " + this.symbolTable.getAttribute().get(i).getVariableName() + " with type : " + this.symbolTable.getAttribute().get(i).getType().toString());
-			}
-			System.out.println(this.symbolTable.getArgumentMap());
-			System.out.println(this.symbolTable.getAttributeMap());
-			System.out.println("Criterion: "+Main.criterion);
-			//輸出invCLG? 看起來grade的inv是null的
-			System.out.println(invCLG);
-			//this.clgParser.genCLGGraph(invCLG, "invclg");
-			
-			
 			pathParser.setAttribute(invCLG, symbolTable);
 			pathParser.init(clgGraph);
 			pmonitor.worked(10);
-			
-			System.out.println("CLGGraph size: "+clgGraph.size());
 			for(int number=0;number<clgGraph.size();number++) {
-				
 				pathParser.genTestData(clgGraph,number);
-				
 				pathParser.genTestScript(classUml);
 				pmonitor.worked(60/clgGraph.size());
 				if (pmonitor.isCanceled()) {
@@ -169,7 +137,6 @@ public class BlackBoxLauncher {
 					DataWriter.writeInfo(testScript, className + "Test", "java", testOutputPath+"dcc/");
 									
 			}
-			
 //			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 //			IProject project = root.getProject(BlackBoxHandler.CurrentProjName);
 //			IFile file = project.getFile(BlackBoxHandler.CurrentEditorProjectPath+"/src/com.test");
