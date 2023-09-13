@@ -14,7 +14,7 @@ public class OclRunner {
 	      
 	       if ( inputFile!=null ) is = new FileInputStream(inputFile);
 	       ANTLRInputStream input = new ANTLRInputStream(is);
-	      
+	     
 	      OclLexer lexer = new OclLexer(input);
 	      CommonTokenStream tokens = new CommonTokenStream(lexer);
 	      OclParser parser = new OclParser(tokens);

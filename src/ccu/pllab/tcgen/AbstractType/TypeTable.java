@@ -6,12 +6,12 @@ import java.util.ArrayList;
 public class TypeTable {
 	private ArrayList<VariableType> typelist;
 	
-	public TypeTable(){
+	public TypeTable(){ //
 		typelist = new ArrayList<VariableType>();
 		init();
 	}
 	
-	public void init() {
+	public void init() { //
 		IntType intType = new IntType();
 		StringType stringType = new StringType();
 		BooleanType booleanType = new BooleanType();
@@ -25,7 +25,7 @@ public class TypeTable {
 		typelist.add(charType);     // 4
 	}
 	
-	public void add(VariableType type) {
+	public void add(VariableType type) {//參數為一個被創建好的型態類別物件，使用此函式將其存進 TypeTable。
 		typelist.add(type);
 	}
 	

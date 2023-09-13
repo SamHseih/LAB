@@ -158,19 +158,25 @@ public class CLG2Path {
 			packagePath = "package team.ccu.pllab.dcc;";
 						
 	}
+		
+		
 		this.testScript = packagePath + "\n" + 
 				"import junit.framework.TestCase;\n" + 
 				"import java.util.ArrayList;\n" + 
 				"import java.util.Arrays;\n" +
 				"import org.junit.Test;\n\n" +
 				"public class "+this.className+"Test extends TestCase {\n";
+		
 	}
 	
 	public List<TestData> genTestData(ArrayList<CLGGraph> clg, int number) throws IOException, CloneNotSupportedException{
 		CoverageCriterionManager manager=new CoverageCriterionManager();	
 		CLGGraph subclg=clg.get(number);
+		System.out.println("before set attri");
 		((CLGStartNode)subclg.getStartNode()).setClassAttributes(this.attribute);
+		
 		manager.init(subclg);
+		System.out.println("before gen suite");
 		this.testData = manager.genTestSuite();
 		
 		return this.testData;

@@ -35,7 +35,14 @@ public class OCL2AST {
 //	      Main.symbolTable=this.symbolTable;
 //	      typeToAst(); 
 	}	
-	
+	//這OCL2AST(file,file)在SQL版本被刪掉!!!!!!
+	/*public OCL2AST(File ocl, File classuml) throws Exception {
+		Main.className = "";
+		makeAST(ocl);
+		makeSymbolTable(classuml);
+		Main.symbolTable = this.symbolTable;
+		typeToAst();
+	}*/
 	public AbstractSyntaxTreeNode getAbstractSyntaxTree()
 	{
 		return this.ast;

@@ -10,8 +10,8 @@ import ccu.pllab.tcgen.AbstractConstraint.*;
 import java.util.HashMap;
 
 
-public abstract class AbstractSyntaxTreeNode {
-	private static int node_count = 0;
+public abstract class AbstractSyntaxTreeNode {  //«Å§i©â¶H»yªk¾ð
+	private static int node_count = 0; 
 	private String id;
 	
 	public AbstractSyntaxTreeNode()

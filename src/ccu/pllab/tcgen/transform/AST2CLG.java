@@ -165,13 +165,14 @@ public class AST2CLG {
 	public AST2CLG(AbstractSyntaxTreeNode ast) throws IOException {
 		ArrayList<AbstractSyntaxTreeNode> astNode = ((PackageExp) ast).getTreeNode();
 		CLGCriterionTransformer clgTF = new CLGCriterionTransformer();
-
+		
 		for (int clg_number = 0; clg_number < astNode.size(); clg_number++) {
 			if (astNode.get(clg_number) instanceof OperationContext) {// 如果是method，分開pre和post的CLG來做
 				int pre_number=((OperationContext) astNode.get(clg_number)).getPreNum();
 				int post_number=((OperationContext) astNode.get(clg_number)).getPostNum();
 				for (int stereo = 0; stereo < ((OperationContext) astNode.get(clg_number)).getStereoType().size(); stereo++) {
 					CLGConstraint temp=((OperationContext) astNode.get(clg_number)).getStereoType().get(stereo).getTreeNode().AST2CLG();
+					
 					if(temp==null)
 					{
 						Main.msort=true; 
@@ -194,6 +195,7 @@ public class AST2CLG {
 					}
 					((CLGStartNode) (clg.getStartNode())).setMethodParameters(argument);
 					((CLGStartNode) (clg.getStartNode())).setMethodParameterTypes(argumenttype);
+					
 					CLGStartNode startNode = (CLGStartNode) (clg.getStartNode());
 					if (returntype.equals(""))
 						((CLGStartNode) (clg.getStartNode())).setIsConstructor(true);
@@ -570,13 +572,14 @@ public class AST2CLG {
 	public void genCLG(AbstractSyntaxTreeNode ast) throws IOException {
 		ArrayList<AbstractSyntaxTreeNode> astNode = ((PackageExp) ast).getTreeNode();
 		CLGCriterionTransformer clgTF = new CLGCriterionTransformer();
-
+		System.out.println("AHOY"+astNode.get(0).getID()+astNode.get(1).getID());
 		for (int clg_number = 0; clg_number < astNode.size(); clg_number++) {
 			if (astNode.get(clg_number) instanceof OperationContext) {// 如果是method，分開pre和post的CLG來做
 				int pre_number=((OperationContext) astNode.get(clg_number)).getPreNum();
 				int post_number=((OperationContext) astNode.get(clg_number)).getPostNum();
 				for (int stereo = 0; stereo < ((OperationContext) astNode.get(clg_number)).getStereoType().size(); stereo++) {
 					CLGConstraint temp=((OperationContext) astNode.get(clg_number)).getStereoType().get(stereo).getTreeNode().AST2CLG();
+					System.out.println("TESTESTE: "+temp.getConstratinImg());
 					if(temp==null)
 					{
 						Main.msort=true; 
@@ -599,6 +602,8 @@ public class AST2CLG {
 					}
 					((CLGStartNode) (clg.getStartNode())).setMethodParameters(argument);
 					((CLGStartNode) (clg.getStartNode())).setMethodParameterTypes(argumenttype);
+					System.out.println("[stereo:每個圖的第一個]" + stereo + " class " + classname + " method " + methodname + " returntype " + returntype);
+					System.out.println("arguments " + argument.toString() + " argumentype " + argumenttype.toString());
 					CLGStartNode startNode = (CLGStartNode) (clg.getStartNode());
 					if (returntype.equals(""))
 						((CLGStartNode) (clg.getStartNode())).setIsConstructor(true);
@@ -659,7 +664,8 @@ public class AST2CLG {
 					}
 					((CLGStartNode) (clg.getStartNode())).setMethodParameters(argument);
 					((CLGStartNode) (clg.getStartNode())).setMethodParameterTypes(argumenttype);
-					
+					System.out.println("class " + classname + " method " + methodname + " returntype " + returntype);
+					System.out.println("arguments " + argument.toString() + " argumentype " + argumenttype.toString());
 					//設定attributes
 					ArrayList<String> attribute = new ArrayList<String>();
 					ArrayList<VariableToken> attributes = Main.symbolTable.getAttribute();

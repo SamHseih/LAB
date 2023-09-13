@@ -32,7 +32,7 @@ import tudresden.ocl20.pivot.parser.ParseException;
 import tudresden.ocl20.pivot.tools.template.exception.TemplateException;
 import ccu.pllab.tcgen.transform.*;
 import ccu.pllab.tcgen.AbstractSyntaxTree.SymbolTable;
-import ccu.pllab.tcgen.AbstractType.TypeTable;;
+import ccu.pllab.tcgen.AbstractType.TypeTable;;//2021年後新增
 
 
 public class Main {

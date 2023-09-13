@@ -146,8 +146,7 @@ public class SingleCDParser {
                 c.setID(e.getAttribute("xmi:id"));    // class id
     			this_class_type = new UserDefinedType(c.getName(), c.getID());
     			//BlackBoxLauncher.typeTable.add(this_class_type);
-    			Main.typeTable.add(this_class_type);
-    			
+    			Main.typeTable.add(this_class_type);//新增加的對比2021 tccgen_ori
     		    //System.out.println(BlackBoxLauncher.typeTable.printTypeTableInfo());
                 
                 // ---------- Property ----------
