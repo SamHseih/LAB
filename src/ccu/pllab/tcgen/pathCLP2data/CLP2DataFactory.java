@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.pathCLP2data;
 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
@@ -16,8 +17,7 @@ import com.parctechnologies.eclipse.EmbeddedEclipse;
 public class CLP2DataFactory {
 	private static EclipseEngine instance = null;
 
-	private static void eclipseRPCInputStream(EclipseEngine eclipse2, InputStream resourceAsStream)
-			throws IOException, EclipseException {
+	private static void eclipseRPCInputStream(EclipseEngine eclipse2, InputStream resourceAsStream) throws IOException, EclipseException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(resourceAsStream));
 		File file = File.createTempFile("tmp", ".ecl");
 		file.deleteOnExit();
@@ -30,10 +30,12 @@ public class CLP2DataFactory {
 		writer.close();
 		eclipse2.compile(file);
 	}
-
+  
 	public static CLP2Data getEcl2DataInstance() throws EclipseException, IOException {
 		if (instance == null) {
-			EclipseEngineOptions eclipseEngineOptions = new EclipseEngineOptions();
+			File f = new File("C:\\TcgenTools\\ECLiPSe");
+			EclipseEngineOptions eclipseEngineOptions = new EclipseEngineOptions(f);
+			//EclipseEngineOptions eclipseEngineOptions = new EclipseEngineOptions();
 			eclipseEngineOptions.setUseQueues(false);
 			instance = EmbeddedEclipse.getInstance(eclipseEngineOptions);
 //			eclipseRPCInputStream(instance, Ecl2Data.class.getResourceAsStream("/imports/ccu_pllab_lib.ecl"));

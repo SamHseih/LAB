@@ -1,4 +1,5 @@
 package ccu.pllab.tcgen.tc;
+  
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -270,10 +271,9 @@ public class BuilderGen {
 				// if attr is a listed object, then it's the id
 				UML2Class info = clsInfo.findClassInfoByName(attr.getMiddle());
 				if (info != null) {
-					ret += String.format("%s(%s).", attr.getLeft(),
-							BuilderGen.genObjName(attr.getMiddle(), Integer.valueOf(attr.getRight())));
+					ret += String.format("%s(%s).", attr.getLeft(), BuilderGen.genObjName(attr.getMiddle(), Integer.valueOf(attr.getRight())));
 				} else {
-					ret += String.format("%s(%s).", attr.getLeft(), attr.getRight());
+						ret += String.format("%s(%s).", attr.getLeft(), attr.getRight());
 				}
 			}
 
@@ -294,8 +294,7 @@ public class BuilderGen {
 				// if attr is a listed object, then it's the id
 				UML2Class info = clsInfo.findClassInfoByName(attr.getMiddle());
 				if (info != null) {
-					ret += String.format("%s(%s).", attr.getLeft(),
-							BuilderGen.genObjName(attr.getMiddle(), Integer.valueOf(attr.getRight())));
+					ret += String.format("%s(%s).", attr.getLeft(), BuilderGen.genObjName(attr.getMiddle(), Integer.valueOf(attr.getRight())));
 				} else {
 					ret += String.format("%s(%s).", attr.getLeft(), attr.getRight());
 				}

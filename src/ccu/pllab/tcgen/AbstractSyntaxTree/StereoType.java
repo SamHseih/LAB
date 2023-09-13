@@ -1,133 +1,128 @@
 package ccu.pllab.tcgen.AbstractSyntaxTree;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 import ccu.pllab.tcgen.ASTGraph.ASTGraphNode;
 import ccu.pllab.tcgen.AbstractCLG.CLGGraph;
 import ccu.pllab.tcgen.AbstractConstraint.*;
-import ccu.pllab.tcgen.AbstractType.TypeTable;
-import ccu.pllab.tcgen.SymbolTable.SymbolTable;
-
-public class StereoType extends AbstractSyntaxTreeNode {
+public class StereoType extends AbstractSyntaxTreeNode{
 	String stereoType;
 	String exception;
 	AbstractSyntaxTreeNode expression;
-
+	
 	public StereoType(String stereoType) {
 		super();
-		this.stereoType = stereoType;
-		this.exception = "";
+		this.stereoType=stereoType;
 	}
 
-	public AbstractSyntaxTreeNode getTreeNode() {
+	public AbstractSyntaxTreeNode getTreeNode()
+	{
 		return this.expression;
 	}
-
-	public void addTreeChildNode(AbstractSyntaxTreeNode expression) {
-		this.expression = expression;
+	
+	public void addTreeChildNode(AbstractSyntaxTreeNode expression)
+	{
+		this.expression=expression;
 	}
-
-	public void setException(String exception) {
-		this.exception = exception;
+	
+	public void setException(String exception)
+	{
+		this.exception=exception;
 	}
-
-	public String getException() {
+	
+	public String getException()
+	{
 		return this.exception;
 	}
-
-	public AbstractSyntaxTreeNode getExpression() {
+	public AbstractSyntaxTreeNode getExpression()
+	{
 		return this.expression;
 	}
-
 	public String getStereoType() {
 		return stereoType;
 	}
-	// @Override
-	// public String addOperatorType() {return "";}
-
-	/*
-	 * @Override public void addAllNodeType(String type){}
-	 * 
-	 * @Override public void putAttributeToHashMap(HashMap<String,String> table){}
-	 * 
-	 * @Override public void takeHashMapKeyValue(HashMap<String,String> table){}
-	 * 
-	 * @Override public void addSelfOrResultType(String className){}
-	 */
-
+	//@Override
+	//public String addOperatorType() {return "";}
+	
+	/*@Override
+	public void addAllNodeType(String type){}
+	
 	@Override
-	public void addVariableType(TypeTable typeTable, String methodName) {
+	public void putAttributeToHashMap(HashMap<String,String> table){}
+	
+	@Override
+	public  void takeHashMapKeyValue(HashMap<String,String> table){}
+	
+	@Override
+	public void addSelfOrResultType(String className){}*/
+	
+	@Override
+	public void addVariableType(SymbolTable symbolTable,String methodName)
+	{}
+	
+	@Override
+	public void changeAssignToEqual(){}
+	
+	@Override
+	public void conditionChangeAssignToEqual() {}
+	
+	@Override
+	public String childNodeInfo(){return "";}
+	
+	@Override
+	public String ASTInformation()
+	{
+		return "\""+"("+this.getID()+")"+this.stereoType+"\"";
 	}
-
+	
 	@Override
-	public void changeAssignToEqual() {
+	public  CLGConstraint AST2CLG()
+	{
+		return expression.AST2CLG();
 	}
-
+	
 	@Override
-	public void conditionChangeAssignToEqual() {
+	public  CLGConstraint AST2CLG(boolean boundaryAnalysis)
+	{
+		return expression.AST2CLG();
 	}
-
+	
 	@Override
-	public String childNodeInfo() {
-		return "";
-	}
-
+	public  String NodeToString(){return "";}
+	
 	@Override
-	public String ASTInformation() {
-		return "\"" + "(" + this.getID() + ")" + this.stereoType + "\"";
-	}
-
-	@Override
-	public CLGConstraint AST2CLG(SymbolTable sym, String methodName, boolean isCondition) {
-		return expression.AST2CLG(sym, methodName, isCondition);
-	}
-
-//	@Override
-//	public String NodeToString() {
-//		return "";
-//	}
-
-	@Override
-	public void toGraphViz() {// 一個遞迴函式，來畫AST圖
-		if (this.expression != null) {
-			System.out.println(this.ASTInformation() + "->" + this.expression.ASTInformation());
-			this.expression.toGraphViz();// 遞迴
+	public void toGraphViz()
+	{//一個遞迴函式，來畫AST圖
+		if(this.expression!=null)
+		{
+			System.out.println(this.ASTInformation()+"->"+this.expression.ASTInformation());
+			this.expression.toGraphViz();//遞迴
 		}
 	}
-
 	@Override
-	public String AST2CLP(String attribute, String argument) {
+	public String AST2CLP(String attribute,String argument) 
+	{
 		return this.expression.AST2CLP(attribute, argument);
 	}
-
 	@Override
-	public String demonganAST2CLP(String attribute, String argument) {
-		return "";
-	}
-
+	public String demonganAST2CLP(String attribute,String argument) {return "";}
 	@Override
-	public void preconditionAddPre() {
+	public  void preconditionAddPre() {
 		this.expression.preconditionAddPre();
 	}
-
 	@Override
-	public void postconditionAddPre() {
+	public  void postconditionAddPre() {
 		this.expression.postconditionAddPre();
 	}
-
 	@Override
-	public void demoganOperator() {
-	}
-
+	public void demoganOperator(){}
 	@Override
-	public ASTGraphNode AST2ASTGraph() {
-		return null;
-	}
-
+	public ASTGraphNode AST2ASTGraph() {return null;}
 	@Override
-	public AbstractSyntaxTreeNode ASTclone() {
+	public AbstractSyntaxTreeNode ASTclone()
+	{
 		return null;
 	}
 }

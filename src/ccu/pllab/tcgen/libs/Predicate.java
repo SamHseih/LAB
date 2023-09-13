@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.libs;
 
+ 
 import java.util.Map;
 
 public interface Predicate {

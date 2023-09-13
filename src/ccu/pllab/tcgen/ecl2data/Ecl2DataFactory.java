@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.ecl2data;
 
+ 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
@@ -16,8 +17,7 @@ import com.parctechnologies.eclipse.EmbeddedEclipse;
 public class Ecl2DataFactory {
 	private static EclipseEngine instance = null;
 
-	private static void eclipseRPCInputStream(EclipseEngine eclipse2, InputStream resourceAsStream)
-			throws IOException, EclipseException {
+	private static void eclipseRPCInputStream(EclipseEngine eclipse2, InputStream resourceAsStream) throws IOException, EclipseException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(resourceAsStream));
 		File file = File.createTempFile("tmp", ".ecl");
 		file.deleteOnExit();

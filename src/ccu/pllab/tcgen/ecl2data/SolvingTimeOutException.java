@@ -1,7 +1,8 @@
 package ccu.pllab.tcgen.ecl2data;
 
-public class SolvingTimeOutException extends Exception {
 
+public class SolvingTimeOutException extends Exception {
+ 
 	/**
 	 * 
 	 */

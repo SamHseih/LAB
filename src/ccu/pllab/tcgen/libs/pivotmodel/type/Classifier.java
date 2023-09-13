@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.libs.pivotmodel.type;
 
+ 
 import java.util.List;
 
 import ccu.pllab.tcgen.libs.pivotmodel.Operation;

@@ -1,17 +1,20 @@
 package ccu.pllab.tcgen.clgGraph2Path;
 
+  
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class CoverageCheckingTable implements Map {
+
+public class CoverageCheckingTable implements Map{
 
 	private Map<Object, Integer> coverageCheckingTable;
-
-	public CoverageCheckingTable() {
+	
+	public CoverageCheckingTable(){
 		this.coverageCheckingTable = new HashMap<Object, Integer>();
 	}
+
 
 	@Override
 	public boolean isEmpty() {
@@ -25,7 +28,7 @@ public class CoverageCheckingTable implements Map {
 
 	@Override
 	public boolean containsValue(Object value) {
-
+		
 		return this.coverageCheckingTable.containsValue(value);
 	}
 
@@ -36,7 +39,7 @@ public class CoverageCheckingTable implements Map {
 
 	@Override
 	public Object put(Object key, Object value) {
-		return this.coverageCheckingTable.put(key, (Integer) value);
+		return this.coverageCheckingTable.put(key, (Integer)value);
 	}
 
 	@Override
@@ -47,7 +50,7 @@ public class CoverageCheckingTable implements Map {
 	@Override
 	public void clear() {
 		this.coverageCheckingTable.clear();
-
+		
 	}
 
 	@Override
@@ -57,7 +60,7 @@ public class CoverageCheckingTable implements Map {
 
 	@Override
 	public Collection values() {
-
+		
 		return this.coverageCheckingTable.values();
 	}
 
@@ -70,6 +73,7 @@ public class CoverageCheckingTable implements Map {
 	public void putAll(Map m) {
 		this.coverageCheckingTable.putAll(m);
 	}
+
 
 	@Override
 	public int size() {

@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.libs.pivotmodel;
 
+ 
 import java.io.File;
 
 import org.eclipse.emf.common.util.URI;
@@ -219,13 +220,11 @@ public class ClassDiagToJson {
 	private void init() {
 		ResourceSet oResSet = new ResourceSetImpl();
 		oResSet.getPackageRegistry().put(UMLPackage.eNS_URI, UMLPackage.eINSTANCE);
-		oResSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(UMLResource.FILE_EXTENSION,
-				UMLResource.Factory.INSTANCE);
+		oResSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(UMLResource.FILE_EXTENSION, UMLResource.Factory.INSTANCE);
 		oResSet.createResource(typesUri);
 		Resource r = oResSet.getResource(typesUri, true);
 
-		oPackageModel = (org.eclipse.uml2.uml.Package) EcoreUtil.getObjectByType(r.getContents(),
-				UMLPackage.Literals.PACKAGE);
+		oPackageModel = (org.eclipse.uml2.uml.Package) EcoreUtil.getObjectByType(r.getContents(), UMLPackage.Literals.PACKAGE);
 	}
 
 	public JSONObject toJSON() {
@@ -239,7 +238,7 @@ public class ClassDiagToJson {
 				for (int i = 0; i < class_array.getJSONObject(index).getJSONArray("attrList").length(); i++) {
 					JSONObject new_attr = class_array.getJSONObject(index).getJSONArray("attrList").getJSONObject(i);
 					if (new_attr.getString("association").equals("")) {
-
+						
 						new_attr.remove("association");
 						new_attr_array.put(new_attr);
 					}
@@ -249,8 +248,7 @@ public class ClassDiagToJson {
 			for (int index = 0; index < association_array.length(); index++) {
 				JSONArray new_roleList = new JSONArray();
 				for (int i = 0; i < association_array.getJSONObject(index).getJSONArray("roleList").length(); i++) {
-					JSONObject new_attr = association_array.getJSONObject(index).getJSONArray("roleList")
-							.getJSONObject(i);
+					JSONObject new_attr = association_array.getJSONObject(index).getJSONArray("roleList").getJSONObject(i);
 					new_attr.remove("lower");
 					new_attr.remove("upper");
 					new_roleList.put(new_attr);
@@ -278,8 +276,7 @@ public class ClassDiagToJson {
 			String cls_str = "";
 			for (int i = 0; i < class_array.length(); i++) {
 				JSONObject class_json = class_array.getJSONObject(i);
-				cls_str += String.format("{\"name\":\"%s\"," + "\"attrList\":%s," + "\"methodList\":%s}",
-						class_json.get("name"), class_json.get("attrList"), class_json.get("methodList"));
+				cls_str += String.format("{\"name\":\"%s\"," + "\"attrList\":%s," + "\"methodList\":%s}", class_json.get("name"), class_json.get("attrList"), class_json.get("methodList"));
 				if (i < class_array.length() - 1)
 					cls_str += ",";
 			}

@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.AbstractCLG;
 
+
 public class CLGEdge<F, S> extends java.util.AbstractMap.SimpleImmutableEntry<F, S> {
 
 	/**

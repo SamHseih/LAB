@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.ecl2data;
 
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,12 +35,11 @@ public class ECLiPSeCompoundTerm {
 		}
 
 	}
-
+ 
 	@Override
 	public String toString() {
 		if (terms != null) {
-			if (terms.size() > 0
-					&& (terms.get(0).toString().equals("uml_obj") || terms.get(0).toString().equals("uml_asc"))) {
+			if (terms.size() > 0 && (terms.get(0).toString().equals("uml_obj") || terms.get(0).toString().equals("uml_asc"))) {
 				return terms.toString().replaceFirst("\\[", "(").substring(0, terms.toString().length() - 1) + ")";
 			} else {
 				return terms.toString();
@@ -84,9 +84,9 @@ public class ECLiPSeCompoundTerm {
 		} else if (((ECLiPSeCompoundTerm) list.get(0).terms.get(1)).getCollectionValue() != null) {
 			ECLiPSeCompoundTerm return_value = ((ECLiPSeCompoundTerm) list.get(0).terms.get(1));
 			list_ST.add("term", return_value.toString() + ", ");
-		} else if (((ECLiPSeCompoundTerm) list.get(0).terms.get(1)).getStringValue() != null) {
+		} else if(((ECLiPSeCompoundTerm) list.get(0).terms.get(1)).getStringValue() != null){
 			ECLiPSeCompoundTerm return_value = ((ECLiPSeCompoundTerm) list.get(0).terms.get(1));
-			list_ST.add("term", "\"" + return_value.toString() + "\"" + ", ");
+			list_ST.add("term", "\""+return_value.toString()+ "\""+ ", ");
 		} else {
 			list_ST.add("term", "void, ");
 		}
@@ -106,8 +106,8 @@ public class ECLiPSeCompoundTerm {
 	public Integer getIntValue() {
 		return this.intValue;
 	}
-
-	public String getStringValue() {
+	
+	public String getStringValue(){
 		return this.stringValue;
 	}
 }

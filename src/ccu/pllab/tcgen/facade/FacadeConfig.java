@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.facade;
 
+ 
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
@@ -123,8 +124,7 @@ public class FacadeConfig implements TCGenConfig, CreateObjectConfig {
 		try {
 			packageAndClassName = this.config.getString(CFG_TARGET_CLS).split("\\.");
 			List<String> names = Arrays.asList(packageAndClassName);
-			return StringUtils.join(names.subList(0, names.size() - 1), ".") + "."
-					+ WordUtils.uncapitalize(this.getTestSuiteName());
+			return StringUtils.join(names.subList(0, names.size() - 1), ".") + "." + WordUtils.uncapitalize(this.getTestSuiteName());
 		} catch (JSONException e) {
 			throw new IllegalStateException(e);
 		}
@@ -204,8 +204,7 @@ public class FacadeConfig implements TCGenConfig, CreateObjectConfig {
 	public boolean isInvalidCase() {
 		return config.optBoolean("invalid_case", false);
 	}
-
-	/* criterion based */
+/*criterion based */
 	public static Criterion parsePathCoverage(String coverage) {
 		if (coverage.equals("dcc")) {
 			return CriterionFactory.Criterion.dcc;
@@ -213,11 +212,11 @@ public class FacadeConfig implements TCGenConfig, CreateObjectConfig {
 			return CriterionFactory.Criterion.dc;
 		} else if (coverage.equals("mcc")) {
 			return CriterionFactory.Criterion.mcc;
-		} else if (coverage.equals("dcdup")) {
+		}else if (coverage.equals("dcdup")) {
 			return CriterionFactory.Criterion.dcdup;
-		} else if (coverage.equals("dccdup")) {
+		}else if (coverage.equals("dccdup")) {
 			return CriterionFactory.Criterion.dccdup;
-		} else if (coverage.equals("mccdup")) {
+		}else if (coverage.equals("mccdup")) {
 			return CriterionFactory.Criterion.mccdup;
 		} else {
 			return CriterionFactory.Criterion.dcc;

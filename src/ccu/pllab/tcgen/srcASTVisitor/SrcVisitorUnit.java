@@ -1,13 +1,12 @@
 package ccu.pllab.tcgen.srcASTVisitor;
 
+ 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.*;
 
 import ccu.pllab.tcgen.AbstractCLG.*;
-import ccu.pllab.tcgen.AbstractType.VoidType;
-import ccu.pllab.tcgen.exe.main.Main;
 import ccu.pllab.tcgen.srcNodeVisitor.*;
 
 public class SrcVisitorUnit extends ASTVisitor {
@@ -32,7 +31,7 @@ public class SrcVisitorUnit extends ASTVisitor {
 	public boolean visit(FieldDeclaration node) {
 		FieldDeclarationVisitor visitor = new FieldDeclarationVisitor();
 		node.accept(visitor);
-		System.out.println("field: " + node.fragments());
+		System.out.println("field: "+node.fragments());
 		classAttrubutes.add(node.fragments().get(0).toString());
 		return true;
 	}
@@ -50,25 +49,19 @@ public class SrcVisitorUnit extends ASTVisitor {
 
 	public void endVisit(MethodDeclaration node) {
 
-		if (clgGraph == null) {
+		if (clgGraph == null){
 			clgGraph = new CLGGraph();
 		}
 		((CLGStartNode) clgGraph.getStartNode()).setClassName(className);
 		((CLGStartNode) clgGraph.getStartNode()).setMethodName(node.getName().toString());
-		if (node.getReturnType2() != null) {
-			((CLGStartNode) clgGraph.getStartNode()).setRetType(Main.typeTable.get(node.getReturnType2().toString(), null));
-		} else {
-			((CLGStartNode) clgGraph.getStartNode()).setRetType(new VoidType());
+		if(node.getReturnType2()!= null){
+			((CLGStartNode) clgGraph.getStartNode()).setRetType(node.getReturnType2().toString());
+		}else{
+			((CLGStartNode) clgGraph.getStartNode()).setRetType("null");
 		}
-		if (classAttrubutes != null) {
+		if (classAttrubutes != null){
 			((CLGStartNode) clgGraph.getStartNode()).setClassAttributes(classAttrubutes);
 		}
-		if (node.isConstructor()) {
-			((CLGStartNode) clgGraph.getStartNode()).setIsConstructor(true);
-		} else {
-			((CLGStartNode) clgGraph.getStartNode()).setIsConstructor(false);
-		}
-
 		if (node.parameters().size() > 0) {
 			ArrayList<String> parameters = new ArrayList<String>();
 			for (Object o : node.parameters()) {
@@ -77,7 +70,7 @@ public class SrcVisitorUnit extends ASTVisitor {
 			}
 			((CLGStartNode) clgGraph.getStartNode()).setMethodParameters(parameters);
 		}
-
+		
 		clgGraphList.add(clgGraph);
 	}
 
@@ -131,19 +124,17 @@ public class SrcVisitorUnit extends ASTVisitor {
 		}
 		return false;
 	}
-
-	public boolean visit(ThrowStatement node) {
+	public boolean visit(ThrowStatement node){
 		ThrowStatementVisitor visitor = new ThrowStatementVisitor();
 		node.accept(visitor);
 		if (clgGraph == null) {
-			clgGraph = visitor.getCLGGraph();
+			clgGraph = visitor.getCLGGraph();			
 		} else {
 			clgGraph.graphAnd(visitor.getCLGGraph());
 		}
 		return false;
-
+		
 	}
-
 	public boolean visit(PostfixExpression node) {
 		PostfixExpressionVisitor visitor = new PostfixExpressionVisitor();
 		node.accept(visitor);

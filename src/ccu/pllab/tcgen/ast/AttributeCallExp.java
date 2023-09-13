@@ -13,6 +13,7 @@ import ccu.pllab.tcgen.clg2path.CriterionFactory.Criterion;
 import ccu.pllab.tcgen.libs.TemplateFactory;
 import ccu.pllab.tcgen.libs.pivotmodel.type.Classifier;
 import ccu.pllab.tcgen.libs.pivotmodel.type.TypeFactory;
+ 
 
 public class AttributeCallExp extends PropertyCallExp {
 
@@ -28,16 +29,15 @@ public class AttributeCallExp extends PropertyCallExp {
 
 	@Override
 	public AttributeCallExp clone() {
-		AttributeCallExp n = new AttributeCallExp(this.getConstraint(), this.getSourceExp().clone(),
-				this.getPropertyName(), this.getType());
+		AttributeCallExp n = new AttributeCallExp(this.getConstraint(), this.getSourceExp().clone(), this.getPropertyName(), this.getType());
 		return n;
 	}
 
 	@Override
 	public String toOCL() {
-		return this.getSourceExp() + "." + this.getPropertyName();
+		return  this.getSourceExp()+ "." + this.getPropertyName();
 	}
-
+ 
 	@Override
 	public String getPredicateName(Map<String, String> templateArgs) {
 		ST tpl = TemplateFactory.getTemplate("property_call");
@@ -59,11 +59,12 @@ public class AttributeCallExp extends PropertyCallExp {
 		tpl.add("node_identifier", this.getId());
 		tpl.add("class_name", this.getSourceExp().getType().getName());
 		tpl.add("property_name", this.getPropertyName());
-		String tempType = this.getType().getName();
-		if (tempType.startsWith("Set") || tempType.startsWith("Sequence") || tempType.startsWith("OrderedSet")
-				|| tempType.startsWith("Bag")) {
+		String tempType =this.getType().getName();
+		if(tempType.startsWith("Set")||tempType.startsWith("Sequence")||tempType.startsWith("OrderedSet")||tempType.startsWith("Bag")){
 			tpl.add("result_call", "[_|Result]");
-		} else {
+		}
+		else
+		{
 			tpl.add("result_call", "Result");
 		}
 		tpl.add("object_getter", this.getSourceExp().getPredicateName(templateArgs).replaceAll("\\(.*\\)", ""));
@@ -84,16 +85,18 @@ public class AttributeCallExp extends PropertyCallExp {
 	}
 
 	@Override
-	public CLGGraph OCL2CLG() {
+	public CLGGraph OCL2CLG( ) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public CLGConstraint CLGConstraint() {
-
+	
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 }

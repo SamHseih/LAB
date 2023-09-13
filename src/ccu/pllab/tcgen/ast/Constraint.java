@@ -32,6 +32,7 @@ import ccu.pllab.tcgen.libs.pivotmodel.type.Classifier;
 import ccu.pllab.tcgen.libs.pivotmodel.type.PrimitiveType;
 import ccu.pllab.tcgen.libs.pivotmodel.type.TypeFactory;
 
+ 
 public class Constraint extends ASTNode {
 	private tudresden.ocl20.pivot.pivotmodel.Constraint dresden_constraint;
 	private ASTNode spec;
@@ -42,12 +43,12 @@ public class Constraint extends ASTNode {
 		this.dresden_constraint = obj;
 		this.model = model;
 		this.spec = spec;
-
+		
 		this.spec.addPreviousNode(this);
 	}
 
 	public ASTNode getSpecification() {
-
+		
 		return this.spec;
 	}
 
@@ -114,7 +115,7 @@ public class Constraint extends ASTNode {
 
 	@Override
 	public String toOCL() {
-
+		
 		return this.getSpecification().toOCL();
 	}
 
@@ -148,15 +149,13 @@ public class Constraint extends ASTNode {
 		if (templateArgs.get("result_name") != null) {
 			result_name = templateArgs.get("result_name");
 		}
-		String result = ("n_" + this.getId() + "_" + this.getConstrainedElement()).replace("::", "_")
-				+ String.format("(%s, %s, %s)", instances_name, vars_name, result_name);
+		String result = ("n_" + this.getId() + "_" + this.getConstrainedElement()).replace("::", "_") + String.format("(%s, %s, %s)", instances_name, vars_name, result_name);
 		return result;
 	}
 
 	@Override
 	public String getEntirePredicate(Map<String, String> templateArgs) {
-		return this.getPredicateName(templateArgs) + " :-\n" + "\t"
-				+ this.getSpecification().getPredicateName(templateArgs) + ".";
+		return this.getPredicateName(templateArgs) + " :-\n" + "\t" + this.getSpecification().getPredicateName(templateArgs) + ".";
 	}
 
 	@Override
@@ -169,8 +168,7 @@ public class Constraint extends ASTNode {
 		this.spec = this.spec.toPreProcessing();
 		final Queue<ASTNode> new_variable_queue = new LinkedList<ASTNode>();
 		final Queue<ASTNode> need_rename_queue = new LinkedList<ASTNode>();
-		GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER,
-				new QueueFrontier<ASTNode>());
+		GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER, new QueueFrontier<ASTNode>());
 		dfs.traverse(this.spec, new NodeVisitHandler<ASTNode>() {
 
 			@Override
@@ -181,18 +179,15 @@ public class Constraint extends ASTNode {
 					if (!(_exp.getPropertyName().equals("="))) {
 
 						if (_exp.getSourceExp() instanceof IterateExp) {
-							VariableExp newVar = new VariableExp(Constraint.this.getConstraint(),
-									"#ASTnewVar_" + current_node.getId(), _exp.getSourceExp().getType(),
-									_exp.getSourceExp().getState());
+							VariableExp newVar = new VariableExp(Constraint.this.getConstraint(), "#ASTnewVar_" + current_node.getId(), _exp.getSourceExp().getType(), _exp.getSourceExp().getState());
 							need_rename_queue.add(_exp.getSourceExp());
 							_exp.setSourceExp(newVar);
 							new_variable_queue.add(newVar);
 						}
 						for (int i = 0; i < _exp.getParameterExps().size(); i++) {
 							if (_exp.getParameterExps().get(i) instanceof IterateExp) {
-								VariableExp newVar = new VariableExp(Constraint.this.getConstraint(),
-										"#ASTnewVar_" + current_node.getId(), _exp.getParameterExps().get(i).getType(),
-										_exp.getParameterExps().get(i).getState());
+								VariableExp newVar = new VariableExp(Constraint.this.getConstraint(), "#ASTnewVar_" + current_node.getId(), _exp.getParameterExps().get(i).getType(), _exp
+										.getParameterExps().get(i).getState());
 								need_rename_queue.add(_exp.getParameterExps().get(i));
 								_exp.setParameterExpAtPosition(0, newVar);
 								new_variable_queue.add(newVar);
@@ -202,27 +197,21 @@ public class Constraint extends ASTNode {
 				} else if (current_node instanceof IfExp) {
 					IfExp _exp = (IfExp) current_node;
 					if (_exp.getConditionExp() instanceof IterateExp) {
-						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(),
-								"#ASTnewVar_" + current_node.getId(), _exp.getConditionExp().getType(),
-								_exp.getConditionExp().getState());
+						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(), "#ASTnewVar_" + current_node.getId(), _exp.getConditionExp().getType(), _exp.getConditionExp().getState());
 						need_rename_queue.add(_exp.getConditionExp());
 						_exp.setConditionExp(newVar);
 						new_variable_queue.add(newVar);
 						need_rename_queue.add(_exp.getConditionExp());
 					}
 					if (_exp.getThenExp() instanceof IterateExp) {
-						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(),
-								"#ASTnewVar_" + current_node.getId(), _exp.getThenExp().getType(),
-								_exp.getThenExp().getState());
+						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(), "#ASTnewVar_" + current_node.getId(), _exp.getThenExp().getType(), _exp.getThenExp().getState());
 						need_rename_queue.add(_exp.getThenExp());
 						_exp.setThenExp(newVar);
 						new_variable_queue.add(newVar);
 						need_rename_queue.add(_exp.getThenExp());
 					}
 					if (_exp.getElseExp() instanceof IterateExp) {
-						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(),
-								"#ASTnewVar_" + current_node.getId(), _exp.getElseExp().getType(),
-								_exp.getElseExp().getState());
+						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(), "#ASTnewVar_" + current_node.getId(), _exp.getElseExp().getType(), _exp.getElseExp().getState());
 						need_rename_queue.add(_exp.getElseExp());
 						_exp.setElseExp(newVar);
 						new_variable_queue.add(newVar);
@@ -232,17 +221,13 @@ public class Constraint extends ASTNode {
 				} else if (current_node instanceof IterateExp) {
 					IterateExp _exp = (IterateExp) current_node;
 					if (_exp.getAccInitExp() instanceof IterateExp) {
-						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(),
-								"#ASTnewVar_" + current_node.getId(), _exp.getAccInitExp().getType(),
-								_exp.getAccInitExp().getState());
+						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(), "#ASTnewVar_" + current_node.getId(), _exp.getAccInitExp().getType(), _exp.getAccInitExp().getState());
 						need_rename_queue.add(_exp.getAccInitExp());
 						_exp.setAccInitExp(newVar);
 						new_variable_queue.add(newVar);
 					}
 					if (_exp.getSourceExp() instanceof IterateExp) {
-						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(),
-								"#ASTnewVar_" + current_node.getId(), _exp.getSourceExp().getType(),
-								_exp.getSourceExp().getState());
+						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(), "#ASTnewVar_" + current_node.getId(), _exp.getSourceExp().getType(), _exp.getSourceExp().getState());
 						need_rename_queue.add(_exp.getSourceExp());
 						_exp.setSourceExp(newVar);
 						new_variable_queue.add(newVar);
@@ -251,18 +236,15 @@ public class Constraint extends ASTNode {
 				} else if (current_node instanceof IteratorExp) {
 					IteratorExp _exp = (IteratorExp) current_node;
 					if (_exp.getSourceExp() instanceof IterateExp) {
-						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(),
-								"#ASTnewVar_" + current_node.getId(), _exp.getSourceExp().getType(),
-								_exp.getSourceExp().getState());
+						VariableExp newVar = new VariableExp(Constraint.this.getConstraint(), "#ASTnewVar_" + current_node.getId(), _exp.getSourceExp().getType(), _exp.getSourceExp().getState());
 						need_rename_queue.add(_exp.getSourceExp());
 						_exp.setSourceExp(newVar);
 						new_variable_queue.add(newVar);
 					}
 					for (int i = 0; i < _exp.getParameterExps().size(); i++) {
 						if (_exp.getParameterExps().get(i) instanceof IterateExp) {
-							VariableExp newVar = new VariableExp(Constraint.this.getConstraint(),
-									"#ASTnewVar_" + current_node.getId(), _exp.getParameterExps().get(i).getType(),
-									_exp.getParameterExps().get(i).getState());
+							VariableExp newVar = new VariableExp(Constraint.this.getConstraint(), "#ASTnewVar_" + current_node.getId(), _exp.getParameterExps().get(i).getType(), _exp
+									.getParameterExps().get(i).getState());
 							need_rename_queue.add(_exp.getParameterExps().get(i));
 							_exp.setParameterExpAtPosition(0, newVar);
 							new_variable_queue.add(newVar);
@@ -277,11 +259,9 @@ public class Constraint extends ASTNode {
 			final VariableExp new_variable = (VariableExp) new_variable_queue.remove();
 			ASTNode root_node = this.spec;
 			final VariableExp new_equal_variable = new_variable.clone();
-			OperationCallExp _exp = new OperationCallExp(need_rename.getConstraint(), new_equal_variable, "=",
-					TypeFactory.getInstance().getClassifier("Boolean"), false, need_rename);
+			OperationCallExp _exp = new OperationCallExp(need_rename.getConstraint(), new_equal_variable, "=", TypeFactory.getInstance().getClassifier("Boolean"), false, need_rename);
 			_exp.setAttribute("dummy_assign", Boolean.toString(true));
-			OperationCallExp _and = new OperationCallExp(root_node.getConstraint(), _exp, "and",
-					TypeFactory.getInstance().getClassifier("Boolean"), false, root_node);
+			OperationCallExp _and = new OperationCallExp(root_node.getConstraint(), _exp, "and", TypeFactory.getInstance().getClassifier("Boolean"), false, root_node);
 			this.spec = _and;
 		}
 
@@ -299,20 +279,17 @@ public class Constraint extends ASTNode {
 		for (Parameter parameter : parameters) {
 			if (model.findClassInfoByName(parameter.getType().getName()) == null) {
 				continue;
-			}
-			Set<Attribute> unchagedPropertiesForParameter = findUnchangedPropertyForParameter(changedPropertyCallExprs,
-					parameter);
+			} 
+			Set<Attribute> unchagedPropertiesForParameter = findUnchangedPropertyForParameter(changedPropertyCallExprs, parameter);
 			Iterator<Attribute> pit = unchagedPropertiesForParameter.iterator();
 			while (pit.hasNext()) {
 				Attribute a = pit.next();
 				if (TypeFactory.getInstance().getClassifier(a.getType()) instanceof PrimitiveType) {
-					equal_exps.add(ASTUtil.getEqualExpForUnchangedAttribute(this.dresden_constraint,
-							parameter.getName(), parameter.getType().getName(), parameters.indexOf(parameter) + 1, a));
+					equal_exps.add(ASTUtil.getEqualExpForUnchangedAttribute(this.dresden_constraint, parameter.getName(), parameter.getType().getName(), parameters.indexOf(parameter) + 1, a));
 				} else {
-					equal_exps.add(ASTUtil.getEqualExpForAsc(this.dresden_constraint,
-							model.findClassInfoByName(parameter.getType().getName()), parameter.getName(),
-							parameters.indexOf(parameter) + 1, a));
-				}
+					equal_exps.add(ASTUtil.getEqualExpForAsc(this.dresden_constraint, model.findClassInfoByName(parameter.getType().getName()), parameter.getName(), parameters.indexOf(parameter) + 1,
+							a));
+				} 
 
 			}
 
@@ -325,10 +302,8 @@ public class Constraint extends ASTNode {
 		return ASTUtil.detectChangedProperties(model, dresden_constraint, Arrays.asList(this.spec));
 	}
 
-	private Set<Attribute> findUnchangedPropertyForParameter(
-			final HashMap<String, Set<PropertyCallExp>> changedPropertyCallExprs, Parameter parameter) {
-		Set<Attribute> unchagnedProperties = new HashSet<Attribute>(
-				model.findClassInfoByName(parameter.getType().getName()).getAttrAndAscList());
+	private Set<Attribute> findUnchangedPropertyForParameter(final HashMap<String, Set<PropertyCallExp>> changedPropertyCallExprs, Parameter parameter) {
+		Set<Attribute> unchagnedProperties = new HashSet<Attribute>(model.findClassInfoByName(parameter.getType().getName()).getAttrAndAscList());
 		for (Entry<String, Set<PropertyCallExp>> e : changedPropertyCallExprs.entrySet()) {
 			if (!e.getKey().equals(parameter.getName())) {
 				continue;
@@ -350,44 +325,42 @@ public class Constraint extends ASTNode {
 	@Override
 	public CLGGraph OCL2CLG() {
 		ASTNode _copy = this.clone();
-		ASTNode copy_tree = _copy.toPreProcessing();
+		ASTNode copy_tree = _copy.toPreProcessing();       
 		CLGGraph clggraph = ((Constraint) copy_tree).spec.OCL2CLG();
 		ArrayList attribute = new ArrayList();
 		ArrayList arg = new ArrayList();
-
+	
 		((CLGStartNode) clggraph.getStartNode()).setClassName(this.getConstraintedClassName());
 		((CLGStartNode) clggraph.getStartNode()).setMethodName(this.getConstraintedMethodName());
-		/* 設定attribute */
-		for (int i = 0; i < model.getClasses().size(); i++) {
-			for (int j = 0; j < model.getClasses().get(i).getAttrList().size(); j++) {
+		/*設定attribute*/
+		for(int i = 0 ; i< model.getClasses().size() ;i++) {
+			for(int j = 0; j< model.getClasses().get(i).getAttrList().size(); j++) {
 				attribute.add(model.getClasses().get(i).getAttrList().get(j).getName());
 			}
 		}
-		// ((CLGStartNode) clggraph.getStartNode()).setClassAttributes(attribute);
-		/* 設定method arg */
-		for (int k = 0; k < model.getClasses().size(); k++) {
-			if (model.getClasses().get(k).findMethod(this.getConstraintedMethodName()) != null) {
-				for (int l = 0; l < model.getClasses().get(k).findMethod(this.getConstraintedMethodName()).getArgList()
-						.size(); l++) {
-					arg.add(model.getClasses().get(k).findMethod(this.getConstraintedMethodName()).getArgList().get(l)
-							.getKey());
+		((CLGStartNode) clggraph.getStartNode()).setClassAttributes(attribute);
+		/*設定method arg*/
+		for(int k = 0 ; k< model.getClasses().size() ;k++) {
+			if(model.getClasses().get(k).findMethod(this.getConstraintedMethodName()) != null) {
+				for(int l =0; l<model.getClasses().get(k).findMethod(this.getConstraintedMethodName()).getArgList().size();l++) {
+					arg.add(model.getClasses().get(k).findMethod(this.getConstraintedMethodName()).getArgList().get(l).getKey());
 				}
 			}
 		}
-		// ((CLGStartNode) clggraph.getStartNode()).setMethodParameters(arg);
-
-		if (((CLGStartNode) clggraph.getStartNode()).getClassName()
-				.equals(((CLGStartNode) clggraph.getStartNode()).getMethodName()))
-			((CLGStartNode) clggraph.getStartNode()).setIsConstructor(true);
+		((CLGStartNode) clggraph.getStartNode()).setMethodParameters(arg);
+		
+		if(   ((CLGStartNode) clggraph.getStartNode()).getClassName().equals(((CLGStartNode) clggraph.getStartNode()).getMethodName())         )
+			((CLGStartNode) clggraph.getStartNode()).setIsConstructor(true);    
 		CLGConstraint test = ((Constraint) copy_tree).spec.CLGConstraint();
 
 		return clggraph;
-	}
+	} 
 
 	@Override
 	public CLGConstraint CLGConstraint() {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 
 }

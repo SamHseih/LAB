@@ -1,5 +1,8 @@
 package ccu.pllab.tcgen.DataWriter;
 
+ 
+
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,29 +15,28 @@ public class DataWriter {
 	private static BufferedWriter bw = null;
 
 	public static String output_folder_path = Main.output_folder_path;
-	public static String Clg_output_path;
-	public static String testPath_output_path;
-	public static String testCons_output_path;
-	public static String testData_output_path;
-	public static String testMethodCLP_output_path;
-	public static String testGuardOCL_path;
-
+	public static String Clg_output_path ;
+	public static String testPath_output_path ;
+	public static String testCons_output_path ;
+	public static String testData_output_path ;
+	
 	public static void writeInfo(Object data, String fileName, String fileType, String fileDes, String folderName) {
-
-		try {
-			File f = new File(fileDes + "\\" + folderName);
-
-			if (!f.exists()) {
+		
+		
+		try {			
+			File f = new File(fileDes+"\\"+folderName);
+			
+			if(!f.exists()){
 				f.mkdirs();
 			}
-
+			
 			fw = new FileWriter(fileDes + "\\" + folderName + "\\" + fileName + "." + fileType, false);
 			bw = new BufferedWriter(fw);
 			if (data instanceof List) {
 				for (int i = 0; i < ((List) data).size(); i++) {
 					bw.write(data + "\n");
 				}
-			} else {
+			}else{
 				bw.write(data + "\n");
 			}
 
@@ -49,15 +51,15 @@ public class DataWriter {
 
 	public static void writeInfo(String data, String fileName, String fileType, String fileDes) {
 		try {
-			// System.out.println("fileName " + fileDes + fileName);
+			//System.out.println("fileName  " + fileDes + fileName);
 			// fw = new FileWriter(outputPath+fileName+"."+fileType, false); //
 			// 預設是fals~如資料夾中有資料會刪除原資料印新的
 			File folder = new File(fileDes);
-
-			if (!folder.exists()) {
+			
+			if(!folder.exists()){
 				folder.mkdirs();
 			}
-			File f = new File(fileDes + fileName + "." + fileType);
+			File f= new File(fileDes + fileName + "." + fileType);
 			fw = new FileWriter(f, false);
 			bw = new BufferedWriter(fw);
 			// for(int i = 0; i < data.length ; i++){
@@ -93,16 +95,15 @@ public class DataWriter {
 			}
 		}
 	}
-
+	
 	public static void initOutputPath() {
-		String[] paths = new String[] { DataWriter.Clg_output_path, DataWriter.testPath_output_path,
-				DataWriter.testCons_output_path, DataWriter.testData_output_path, DataWriter.testGuardOCL_path };
-		for (String p : paths) {
+		String[] paths = new String[]{DataWriter.Clg_output_path, DataWriter.testPath_output_path, DataWriter.testCons_output_path, DataWriter.testData_output_path};
+		for(String p : paths) {
 			File f = new File(p);
 			if (!f.exists()) {
 				f.mkdirs();
 			}
-		}
+		}	
 	}
 
 }

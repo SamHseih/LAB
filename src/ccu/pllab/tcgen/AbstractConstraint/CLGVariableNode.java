@@ -1,76 +1,56 @@
 package ccu.pllab.tcgen.AbstractConstraint;
 
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map.Entry;
 
-import ccu.pllab.tcgen.AbstractType.ArrayListType;
-import ccu.pllab.tcgen.AbstractType.ArrayType;
-import ccu.pllab.tcgen.AbstractType.CollectionType;
-import ccu.pllab.tcgen.AbstractType.UserDefinedType;
-import ccu.pllab.tcgen.AbstractType.VariableType;
-import ccu.pllab.tcgen.AbstractType.VoidType;
-import ccu.pllab.tcgen.CBTCGUtility.Utility;
-import ccu.pllab.tcgen.SymbolTable.MethodToken;
-import ccu.pllab.tcgen.SymbolTable.SymbolTable;
 import ccu.pllab.tcgen.exe.main.Main;
-import ccu.pllab.tcgen.pathCLPFinder.CLPInfo;
 
-public abstract class CLGVariableNode extends CLGConstraint {
-	private VariableType type;
+public class CLGVariableNode extends CLGConstraint{
+	private String type;
 	private String name;
-	private CLGConstraint constraint;// 由於AST 改變成左遞迴，constraint 改成紀錄左邊的
-
-	public CLGVariableNode() {
+	private CLGConstraint constraint;
+	private String clp="";
+	public CLGVariableNode(){
 		super();
-		this.type = new VoidType();
+		this.type = "";
 		this.name = "";
 		this.constraint = null;
 	}
-
-	public CLGVariableNode(String name) {
+	public CLGVariableNode(String name){
 		super();
-		this.type = new VoidType();
+		this.type = "";
 		this.name = name;
 		this.constraint = null;
 	}
 
-	public CLGVariableNode(String name, VariableType type) {
+	public CLGVariableNode(String name ,String type){
 		super();
 		this.type = type;
 		this.name = name;
 		this.constraint = null;
 	}
-
-	public CLGVariableNode(String name, VariableType type, CLGConstraint source_constraint) {
+	public CLGVariableNode(String name, String type, CLGConstraint constraint) {
 		super();
 		this.type = type;
 		this.name = name;
-		this.constraint = source_constraint;
+		this.constraint = constraint;
 	}
-
 	public void setConstraint(CLGConstraint constraint) {
 		this.constraint = constraint;
 	}
-
-	public CLGConstraint getConstraint() {
+	public CLGConstraint getConstraint(){
 		return this.constraint;
 	}
-
-	public void setType(VariableType type) {
-		this.type = type;
+	public void setType(String type){
+		this.type=type;
 	}
-
-	public VariableType getType() {
+	public String getType() {
 		return this.type;
 	}
-
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String name){
+		this.name=name;
 	}
-
-	public String getName() {
+	public String getName(){
 		return this.name;
 	}
 
@@ -79,158 +59,209 @@ public abstract class CLGVariableNode extends CLGConstraint {
 		if (this.constraint == null) {
 			return this.getName();
 		} else {
-			// return this.name + "[" + this.constraint.getImgInfo() + "]";//我改的
-			// return this.name + "." + this.constraint.getImgInfo();
-			return this.constraint.getImgInfo() + "." + this.name;
+		//	return this.name + "[" + this.constraint.getImgInfo() + "]";//我改的
+			return this.name + "." + this.constraint.getImgInfo() ;
 		}
 	}
-
+	
+//	@Override
+//	public String getCLPInfo() {
+//		String new_name="";
+//		new_name+=this.name.toUpperCase().charAt(0);
+//		if(this.name.length()>1){
+//			new_name+=this.name.substring(1);
+//		}
+//		if (this.constraint == null) {
+//			return new_name;
+//		} else {
+//			return new_name + "[" + this.constraint.getCLPInfo() + "]";
+//		}
+//		
+//	}
+	
 	@Override
-	public CLPInfo getCLPInfo(HashMap<String, Integer> variableSet, HashMap<String, Boolean> containKey) {
-		String new_name = this.name;
-
-		if (containKey.containsKey(Utility.titleToUppercase(new_name))) {
-			containKey.put(Utility.titleToUppercase(new_name), true);
+	public String getCLPInfo() {
+		String new_name="";
+		if(clp.length()>0)
+			return clp;
+		/*need  modify*/
+		if(this.name.length()>1){
+			/*method call*/
+			if(this.getName().startsWith("Sequence")) {
+				String name1 = this.getName().split("->")[0];
+				String name2 = this.getName().split("->")[1];
+				String arg1 = name1.substring(9, name1.length()-1).split("\\.\\.")[0];
+				String arg2 = name1.substring(9, name1.length()-1).split("\\.\\.")[1];
+				
+				if (arg1.contains("self@pre.")) {
+					arg1= arg1.replaceAll("self@pre.", "");
+				//	arg1 = arg1.substring(0, 1).toUpperCase() + arg1.substring(1)+"_0";
+					arg1 = arg1.substring(0, 1).toUpperCase() + arg1.substring(1)+"_pre";
+				}
+				if (arg2.contains("self@pre.")) {
+					arg2= arg2.replaceAll("self@pre.", "");
+				//	arg2 = arg2.substring(0, 1).toUpperCase() + arg2.substring(1)+"_0";
+					arg2 = arg2.substring(0, 1).toUpperCase() + arg2.substring(1)+"_pre";
+				}
+				
+				String method = name2.split("\\(")[0];
+				method = method.substring(0, 1).toUpperCase() + method.substring(1);
+				String arg = name2.split("\\(")[1];
+				if (arg.equals(")")) {
+					arg = "(Temp,"+method+")";
+				}
+				else {
+					arg = arg.split("\\)")[0];
+					arg = "(Temp,"+arg+","+ method+")";
+				}
+				
+				new_name = method +",\n	newSequence("+ arg1 +","+ arg2 +",Temp),\n	sequence"+method+arg;
+			}
+			
+			/*ocl modify*/
+			else {
+				//System.out.println("CLGVariable.java Name:"+this.getName());
+				if(this.getName().contains("self@pre."))
+				{
+					new_name= this.getName().replaceAll("self@pre.", "");
+					//new_name = new_name.substring(0, 1).toUpperCase() + new_name.substring(1)+"_0";
+					new_name = new_name.substring(0, 1).toUpperCase() + new_name.substring(1)+"_pre";
+				}
+				else if(this.getName().contains("@pre")){
+					new_name= this.getName().replaceAll("@pre", "_pre");
+					//new_name = new_name.substring(0, 1).toUpperCase() + new_name.substring(1)+"_0";
+					new_name = new_name.substring(0, 1).toUpperCase() + new_name.substring(1)+"_pre";
+				}
+				else if(this.getName().contains("self") && this.constraint!=null) {
+					new_name= this.getName().replaceAll("self", "");
+					//new_name = new_name.substring(0, 1).toUpperCase() + new_name.substring(1);
+				}
+						
+				else {
+					new_name+=this.name.toUpperCase().charAt(0);
+					new_name+=this.name.substring(1);
+				}
+			}
 		}
-
+		
+		/*do not modify*/
+		else {
+			if(this.name.length()>0)
+			new_name+=this.name.toUpperCase().charAt(0);
+		}
+		if(new_name.contains("presize") && !new_name.contains("presize_pre"))
+		new_name=new_name.replaceAll("presize", "presize_pre");
 		if (this.constraint == null) {
-			return new CLPInfo(Utility.titleToUppercase(new_name), new ArrayList<String>());
-		} else if (new_name.equals("")) { // 不知道照做什麼的?
-			return this.constraint.getCLPInfo(variableSet, containKey);
-		} else if (!(this.constraint instanceof CLGOperatorNode)) {
-			CLPInfo operator_clpinfo = this.constraint.getCLPInfo(variableSet, containKey);
-			String return_str = Utility.titleToUppercase(operator_clpinfo.getReturnCLP() + "_" + new_name);
-			return new CLPInfo(return_str, operator_clpinfo.getMethodCallCLP());
-		} else {
-			return new CLPInfo(Utility.titleToUppercase(new_name), new ArrayList<String>());
+			clp=new_name;
+			return new_name;
+		} 
+		else if(new_name.equals(""))
+		{
+			clp=this.constraint.getCLPInfo() ;
+			return clp;
+			//return this.constraint.getCLPInfo() ;
+		}
+		else if(!(this.constraint instanceof CLGOperatorNode)){
+			//return new_name + "[" + this.constraint.getCLPInfo() + "]";
+			clp=new_name + "_" + this.constraint.getCLPInfo() ;
+			return clp;
+			//return new_name + "_" + this.constraint.getCLPInfo() ;
+		}
+		else {
+			clp= new_name;
+			return new_name;
 		}
 	}
-
+	
 	@Override
 	public CLGConstraint clone() {
-		if (this.constraint == null) {
-			CLGConstraint cons = new CLGObjectNode(String.valueOf(this.name), this.type, this.constraint);
+		if(this.constraint==null){
+			CLGConstraint cons=new CLGVariableNode(this.name,this.type,this.constraint);
 			cons.setCloneId(this.getConstraintId());
-			// return new CLGVariableNode(this.name,this.type,this.constraint);
+		//return new CLGVariableNode(this.name,this.type,this.constraint);
 			return cons;
-		} else {
-			CLGConstraint newConstrain = this.constraint.clone();
-			CLGConstraint cons = new CLGObjectNode(String.valueOf(this.name), this.type, newConstrain);
+		}else{
+			CLGConstraint newConstrain=this.constraint.clone();
+			CLGConstraint cons=new CLGVariableNode(this.name,this.type,newConstrain);
 			cons.setCloneId(this.getConstraintId());
 			return cons;
-			// return new CLGVariableNode(this.name,this.type,newConstrain);
+			//return new CLGVariableNode(this.name,this.type,newConstrain);
 		}
-
+	
 	}
-
 	@Override
 	public String getCLPValue() {
 
-		if (this.getName().contains("@")) {
-			return this.getName().replaceAll("@", "_");
+	/*	if(this.getName().contains("@pre"))
+		{
+			return  this.getName().replaceAll("@pre", "");
+		}*/
+		if(this.getName().contains("@"))
+		{
+			return  this.getName().replaceAll("@", "_");
 		}
-		if (this.getName().contains("self") && this.constraint != null) {
-			return this.getName().replaceAll("self", "");
+		/*if(this.getName().contains("self."))
+		{
+			return  this.getName().replaceAll("self.", "");
+		}我自加*/
+		if(this.getName().contains("self") &&this.constraint!=null)
+		{
+			return  this.getName().replaceAll("self", "");
 		}
 		return this.getName();
 	}
-
-	public void setCLPValue(String data) {
+	public void setCLPValue(String data){
 		this.setName(data);
 	}
-
-	public void renameCLPValue(int count) {
-		if (count == 1)
-			return;
-		else if (this.constraint != null)
-			this.constraint.renameCLPValue(count);
-		else
-			this.setName(this.name + "_" + count);
+	
+	@Override
+	public  ArrayList<String> getInvCLPInfo()
+	{
+		ArrayList<String> variable=new ArrayList<String>();
+		variable.add(this.getCLPInfo());
+		return variable;
 	}
-
+	
+	@Override
+	public String getLocalVariable() {
+		// TODO Auto-generated method stub
+//		if(this.getName().startsWith("IterateAcc") || this.getName().startsWith("IterateIndex")) {
+//			return this.getName();
+//		}
+		if(this.getName().toLowerCase().equals("it")) {
+			return "It";
+		}
+		else if(this.getName().toLowerCase().equals("acc")) {
+			return "Acc";
+		}
+		else {
+			return "";
+		}
+	}
 	@Override
 	public void negConstraint() {
 	}
-
+	
 	@Override
-	public void preconditionAddPre(SymbolTable sym, String methodName) {
-		if (this.constraint == null) {
-			if (!this.name.contains("_pre")) {
-				if ((sym.getAttribute().get(this.name.replace("Self_", "")) != null))
-					this.name = "Self_pre_" + this.name.replace("Self_", "");
-				else if (sym.getMethodToken(methodName).getArgument().get(this.name) != null)
-					this.name += "_pre";
-			}
-		} else
-			this.constraint.preconditionAddPre(sym, methodName);
-	}
-
-	public String getConstraintName() {
-		if (this.name.equals("null") && this.type instanceof VoidType)
-			return "";
-		else if (this.constraint != null)
-			// return this.name + "." + this.constraint.getConstraintName();
-			return this.constraint.getConstraintName() + "." + this.name; // 有可能要改 20210505，可悲
+	public void preconditionAddPre()
+	{
+		if(this.constraint==null)
+		{
+			if(!this.name.contains("_pre") && (Main.symbolTable.getArgumentMap().get(this.name)!=null ||Main.symbolTable.getAttributeMap().get(this.name)!=null))
+				this.name+="_pre";
+		}
 		else
-			return this.name;
+			this.constraint.preconditionAddPre();
 	}
-
-	public CLGConstraint addPre() {
-		this.setName(this.getName() + "_pre");
-		return this;
-	}
-
 	@Override
-	public void renameUseVar(HashMap<String, Integer> variableSet, HashSet<String> defineVariableSet, boolean isMethodCLP) {
-		String variable = this.getCLPValue();
-
-		if (variableSet.containsKey(variable)) {
-			this.renameCLPValue(variableSet.get(variable));
+	public void postconditionAddPre()
+	{
+		if(this.constraint!=null)
+			this.constraint.postconditionAddPre();
+		else
+		{
+			if(!this.name.contains("_pre")&& (Main.symbolTable.getArgumentMap().get(this.name)!=null ||Main.symbolTable.getAttributeMap().get(this.name)!=null))
+				this.name+="_pre";
 		}
 	}
-
-	@Override
-	public void renameDefVar(HashMap<String, Integer> variableSet, HashSet<String> defineVariableSet, boolean isMethodCLP) {
-		String variable = this.getCLPValue();
-
-		if (!variableSet.containsKey(variable)) {
-			variableSet.put(variable, 1);
-			this.renameCLPValue(1);
-		} else if (variableSet.containsKey(variable)) {
-			this.renameCLPValue(variableSet.get(variable) + 1);
-			variableSet.put(variable, variableSet.get(variable) + 1);
-		}
-		defineVariableSet.add(variable);
-	}
-
-	@Override
-	public VariableType getCLPVarType() {
-		return this.type;
-	}
-
-	@Override
-	public void renameWithMap(HashMap<String, String> attMap) {
-		if (this.constraint == null) {
-			if (attMap.containsKey(this.name)) {
-				this.name = attMap.get(this.name);
-			}
-		} else {
-			this.constraint.renameWithMap(attMap);
-		}
-	} // 根據表修改變數名
-
-	@Override
-	public String getOriginalConName() {
-		return this.name + (this.constraint == null ? "" : "_" + this.constraint.getOriginalConName());
-	}
-
-	@Override
-	protected void reverseDefVar(HashMap<String, Integer> variableSet) {
-		String variable = this.getCLPValue();
-		if (variableSet.containsKey(variable)) {
-			if (variableSet.get(variable) != 1)
-				variableSet.put(variable, variableSet.get(variable) - 1);
-		}
-	}
-
 }

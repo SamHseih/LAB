@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.libs.pivotmodel;
 
+ 
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,8 +50,7 @@ public class UML2Class extends Classifier {
 		List<Attribute> ascAsAttr = new ArrayList<Attribute>();
 		for (Association asc : mAscList) {
 			AssociationEnd ascEnd = asc.getRoleList().get(0);
-			ascAsAttr.add(new Attribute(ascEnd.getName(), ascEnd.getType(), ascEnd.getLower(), ascEnd.getUpper(),
-					ascEnd.getUnique()));
+			ascAsAttr.add(new Attribute(ascEnd.getName(), ascEnd.getType(),ascEnd.getLower(),ascEnd.getUpper(),ascEnd.getUnique()));
 		}
 		return ascAsAttr;
 	}
@@ -89,12 +89,12 @@ public class UML2Class extends Classifier {
 
 		for (int i = 0; i < attr_list_array.length(); i++) {
 			JSONObject attr_obj = attr_list_array.optJSONObject(i);
-			if (attr_obj.optInt("upper") != 1) {
-				mAttrList.add(new Attribute(attr_obj.optString("name"), "collection_" + attr_obj.optString("type"),
-						attr_obj.optInt("lower"), attr_obj.optInt("upper"), attr_obj.optString("unique")));
-			} else {
-				mAttrList.add(new Attribute(attr_obj.optString("name"), attr_obj.optString("type"),
-						attr_obj.optInt("lower"), attr_obj.optInt("upper"), attr_obj.optString("unique")));
+			if(attr_obj.optInt("upper")!=1)
+			{
+				mAttrList.add(new Attribute(attr_obj.optString("name"), "collection_"+attr_obj.optString("type"),attr_obj.optInt("lower"),attr_obj.optInt("upper"),attr_obj.optString("unique")));
+			}
+			else{
+			mAttrList.add(new Attribute(attr_obj.optString("name"), attr_obj.optString("type"),attr_obj.optInt("lower"),attr_obj.optInt("upper"),attr_obj.optString("unique")));
 			}
 		}
 		// method list

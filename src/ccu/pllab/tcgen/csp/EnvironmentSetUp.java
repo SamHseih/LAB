@@ -1,4 +1,5 @@
 package ccu.pllab.tcgen.csp;
+ 
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -50,9 +51,8 @@ public class EnvironmentSetUp {
 			writer.println(String.format("attIndex(\"%s\", \"%s\",%d).", class_info.getName(), "name", 2));
 			writer.println(String.format("attIndex(\"%s\", \"%s\",%d).", class_info.getName(), "oid", 3));
 			int count = 4;
-			for (Attribute attr : class_info.getAttrList()) { // getAttrAndAscList
-				writer.println(
-						String.format("attIndex(\"%s\", \"%s\",%d).", class_info.getName(), attr.getName(), count));
+			for (Attribute attr : class_info.getAttrList()) { //getAttrAndAscList
+				writer.println(String.format("attIndex(\"%s\", \"%s\",%d).", class_info.getName(), attr.getName(), count));
 				count++;
 			}
 		}
@@ -62,8 +62,7 @@ public class EnvironmentSetUp {
 			writer.println(String.format("attIndex(\"%s\", \"%s\",%d).", association_info.getName(), "name", 2));
 			int count = 3;
 			for (AssociationEnd attr : association_info.getRoleList()) {
-				writer.println(String.format("attIndex(\"%s\", \"%s\",%d).", association_info.getName(), attr.getName(),
-						count));
+				writer.println(String.format("attIndex(\"%s\", \"%s\",%d).", association_info.getName(), attr.getName(), count));
 				count++;
 			}
 		}
@@ -100,8 +99,7 @@ public class EnvironmentSetUp {
 				if (attr.getUpper() < 0) {
 					writer.println(String.format("roleMax(\"%s\", \"%s\", \"*\").", info.getName(), attr.getName()));
 				} else {
-					writer.println(String.format("roleMax(\"%s\", \"%s\", %d).", info.getName(), attr.getName(),
-							attr.getUpper()));
+					writer.println(String.format("roleMax(\"%s\", \"%s\", %d).", info.getName(), attr.getName(), attr.getUpper()));
 				}
 			}
 		}
@@ -114,8 +112,7 @@ public class EnvironmentSetUp {
 				if (attr.getLower() < 0) {
 					writer.println(String.format("roleMin(\"%s\", \"%s\", \"*\").", info.getName(), attr.getName()));
 				} else {
-					writer.println(String.format("roleMin(\"%s\", \"%s\", %d).", info.getName(), attr.getName(),
-							attr.getLower()));
+					writer.println(String.format("roleMin(\"%s\", \"%s\", %d).", info.getName(), attr.getName(), attr.getLower()));
 				}
 			}
 		}
@@ -125,8 +122,7 @@ public class EnvironmentSetUp {
 		// roleType("instruct", "instructor", "Teacher").
 		for (Association info : this.model.getAssociations()) {
 			for (AssociationEnd attr : info.getRoleList()) {
-				writer.println(String.format("roleType(\"%s\", \"%s\", \"%s\").", info.getName(), attr.getName(),
-						attr.getType()));
+				writer.println(String.format("roleType(\"%s\", \"%s\", \"%s\").", info.getName(), attr.getName(), attr.getType()));
 			}
 		}
 		for (UML2Class info : this.model.getClasses()) {

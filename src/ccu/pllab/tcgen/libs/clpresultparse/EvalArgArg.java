@@ -1,4 +1,5 @@
 package ccu.pllab.tcgen.libs.clpresultparse;
+ 
 
 import ccu.pllab.tcgen.libs.clpresultparse.ResultParser.ArgArgContext;
 import ccu.pllab.tcgen.libs.pivotmodel.Model;
@@ -10,7 +11,7 @@ public class EvalArgArg extends ResultBaseVisitor<String> {
 	public EvalArgArg(Model clsInfo) {
 		mClsDiagInfo = clsInfo;
 	}
-
+ 
 	// report only object id if the argument is an object
 	@Override
 	public String visitArgArg(ArgArgContext ctx) {

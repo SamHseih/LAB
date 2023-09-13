@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.pathCLP2data;
 
+
 public class SolvingTimeOutException extends Exception {
 
 	/**
@@ -12,9 +13,11 @@ public class SolvingTimeOutException extends Exception {
 		this.msg = String.format("have spent more then %s secs on path: %s", timeout, pathName);
 	}
 
+ 
 	@Override
 	public String getMessage() {
 		return this.msg;
 	}
 
 }
+ 

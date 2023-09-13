@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.libs.pivotmodel;
 
+ 
 import java.util.List;
 
 public class Model {
@@ -17,8 +18,7 @@ public class Model {
 		for (Association association : class_diag_info.getAscInfoList()) {
 			AssociationEnd memberEnd1 = association.getRoleList().get(0);
 			AssociationEnd memberEnd2 = association.getRoleList().get(1);
-			if ((memberEnd1.getType().equals(class_name) && memberEnd2.getName().equals(property_name))
-					|| (memberEnd2.getType().equals(class_name) && memberEnd1.getName().equals(property_name))) {
+			if ((memberEnd1.getType().equals(class_name) && memberEnd2.getName().equals(property_name)) || (memberEnd2.getType().equals(class_name) && memberEnd1.getName().equals(property_name))) {
 				return association;
 			}
 		}
@@ -60,11 +60,9 @@ public class Model {
 	public void attachConstraints(List<ccu.pllab.tcgen.ast.Constraint> ast_tree_list) {
 		for (ccu.pllab.tcgen.ast.Constraint tree : ast_tree_list) {
 			if (tree.getConstraintKind().equals("precondition")) {
-				this.findMethodInfoByClassNameAndMethodName(tree.getConstraintedClassName(),
-						tree.getConstraintedMethodName()).addPrecondition(tree);
+				this.findMethodInfoByClassNameAndMethodName(tree.getConstraintedClassName(), tree.getConstraintedMethodName()).addPrecondition(tree);
 			} else if (tree.getConstraintKind().equals("postcondition")) {
-				this.findMethodInfoByClassNameAndMethodName(tree.getConstraintedClassName(),
-						tree.getConstraintedMethodName()).addPostcondition(tree);
+				this.findMethodInfoByClassNameAndMethodName(tree.getConstraintedClassName(), tree.getConstraintedMethodName()).addPostcondition(tree);
 			} else if (tree.getConstraintKind().equals("invariant")) {
 				this.findClassInfoByName(tree.getConstraintedClassName()).addInvariant(tree);
 			}

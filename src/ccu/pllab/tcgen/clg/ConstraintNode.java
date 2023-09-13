@@ -1,4 +1,5 @@
 package ccu.pllab.tcgen.clg;
+ 
 
 import tudresden.ocl20.pivot.pivotmodel.Constraint;
 import ccu.pllab.tcgen.ast.ASTNode;
@@ -34,9 +35,7 @@ public class ConstraintNode extends CLGNode {
 	public String toGraphViz() {
 		this.setAttribute("graphviz_dfs_state", "explored");
 		String result = "";
-		result += (this.getId() + " "
-				+ String.format("[shape=box, label=\"%s\", xlabel=\"%d\"]", this.getASTNode().toOCL(), this.xlable_id)
-				+ "\n");
+		result += (this.getId() + " " + String.format("[shape=box, label=\"%s\", xlabel=\"%d\"]", this.getASTNode().toOCL(), this.xlable_id) + "\n");
 		for (INode it_child : this.getNextNodes()) {
 			CLGNode child = (CLGNode) it_child;
 			if (child.getAttribute("graphviz_dfs_state").equals("")) {
