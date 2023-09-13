@@ -1,0 +1,11 @@
+diff a/src/ccu/pllab/tcgen/exe/main/Main.java b/src/ccu/pllab/tcgen/exe/main/Main.java	(rejected hunks)
+@@ -103,7 +103,9 @@
+ 	public static List<ccu.pllab.tcgen.ast.Constraint> oclCons;
+ 	public static ArrayList<String> attribute = new ArrayList<String>();
+ 	public static String invCLP;
++	public static String ifCLP;// ++
+ 	public static int count = 0;// ++
++	public static String head;
+ 	public static String className;
+ 	public static SymbolTable symbolTable;
+ 	public static boolean isSort;//OCL�}�C�O�_���ƦC

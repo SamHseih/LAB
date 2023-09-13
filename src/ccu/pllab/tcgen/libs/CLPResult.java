@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs;
 
- 
 public class CLPResult {
 	CLPArg mArg;
 	CLPState mPostState;

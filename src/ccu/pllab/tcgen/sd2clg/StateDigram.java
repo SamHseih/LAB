@@ -1,39 +1,48 @@
 package ccu.pllab.tcgen.sd2clg;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
- 
+
+import ccu.pllab.tcgen.SymbolTable.VariableToken;
 
 public class StateDigram {
 
-	private List<State> states=new ArrayList<State>();
-	private List<Transition> transitions=new ArrayList<Transition>();
+	private LinkedHashMap<String, State> states = new LinkedHashMap<String, State>();
+	private LinkedHashMap<String, Transition> transitions = new LinkedHashMap<String, Transition>();
 	private String sdName = "";
-	private ArrayList<String> sdAttribute = new ArrayList<String>();
+	private LinkedHashMap<String, VariableToken> sdAttribute = new LinkedHashMap<String, VariableToken>();
 
-	public StateDigram(){
-		
+	public StateDigram() {
+
 	}
-	public StateDigram(String sdName, ArrayList<String> sdAttribute){
+
+	public StateDigram(String sdName, LinkedHashMap<String, VariableToken> sdAttribute) {
 		this.sdName = sdName;
 		this.sdAttribute = sdAttribute;
 	}
-	public List<State> getStates(){
+
+	public LinkedHashMap<String, State> getStates() {
 		return this.states;
 	}
-	public void addstate(State states){
-		this.states.add(states);
+
+	public void addstate(State states) {
+		this.states.put(states.getXmiID(), states);
 	}
-	public List<Transition> getTransitions(){
+
+	public LinkedHashMap<String, Transition> getTransitions() {
 		return this.transitions;
 	}
-	public void addtransition(Transition trans){
-		this.transitions.add(trans);
+
+	public void addtransition(Transition trans) {
+		this.transitions.put(trans.getXmiID(), trans);
 	}
-	public String getSDName(){
+
+	public String getSDName() {
 		return this.sdName;
 	}
-	public ArrayList<String> getSDAttribute(){
+
+	public LinkedHashMap<String, VariableToken> getSDAttribute() {
 		return this.sdAttribute;
 	}
 }

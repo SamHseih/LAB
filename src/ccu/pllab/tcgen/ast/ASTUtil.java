@@ -23,7 +23,6 @@ import ccu.pllab.tcgen.libs.pivotmodel.AssociationEnd;
 import ccu.pllab.tcgen.libs.pivotmodel.Attribute;
 import ccu.pllab.tcgen.libs.pivotmodel.Model;
 import ccu.pllab.tcgen.libs.pivotmodel.type.TypeFactory;
- 
 
 public class ASTUtil {
 
@@ -40,7 +39,8 @@ public class ASTUtil {
 
 	private static void addReturnParameterIfNeed(Constraint constraint, List<Parameter> parameter_list) {
 		if (hasReturnValue(constraint)) {
-			parameter_list.add(createNewParameter("result", ((UML2Operation) constraint.getConstrainedElement().get(0)).getReturnParameter().getType()));
+			parameter_list.add(createNewParameter("result",
+					((UML2Operation) constraint.getConstrainedElement().get(0)).getReturnParameter().getType()));
 		}
 	}
 
@@ -49,7 +49,8 @@ public class ASTUtil {
 			if (constraint.getConstrainedElement().get(0) instanceof UML2Class) {
 				parameter_list.add(createNewParameter("self", (UML2Class) constraint.getConstrainedElement().get(0)));
 			} else {
-				parameter_list.add(createNewParameter("self", ((UML2Operation) constraint.getConstrainedElement().get(0)).getOwningType()));
+				parameter_list.add(createNewParameter("self",
+						((UML2Operation) constraint.getConstrainedElement().get(0)).getOwningType()));
 			}
 
 		}
@@ -68,7 +69,8 @@ public class ASTUtil {
 		return p;
 	}
 
-	public static List<Parameter> createNewParameterListForIterator(Constraint constraint, List<Parameter> inputParameter) {
+	public static List<Parameter> createNewParameterListForIterator(Constraint constraint,
+			List<Parameter> inputParameter) {
 		List<Parameter> parameter_list = new ArrayList<Parameter>();
 		addSelfParameterIfNeed(constraint, parameter_list);
 		parameter_list.addAll(inputParameter);
@@ -122,7 +124,8 @@ public class ASTUtil {
 	}
 
 	public enum AST_Operator {
-		EqualTo("="), NonEqualTo("<>"), LessThan("<"), GreaterThan(">"), LessEqualTo("<="), GreaterEqualTo(">="), And("and"), Or("or");
+		EqualTo("="), NonEqualTo("<>"), LessThan("<"), GreaterThan(">"), LessEqualTo("<="), GreaterEqualTo(">="),
+		And("and"), Or("or");
 		private String name;
 
 		AST_Operator(final String name) {
@@ -146,7 +149,8 @@ public class ASTUtil {
 	// ......................Variable.......................
 
 	public VariableExp createNewVaraible(Constraint constraint, Variable var) {
-		VariableExp node = new VariableExp(constraint, var.getName(), TypeFactory.getInstance().getClassifier(var.getType().getName()), constraint.getKind().getName());
+		VariableExp node = new VariableExp(constraint, var.getName(),
+				TypeFactory.getInstance().getClassifier(var.getType().getName()), constraint.getKind().getName());
 		node.setCLPIndex(Integer.toString(this.newVariableIndex++));
 		return node;
 	}
@@ -160,36 +164,50 @@ public class ASTUtil {
 		newVariableIndex = ASTUtil.getVarsLengthForCLP(constraint) + NewVariableFirstIndex;
 	}
 
-	static public OperationCallExp getEqualExpForAsc(Constraint constraint, ccu.pllab.tcgen.libs.pivotmodel.UML2Class clazz, String sourceName, int sourceVaraibleIndex, Attribute a) {
-		VariableExp preVar = new VariableExp(constraint, sourceName, TypeFactory.getInstance().getClassifier(clazz.getName()), "precondition");
+	static public OperationCallExp getEqualExpForAsc(Constraint constraint,
+			ccu.pllab.tcgen.libs.pivotmodel.UML2Class clazz, String sourceName, int sourceVaraibleIndex, Attribute a) {
+		VariableExp preVar = new VariableExp(constraint, sourceName,
+				TypeFactory.getInstance().getClassifier(clazz.getName()), "precondition");
 		preVar.setCLPIndex(Integer.toString(sourceVaraibleIndex));
-		VariableExp postVar = new VariableExp(constraint, sourceName, TypeFactory.getInstance().getClassifier(clazz.getName()), "postcondition");
+		VariableExp postVar = new VariableExp(constraint, sourceName,
+				TypeFactory.getInstance().getClassifier(clazz.getName()), "postcondition");
 		postVar.setCLPIndex(Integer.toString(sourceVaraibleIndex));
 		Association asc = clazz.findAscByAttributeName(a.getName());
 		AssociationEnd ascEnd = asc.getRoleList().get(1);
 		AssociationEnd anotherEnd = asc.getRoleList().get(0);
-		AssociationEndCallExp preAtt = new AssociationEndCallExp(constraint, preVar.clone(), a.getName(), TypeFactory.getInstance().getClassifier(String.format("Set(%s)", a.getType())),
-				anotherEnd.getName(), ascEnd.getName(), asc.getName());
-		AssociationEndCallExp postAtt = new AssociationEndCallExp(constraint, postVar.clone(), a.getName(), TypeFactory.getInstance().getClassifier(String.format("Set(%s)", a.getType())),
-				anotherEnd.getName(), ascEnd.getName(), asc.getName());
-		return (new OperationCallExp(constraint, postAtt, "=", TypeFactory.getInstance().getClassifier("Boolean"), false, preAtt));
+		AssociationEndCallExp preAtt = new AssociationEndCallExp(constraint, preVar.clone(), a.getName(),
+				TypeFactory.getInstance().getClassifier(String.format("Set(%s)", a.getType())), anotherEnd.getName(),
+				ascEnd.getName(), asc.getName());
+		AssociationEndCallExp postAtt = new AssociationEndCallExp(constraint, postVar.clone(), a.getName(),
+				TypeFactory.getInstance().getClassifier(String.format("Set(%s)", a.getType())), anotherEnd.getName(),
+				ascEnd.getName(), asc.getName());
+		return (new OperationCallExp(constraint, postAtt, "=", TypeFactory.getInstance().getClassifier("Boolean"),
+				false, preAtt));
 	}
 
-	static public OperationCallExp getEqualExpForUnchangedAttribute(Constraint constraint, String sourceName, String sourceType, int sourceVaraibleIndex, Attribute a) {
-		VariableExp preVar = new VariableExp(constraint, sourceName, TypeFactory.getInstance().getClassifier(sourceType), "precondition");
+	static public OperationCallExp getEqualExpForUnchangedAttribute(Constraint constraint, String sourceName,
+			String sourceType, int sourceVaraibleIndex, Attribute a) {
+		VariableExp preVar = new VariableExp(constraint, sourceName,
+				TypeFactory.getInstance().getClassifier(sourceType), "precondition");
 		preVar.setCLPIndex(Integer.toString(sourceVaraibleIndex));
-		VariableExp postVar = new VariableExp(constraint, sourceName, TypeFactory.getInstance().getClassifier(sourceType), "postcondition");
+		VariableExp postVar = new VariableExp(constraint, sourceName,
+				TypeFactory.getInstance().getClassifier(sourceType), "postcondition");
 		postVar.setCLPIndex(Integer.toString(sourceVaraibleIndex));
-		AttributeCallExp preAtt = new AttributeCallExp(constraint, preVar, a.getName(), TypeFactory.getInstance().getClassifier(a.getType()));
-		AttributeCallExp postAtt = new AttributeCallExp(constraint, postVar, a.getName(), TypeFactory.getInstance().getClassifier(a.getType()));
-		OperationCallExp equal_for_att = new OperationCallExp(constraint, postAtt, "=", TypeFactory.getInstance().getClassifier("Boolean"), false, preAtt);
+		AttributeCallExp preAtt = new AttributeCallExp(constraint, preVar, a.getName(),
+				TypeFactory.getInstance().getClassifier(a.getType()));
+		AttributeCallExp postAtt = new AttributeCallExp(constraint, postVar, a.getName(),
+				TypeFactory.getInstance().getClassifier(a.getType()));
+		OperationCallExp equal_for_att = new OperationCallExp(constraint, postAtt, "=",
+				TypeFactory.getInstance().getClassifier("Boolean"), false, preAtt);
 		return equal_for_att;
 	}
 
-	static public HashMap<String, Set<PropertyCallExp>> detectChangedProperties(final Model model, final Constraint dresden_constraint, final List<ASTNode> exps) {
+	static public HashMap<String, Set<PropertyCallExp>> detectChangedProperties(final Model model,
+			final Constraint dresden_constraint, final List<ASTNode> exps) {
 		final List<Parameter> parameters = ASTUtil.createNewParameterListForCLP(dresden_constraint);
 		final HashMap<String, Set<PropertyCallExp>> changedPropertyCallExprs = new HashMap<String, Set<PropertyCallExp>>();
-		GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER, new StackFrontier<ASTNode>());
+		GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER,
+				new StackFrontier<ASTNode>());
 		for (ASTNode node : exps) {
 			dfs.traverse(node, new NodeVisitHandler<ASTNode>() {
 
@@ -197,13 +215,16 @@ public class ASTUtil {
 				public void visit(ASTNode current_node) {
 					if (current_node instanceof ccu.pllab.tcgen.ast.OperationCallExp) {
 						final ASTNode op_source = ((ccu.pllab.tcgen.ast.OperationCallExp) current_node).getSourceExp();
-						if (op_source instanceof ccu.pllab.tcgen.ast.AttributeCallExp || op_source instanceof ccu.pllab.tcgen.ast.AssociationEndCallExp) {
+						if (op_source instanceof ccu.pllab.tcgen.ast.AttributeCallExp
+								|| op_source instanceof ccu.pllab.tcgen.ast.AssociationEndCallExp) {
 							ccu.pllab.tcgen.ast.PropertyCallExp v = (ccu.pllab.tcgen.ast.PropertyCallExp) op_source;
 							if (v.getSourceExp() instanceof VariableExp && v.getState().equals("postcondition")
-									&& Integer.parseInt(((VariableExp) v.getSourceExp()).getCLPIndex()) <= parameters.size()) {
+									&& Integer.parseInt(((VariableExp) v.getSourceExp()).getCLPIndex()) <= parameters
+											.size()) {
 								VariableExp source = (VariableExp) v.getSourceExp();
 								if (changedPropertyCallExprs.get(source.getVariableName()) == null) {
-									changedPropertyCallExprs.put(source.getVariableName(), new HashSet<PropertyCallExp>());
+									changedPropertyCallExprs.put(source.getVariableName(),
+											new HashSet<PropertyCallExp>());
 								}
 								changedPropertyCallExprs.get(source.getVariableName()).add(v);
 							}

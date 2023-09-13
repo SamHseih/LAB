@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 
 
-public class errTest<class_name>_<method_name><case_no> extends TestCase {
+public class test<class_name>_<method_name>Error<case_no> extends TestCase {
 	<sys_decl>
 
 	public void test<method_name>() {

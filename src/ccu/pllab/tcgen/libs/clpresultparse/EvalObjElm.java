@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs.clpresultparse;
 
- 
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -18,7 +17,7 @@ public class EvalObjElm extends ResultBaseVisitor<ObjectInstance> {
 	public EvalObjElm(Model clsInfo) {
 		mClsDiagInfo = clsInfo;
 	}
- 
+
 	@Override
 	public ObjectInstance visitObjElm(ObjElmContext ctx) {
 		ObjectInstance obj = new ObjectInstance();
@@ -46,7 +45,8 @@ public class EvalObjElm extends ResultBaseVisitor<ObjectInstance> {
 				value = String.valueOf(inner_obj.getOid());
 			}
 
-			ImmutableTriple<String, String, String> attrIns = new ImmutableTriple<String, String, String>(attr.getName(), attr.getType(), value);
+			ImmutableTriple<String, String, String> attrIns = new ImmutableTriple<String, String, String>(
+					attr.getName(), attr.getType(), value);
 			obj.getAttrValueList().add(attrIns);
 		}
 

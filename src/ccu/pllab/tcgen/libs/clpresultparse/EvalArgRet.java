@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs.clpresultparse;
 
- 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import ccu.pllab.tcgen.libs.clpresultparse.ResultParser.ArgRetContext;
@@ -15,7 +14,7 @@ public class EvalArgRet extends ResultBaseVisitor<ImmutablePair<String, String>>
 	public EvalArgRet(UML2Operation mInfo) {
 		mMethodInfo = mInfo;
 	}
- 
+
 	@Override
 	public ImmutablePair<String, String> visitArgRet(ArgRetContext ctx) {
 		String type = mMethodInfo.getRetType();

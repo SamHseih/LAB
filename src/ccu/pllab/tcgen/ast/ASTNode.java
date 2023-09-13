@@ -17,7 +17,6 @@ import ccu.pllab.tcgen.AbstractConstraint.CLGOperatorNode;
 import ccu.pllab.tcgen.AbstractConstraint.CLGConstraint;
 import ccu.pllab.tcgen.AbstractConstraint.CLGVariableNode;
 import ccu.pllab.tcgen.AbstractConstraint.CLGMethodInvocationNode;
- 
 
 public abstract class ASTNode extends AnnotatedNode implements Predicate {
 	private static long node_count = 0;
@@ -31,7 +30,7 @@ public abstract class ASTNode extends AnnotatedNode implements Predicate {
 	}
 
 	@Override
-	public boolean equals(Object obj) {//等於
+	public boolean equals(Object obj) {// 等於
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -51,7 +50,6 @@ public abstract class ASTNode extends AnnotatedNode implements Predicate {
 	private Constraint constraint;
 	private CLGConstraint constraint1;
 	private String nodeWord;
-	
 
 	public ASTNode(Constraint obj) {
 		super();
@@ -59,13 +57,14 @@ public abstract class ASTNode extends AnnotatedNode implements Predicate {
 		this.constraint = obj;
 		parents = new ArrayList<INode>();
 	}
+
 	public ASTNode(String word) {
 		super();
 		this.id = node_count++;
 		this.nodeWord = word;
 		parents = new ArrayList<INode>();
 	}
-	
+
 	@Override
 	public void addPreviousNode(INode node) {
 		this.clearPreviousNodes();
@@ -118,13 +117,12 @@ public abstract class ASTNode extends AnnotatedNode implements Predicate {
 	public Constraint getConstraint() {
 		return this.constraint;
 	}
-	
-	public static boolean isInteger(String str){
-		Pattern pattern =  Pattern.compile("^[-//+]?[\\d]*$");
+
+	public static boolean isInteger(String str) {
+		Pattern pattern = Pattern.compile("^[-//+]?[\\d]*$");
 		return pattern.matcher(str).matches();
 	}
 
-	
 	@Override
 	public String toString() {
 		return this.toOCL();
@@ -136,9 +134,9 @@ public abstract class ASTNode extends AnnotatedNode implements Predicate {
 	}
 
 	public abstract CLGNode toCLG(Criterion criterion);
-	
+
 	public abstract CLGGraph OCL2CLG();
-	
+
 	public abstract CLGConstraint CLGConstraint();
 
 	public abstract Classifier getType();
@@ -159,7 +157,8 @@ public abstract class ASTNode extends AnnotatedNode implements Predicate {
 	@Override
 	public final String toGraphViz() {
 		String result = "";
-		result += (this.getId() + " " + String.format("[label=\"(%d) %s\"]", this.getId(), this.getLabelForGraphviz()) + "\n"); 
+		result += (this.getId() + " " + String.format("[label=\"(%d) %s\"]", this.getId(), this.getLabelForGraphviz())
+				+ "\n");
 		for (INode child : this.getNextNodes()) {
 			result += child.toGraphViz();
 			result += (this.getId() + " -> " + child.getId() + "\n");

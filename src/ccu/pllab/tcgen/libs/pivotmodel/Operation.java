@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs.pivotmodel;
 
- 
 public class Operation {
 	private String name;
 

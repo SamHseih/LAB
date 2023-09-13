@@ -1,5 +1,4 @@
 package ccu.pllab.tcgen.clg2path;
- 
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -41,7 +40,8 @@ public class BranchCriterion implements CoverageCriterion {
 			visited_nodes.add(current_node);
 
 			for (INode child : current_node.getNextNodes()) {
-				final ImmutablePair<CLGNode, CLGNode> node_pair = new ImmutablePair<CLGNode, CLGNode>(current_node, ((CLGNode) child));
+				final ImmutablePair<CLGNode, CLGNode> node_pair = new ImmutablePair<CLGNode, CLGNode>(current_node,
+						((CLGNode) child));
 				branches.add(node_pair);
 				bfs_queue.add((CLGNode) child);
 			}
@@ -57,7 +57,8 @@ public class BranchCriterion implements CoverageCriterion {
 	@Override
 	public void addFeasiblePath(List<CLGNode> path) {
 		for (int i = 0; i < path.size() - 1; i++) {
-			final ImmutablePair<CLGNode, CLGNode> node_pair = new ImmutablePair<CLGNode, CLGNode>(path.get(i), path.get(i + 1));
+			final ImmutablePair<CLGNode, CLGNode> node_pair = new ImmutablePair<CLGNode, CLGNode>(path.get(i),
+					path.get(i + 1));
 			visited_branches.add(node_pair);
 		}
 		feasible_path.add(path);

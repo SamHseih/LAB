@@ -1,7 +1,5 @@
 package ccu.pllab.tcgen.srcNodeVisitor;
 
- 
-
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import ccu.pllab.tcgen.AbstractCLG.CLGGraph;

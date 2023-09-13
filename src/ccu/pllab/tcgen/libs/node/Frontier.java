@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs.node;
 
- 
 public interface Frontier<T> {
 	public void addItem(T node);
 

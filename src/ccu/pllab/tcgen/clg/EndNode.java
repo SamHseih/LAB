@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.clg;
 
- 
 import tudresden.ocl20.pivot.pivotmodel.Constraint;
 
 public class EndNode extends ConnectionNode {
@@ -13,7 +12,7 @@ public class EndNode extends ConnectionNode {
 	public String getShape() {
 		return "doublecircle";
 	}
-	
+
 	@Override
 	public CLGNode clone() {
 		return new EndNode(this.getConstraint());

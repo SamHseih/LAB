@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.srcASTVisitor;
 
- 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,10 +18,10 @@ public class SrcJdtAstUtil {
 	 * @param javaFilePath
 	 * @return CompilationUnit
 	 */
-	
+
 	public static CompilationUnit getCompilationUnit(String javaFilePath) {
 		byte[] input = null;
-		try {			
+		try {
 			BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(javaFilePath));
 			input = new byte[bufferedInputStream.available()];
 			bufferedInputStream.read(input);
@@ -42,5 +41,4 @@ public class SrcJdtAstUtil {
 		return result;
 	}
 
-	
 }

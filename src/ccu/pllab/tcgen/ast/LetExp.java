@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.ast;
 
- 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,11 +33,12 @@ import ccu.pllab.tcgen.libs.pivotmodel.type.Classifier;
 import ccu.pllab.tcgen.libs.pivotmodel.type.CollectionType;
 import ccu.pllab.tcgen.libs.pivotmodel.type.PrimitiveType;
 import ccu.pllab.tcgen.libs.pivotmodel.type.TypeFactory;
+
 public class LetExp extends ASTNode {
 	private ASTNode var_assign;
 	private ASTNode init_exp;
-	
-	public LetExp(Constraint obj,ASTNode var_assign, ASTNode init_exp) {
+
+	public LetExp(Constraint obj, ASTNode var_assign, ASTNode init_exp) {
 		super(obj);
 		this.var_assign = var_assign;
 		this.init_exp = init_exp;
@@ -117,6 +117,5 @@ public class LetExp extends ASTNode {
 	public ASTNode toPreProcessing() {
 		return this;
 	}
-	
 
 }

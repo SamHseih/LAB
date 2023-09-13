@@ -7,21 +7,24 @@ import org.stringtemplate.v4.ST;
 import tudresden.ocl20.pivot.pivotmodel.Constraint;
 import ccu.pllab.tcgen.AbstractCLG.CLGGraph;
 import ccu.pllab.tcgen.AbstractConstraint.CLGConstraint;
+import ccu.pllab.tcgen.AbstractConstraint.CLGObjectNode;
 import ccu.pllab.tcgen.AbstractConstraint.CLGVariableNode;
 import ccu.pllab.tcgen.clg.CLGNode;
 import ccu.pllab.tcgen.clg.ConstraintNode;
 import ccu.pllab.tcgen.clg2path.CriterionFactory.Criterion;
+import ccu.pllab.tcgen.exe.main.Main;
 import ccu.pllab.tcgen.libs.TemplateFactory;
 import ccu.pllab.tcgen.libs.pivotmodel.type.Classifier;
 import ccu.pllab.tcgen.libs.pivotmodel.type.TypeFactory;
 
-public  class AssociationEndCallExp extends PropertyCallExp {
+public class AssociationEndCallExp extends PropertyCallExp {
 
 	private String dstRole;
 	private String srcRole;
 	private String ascName;
 
-	public AssociationEndCallExp(Constraint obj, ASTNode source, String name, Classifier type, String dstRole, String srcRole, String ascName) {
+	public AssociationEndCallExp(Constraint obj, ASTNode source, String name, Classifier type, String dstRole,
+			String srcRole, String ascName) {
 		super(obj, source, name, type);
 		this.dstRole = dstRole;
 		this.srcRole = srcRole;
@@ -48,11 +51,13 @@ public  class AssociationEndCallExp extends PropertyCallExp {
 		assert this.getType().equals(TypeFactory.getInstance().getClassifier("Boolean"));
 		return new ConstraintNode(this.getConstraint(), this);
 	}
+
 	@Override
 	public CLGGraph OCL2CLG() {
 		String type = this.getType().toString();
-		CLGVariableNode variableConstraint =new CLGVariableNode(this.getPropertyName(),type);
-		assert this.getType().equals(TypeFactory.getInstance().getClassifier("Boolean")); 
+		CLGVariableNode variableConstraint = new CLGObjectNode(this.getPropertyName(), Main.typeTable.get(type, null),
+				-1);
+		assert this.getType().equals(TypeFactory.getInstance().getClassifier("Boolean"));
 		CLGGraph constraintgraph = new CLGGraph(variableConstraint);
 		constraintgraph.getStartNode().getSuccessor().get(0).removePredecessor(constraintgraph.getStartNode());
 		constraintgraph.getEndNode().getPredecessor().get(0).removeSuccessor(constraintgraph.getEndNode());
@@ -61,7 +66,8 @@ public  class AssociationEndCallExp extends PropertyCallExp {
 
 	@Override
 	public AssociationEndCallExp clone() {
-		AssociationEndCallExp n = new AssociationEndCallExp(this.getConstraint(), this.getSourceExp().clone(), this.getPropertyName(), this.getType(), dstRole, srcRole, ascName);
+		AssociationEndCallExp n = new AssociationEndCallExp(this.getConstraint(), this.getSourceExp().clone(),
+				this.getPropertyName(), this.getType(), dstRole, srcRole, ascName);
 		return n;
 	}
 
@@ -143,9 +149,5 @@ public  class AssociationEndCallExp extends PropertyCallExp {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-
-
-	
 
 }

@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.clg2path;
 
- 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -89,29 +88,37 @@ public class Path implements GraphVizable, Predicate {
 		String result = "";
 		for (int i = 0; i < this.nodes.size(); i++) {
 			if (this.nodes.get(i) instanceof ConstraintNode) {
-				result += this.nodes.get(i).getId() + String.format(" [shape=box, label=\"%s\"]", ((ConstraintNode) this.nodes.get(i)).getASTNode().toOCL()) + "\n";
+				result += this.nodes.get(i).getId() + String.format(" [shape=box, label=\"%s\"]",
+						((ConstraintNode) this.nodes.get(i)).getASTNode().toOCL()) + "\n";
 			} else {
 				result += this.nodes.get(i).getId();
 				if (i == 0) {
 					result += "[style=filled, fillcolor=black, shape=\"circle\", label=\"\", fixedsize=true, width=.2, height=.2]\n";
-					result += "n_" + this.nodes.get(i).getId() + " [label=\"" + this.nodes.get(i).getConstraintedClass() + "::" + this.nodes.get(i).getConstraintedMethod() + " " + this.id + "\"]\n";
-					result += "n_" + this.nodes.get(i).getId() + " -> " + this.nodes.get(i).getId() + "[color=\"" + this.getEdgeColor() + "\"]";
+					result += "n_" + this.nodes.get(i).getId() + " [label=\"" + this.nodes.get(i).getConstraintedClass()
+							+ "::" + this.nodes.get(i).getConstraintedMethod() + " " + this.id + "\"]\n";
+					result += "n_" + this.nodes.get(i).getId() + " -> " + this.nodes.get(i).getId() + "[color=\""
+							+ this.getEdgeColor() + "\"]";
 				} else if (this.nodes.get(i) instanceof EndNode) {
-					result += String.format(" [style=filled, fillcolor=black, label=\"\", shape=\"%s\", fixedsize=true, width=.2, height=.2]", this.nodes.get(i).getShape());
+					result += String.format(
+							" [style=filled, fillcolor=black, label=\"\", shape=\"%s\", fixedsize=true, width=.2, height=.2]",
+							this.nodes.get(i).getShape());
 				} else {
-					result += String.format(" [label=\"\", shape=\"%s\", fixedsize=true, width=.2, height=.2]", this.nodes.get(i).getShape());
+					result += String.format(" [label=\"\", shape=\"%s\", fixedsize=true, width=.2, height=.2]",
+							this.nodes.get(i).getShape());
 				}
 				result += "\n";
 			}
 			if (i != this.nodes.size() - 1) {
-				result += this.nodes.get(i).getId() + " -> " + this.nodes.get(i + 1).getId() + " [color=\"" + this.getEdgeColor() + "\", label=\"" + i + "\"]\n";
+				result += this.nodes.get(i).getId() + " -> " + this.nodes.get(i + 1).getId() + " [color=\""
+						+ this.getEdgeColor() + "\", label=\"" + i + "\"]\n";
 			}
 		}
 		return result;
 	}
 
 	public String getPredicateName() {
-		return String.format("tcgen_%d_%s", this.id, this.nodes.get(0).getConstraintedClass() + this.nodes.get(0).getConstraintedMethod());
+		return String.format("tcgen_%d_%s", this.id,
+				this.nodes.get(0).getConstraintedClass() + this.nodes.get(0).getConstraintedMethod());
 	}
 
 	@Override
@@ -150,8 +157,9 @@ public class Path implements GraphVizable, Predicate {
 			result_name = templateArgs.get("result_name");
 		}
 
-		writer.println(String.format("tcgen_%d_%s(%s, %s, %s)", this.id, this.nodes.get(0).getConstraintedClass() + this.nodes.get(0).getConstraintedMethod(), instances_name, vars_name, result_name)
-				+ " :-");
+		writer.println(String.format("tcgen_%d_%s(%s, %s, %s)", this.id,
+				this.nodes.get(0).getConstraintedClass() + this.nodes.get(0).getConstraintedMethod(), instances_name,
+				vars_name, result_name) + " :-");
 
 		List<String> class_names = generate_var_class_name(op);
 		List<String> o_prefix_class_names = generate_var_object_names(class_names);
@@ -168,8 +176,11 @@ public class Path implements GraphVizable, Predicate {
 		writer.println(String.format("\tcreateInstances%d(InstancesPre),", this.getId()));
 		List<String> created_vars_list = write_each_predicate(writer);
 		writer.println(String.format("\tcreateInstances%d(InstancesPost),", this.getId()));
-		writer.println(String.format("\tallIntegerIndomain([Instances, Vars, [%s]]),", StringUtils.join(created_vars_list, ", ")));
-		writer.println(String.format("\teclipse_language:'delayed_goals'(Goals), (Goals = [] -> true; write(\"%s\"), writeln(Goals)).", this.getPredicateName()));
+		writer.println(String.format("\tallIntegerIndomain([Instances, Vars, [%s]]),",
+				StringUtils.join(created_vars_list, ", ")));
+		writer.println(String.format(
+				"\teclipse_language:'delayed_goals'(Goals), (Goals = [] -> true; write(\"%s\"), writeln(Goals)).",
+				this.getPredicateName()));
 		writer.flush();
 		StringWriter string_writer = new StringWriter();
 		writer.println(string_writer.toString());
@@ -238,17 +249,20 @@ public class Path implements GraphVizable, Predicate {
 	private void write_paramenter_initialization(PrintWriter writer, List<String> class_names) {
 		int parameter_index = 0;
 		for (String class_name : class_names) {
-			writer.println(String.format("\tparameterOf%s%d(Instances, O%s%d),", class_name, this.getId(), class_name, parameter_index));
+			writer.println(String.format("\tparameterOf%s%d(Instances, O%s%d),", class_name, this.getId(), class_name,
+					parameter_index));
 			parameter_index++;
 		}
 		if (!nodes.get(0).getConstraintedMethodReturnType().equals("OclVoid")) {
-			writer.println(String.format("\tparameterOf%s%d(Instances, Result),", nodes.get(0).getConstraintedMethodReturnType(), this.getId()));
+			writer.println(String.format("\tparameterOf%s%d(Instances, Result),",
+					nodes.get(0).getConstraintedMethodReturnType(), this.getId()));
 		}
 	}
 
 	private List<String> generate_var_class_name(Operation op) {
 		List<String> class_names = new ArrayList<String>();
-		if (!ASTUtil.isStatic(this.getCLGNodes().get(0).getConstraint()) || ASTUtil.isConstructor(this.getCLGNodes().get(0).getConstraint())) {
+		if (!ASTUtil.isStatic(this.getCLGNodes().get(0).getConstraint())
+				|| ASTUtil.isConstructor(this.getCLGNodes().get(0).getConstraint())) {
 			class_names.add(op.getOwningType().getName());
 		}
 
@@ -285,7 +299,8 @@ public class Path implements GraphVizable, Predicate {
 				variableExp.setCLPIndex(symbolTable.get(variableExp.getVariableName()).toString());
 			}
 		};
-		final GraphVisitor<ASTNode> assign_index_dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER, new StackFrontier<ASTNode>());
+		final GraphVisitor<ASTNode> assign_index_dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER,
+				new StackFrontier<ASTNode>());
 
 		final HashMap<Integer, Integer> iterate_count_table = new HashMap<Integer, Integer>();
 		ListIterator<CLGNode> it = this.nodes.listIterator();
@@ -305,7 +320,8 @@ public class Path implements GraphVizable, Predicate {
 		}
 	}
 
-	private void ssaProcessingForIterateVariable(final HashMap<Integer, Integer> iterate_count_table, final ConstraintNode constraintNode) {
+	private void ssaProcessingForIterateVariable(final HashMap<Integer, Integer> iterate_count_table,
+			final ConstraintNode constraintNode) {
 		if (constraintNode.getASTNode().toOCL().matches("\\(#IterateAcc\\d+ = .+\\)")) {
 			final OperationCallExp opcall = (OperationCallExp) constraintNode.getASTNode();
 			final VariableExp lhs_of_op = (VariableExp) opcall.getSourceExp();
@@ -318,7 +334,8 @@ public class Path implements GraphVizable, Predicate {
 
 				lhs_of_op.setVariableName(lhs_of_op.getVariableName() + "[" + new_count + "]");
 
-				GraphVisitor<ASTNode> ssa_dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER, new StackFrontier<ASTNode>());
+				GraphVisitor<ASTNode> ssa_dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER,
+						new StackFrontier<ASTNode>());
 				ssa_dfs.traverse(rhs_of_op, new NodeVisitHandler<ASTNode>() {
 					@Override
 					public void visit(ASTNode current_node) {
@@ -335,13 +352,16 @@ public class Path implements GraphVizable, Predicate {
 				iterate_count_table.put(iterate_id, 1);
 				lhs_of_op.setVariableName(lhs_of_op.getVariableName() + "[" + 1 + "]");
 			}
-		} else if (constraintNode.getASTNode().toOCL().matches("\\(#IterateElement\\d+ = .+->at\\(#IterateIndex\\d+\\)\\)")) {
+		} else if (constraintNode.getASTNode().toOCL()
+				.matches("\\(#IterateElement\\d+ = .+->at\\(#IterateIndex\\d+\\)\\)")) {
 			final OperationCallExp opcall = (OperationCallExp) constraintNode.getASTNode();
 			final VariableExp lhs_of_op = (VariableExp) opcall.getSourceExp();
 			Integer iterate_id = Integer.parseInt(lhs_of_op.getVariableName().replace("#IterateElement", ""));
 			lhs_of_op.setVariableName(lhs_of_op.getVariableName() + "[" + iterate_count_table.get(iterate_id) + "]");
-			final VariableExp iterateIndex = (VariableExp) ((IteratorExp) opcall.getParameterExps().get(0)).getParameterExps().get(0);
-			iterateIndex.setVariableName(iterateIndex.getVariableName() + "[" + iterate_count_table.get(iterate_id) + "]");
+			final VariableExp iterateIndex = (VariableExp) ((IteratorExp) opcall.getParameterExps().get(0))
+					.getParameterExps().get(0);
+			iterateIndex
+					.setVariableName(iterateIndex.getVariableName() + "[" + iterate_count_table.get(iterate_id) + "]");
 		} else if (constraintNode.getASTNode().toOCL().matches("\\(#IterateIndex\\d+ (\\<\\=|\\>) .+->size\\(\\)\\)")) {
 			final OperationCallExp opcall = (OperationCallExp) constraintNode.getASTNode();
 			final VariableExp lhs_of_op = (VariableExp) opcall.getSourceExp();
@@ -352,15 +372,19 @@ public class Path implements GraphVizable, Predicate {
 			final VariableExp rhs_of_op = (VariableExp) opcall.getParameterExps().get(0);
 			Integer iterate_id = Integer.parseInt(rhs_of_op.getVariableName().replace("#IterateAcc", ""));
 			rhs_of_op.setVariableName(rhs_of_op.getVariableName() + "[" + iterate_count_table.get(iterate_id) + "]");
-		} else if (constraintNode.getASTNode().toOCL().matches("\\(#IterateIndex\\d+ = \\(#IterateIndex\\d+ \\+ 1\\)\\)")) {
+		} else if (constraintNode.getASTNode().toOCL()
+				.matches("\\(#IterateIndex\\d+ = \\(#IterateIndex\\d+ \\+ 1\\)\\)")) {
 			final OperationCallExp opcall = (OperationCallExp) constraintNode.getASTNode();
 			final VariableExp lhs_of_op = (VariableExp) opcall.getSourceExp();
 			Integer iterate_id = Integer.parseInt(lhs_of_op.getVariableName().replace("#IterateIndex", ""));
 			lhs_of_op.setVariableName(lhs_of_op.getVariableName() + "[" + iterate_count_table.get(iterate_id) + "]");
-			final VariableExp lhs_of_plus = (VariableExp) ((OperationCallExp) opcall.getParameterExps().get(0)).getSourceExp();
-			lhs_of_plus.setVariableName(lhs_of_plus.getVariableName() + "[" + (iterate_count_table.get(iterate_id) - 1) + "]");
+			final VariableExp lhs_of_plus = (VariableExp) ((OperationCallExp) opcall.getParameterExps().get(0))
+					.getSourceExp();
+			lhs_of_plus.setVariableName(
+					lhs_of_plus.getVariableName() + "[" + (iterate_count_table.get(iterate_id) - 1) + "]");
 		} else {
-			GraphVisitor<ASTNode> ssa_dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER, new StackFrontier<ASTNode>());
+			GraphVisitor<ASTNode> ssa_dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER,
+					new StackFrontier<ASTNode>());
 			ssa_dfs.traverse(constraintNode.getASTNode(), new NodeVisitHandler<ASTNode>() {
 				@Override
 				public void visit(ASTNode current_node) {
@@ -368,12 +392,14 @@ public class Path implements GraphVizable, Predicate {
 						return;
 					}
 					VariableExp variableExp = (VariableExp) current_node;
-					if (!variableExp.getVariableName().startsWith("#Iterate") && !variableExp.getVariableName().startsWith("#Result")) {
+					if (!variableExp.getVariableName().startsWith("#Iterate")
+							&& !variableExp.getVariableName().startsWith("#Result")) {
 						return;
 					}
 					final Integer iterate_id = Integer.parseInt(variableExp.getVariableName().replaceAll("#\\D+", ""));
 					if (variableExp.getVariableName().matches("#Iterate\\w+" + iterate_id)) {
-						variableExp.setVariableName(variableExp.getVariableName() + "[" + iterate_count_table.get(iterate_id) + "]");
+						variableExp.setVariableName(
+								variableExp.getVariableName() + "[" + iterate_count_table.get(iterate_id) + "]");
 					}
 				}
 			});
@@ -382,21 +408,25 @@ public class Path implements GraphVizable, Predicate {
 
 	private List<OperationCallExp> getEqualExpsForAttributeConsistency() {
 		final List<Parameter> parameters = ASTUtil.createNewParameterListForCLP(dresden_constraint);
-		final HashMap<String, Set<PropertyCallExp>> changedPropertyCallExprs = ASTUtil.detectChangedProperties(model, dresden_constraint, this.getASTNodes());
+		final HashMap<String, Set<PropertyCallExp>> changedPropertyCallExprs = ASTUtil.detectChangedProperties(model,
+				dresden_constraint, this.getASTNodes());
 		List<OperationCallExp> equal_exps = new ArrayList<OperationCallExp>();
 		for (Parameter parameter : parameters) {
 			if (this.model.findClassInfoByName(parameter.getType().getName()) == null) {
 				continue;
 			}
-			Set<Attribute> unchagedPropertiesForParameter = findUnchangedPropertyForParameter(changedPropertyCallExprs, parameter);
+			Set<Attribute> unchagedPropertiesForParameter = findUnchangedPropertyForParameter(changedPropertyCallExprs,
+					parameter);
 			Iterator<Attribute> pit = unchagedPropertiesForParameter.iterator();
 			while (pit.hasNext()) {
 				Attribute a = pit.next();
 				if (TypeFactory.getInstance().getClassifier(a.getType()) instanceof PrimitiveType) {
-					equal_exps.add(ASTUtil.getEqualExpForUnchangedAttribute(this.dresden_constraint, parameter.getName(), parameter.getType().getName(), parameters.indexOf(parameter) + 1, a));
+					equal_exps.add(ASTUtil.getEqualExpForUnchangedAttribute(this.dresden_constraint,
+							parameter.getName(), parameter.getType().getName(), parameters.indexOf(parameter) + 1, a));
 				} else {
-					equal_exps.add(ASTUtil.getEqualExpForAsc(this.dresden_constraint, model.findClassInfoByName(parameter.getType().getName()), parameter.getName(), parameters.indexOf(parameter) + 1,
-							a));
+					equal_exps.add(ASTUtil.getEqualExpForAsc(this.dresden_constraint,
+							model.findClassInfoByName(parameter.getType().getName()), parameter.getName(),
+							parameters.indexOf(parameter) + 1, a));
 				}
 
 			}
@@ -405,8 +435,10 @@ public class Path implements GraphVizable, Predicate {
 		return equal_exps;
 	}
 
-	private Set<Attribute> findUnchangedPropertyForParameter(final HashMap<String, Set<PropertyCallExp>> changedPropertyCallExprs, Parameter parameter) {
-		Set<Attribute> unchagnedProperties = new HashSet<Attribute>(this.model.findClassInfoByName(parameter.getType().getName()).getAttrAndAscList());
+	private Set<Attribute> findUnchangedPropertyForParameter(
+			final HashMap<String, Set<PropertyCallExp>> changedPropertyCallExprs, Parameter parameter) {
+		Set<Attribute> unchagnedProperties = new HashSet<Attribute>(
+				this.model.findClassInfoByName(parameter.getType().getName()).getAttrAndAscList());
 		for (Entry<String, Set<PropertyCallExp>> e : changedPropertyCallExprs.entrySet()) {
 			if (!e.getKey().equals(parameter.getName())) {
 				continue;
@@ -430,7 +462,8 @@ public class Path implements GraphVizable, Predicate {
 		result.add(new Path(this.nodes, this.model));
 		List<List<Pair<Integer, String>>> variants = this.calculateVariants();
 		for (final List<Pair<Integer, String>> elem : variants) {
-			final GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER, new StackFrontier<ASTNode>());
+			final GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER,
+					new StackFrontier<ASTNode>());
 			final AtomicInteger counter = new AtomicInteger(0);
 			List<CLGNode> new_nodes = new ArrayList<CLGNode>();
 			for (CLGNode node : this.nodes) {
@@ -460,7 +493,7 @@ public class Path implements GraphVizable, Predicate {
 			}
 			result.add(new Path(new_nodes, this.model, false));
 		}
-		
+
 		return result;
 	}
 
@@ -472,7 +505,8 @@ public class Path implements GraphVizable, Predicate {
 				ConstraintNode constraintNode = (ConstraintNode) node;
 				if (constraintNode.getASTNode() instanceof OperationCallExp) {
 					OperationCallExp opcall = (OperationCallExp) constraintNode.getASTNode();
-					if (opcall.getSourceExp() instanceof VariableExp && ((VariableExp) opcall.getSourceExp()).getVariableName().startsWith("#IterateIndex")) {
+					if (opcall.getSourceExp() instanceof VariableExp
+							&& ((VariableExp) opcall.getSourceExp()).getVariableName().startsWith("#IterateIndex")) {
 						continue;
 					}
 				}
@@ -485,7 +519,8 @@ public class Path implements GraphVizable, Predicate {
 	private List<Pair<Integer, List<String>>> calculateRelOpPositions(ASTNode node, final AtomicInteger counter) {
 		final List<Pair<Integer, List<String>>> result = new ArrayList<Pair<Integer, List<String>>>();
 
-		GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER, new StackFrontier<ASTNode>());
+		GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER,
+				new StackFrontier<ASTNode>());
 		dfs.traverse(node, new NodeVisitHandler<ASTNode>() {
 			private List<String> ops;
 

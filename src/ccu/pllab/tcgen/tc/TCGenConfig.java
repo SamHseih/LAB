@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.tc;
 
-  
 import java.io.File;
 import java.net.URL;
 

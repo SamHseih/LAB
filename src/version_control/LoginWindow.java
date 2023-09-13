@@ -29,7 +29,7 @@ import java.awt.event.ActionEvent;
 
 public class LoginWindow {
 
-	public JFrame frame;
+	private JFrame frame;
 	private JTextField account_textField;
 	private JPasswordField passwordField;
 	public static String account = "";

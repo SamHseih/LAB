@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs.node;
 
- 
 public class GraphVisitor<T extends INode> {
 	public enum TRAVERSAL_ORDER {
 		PREORDER, POSTORDER;

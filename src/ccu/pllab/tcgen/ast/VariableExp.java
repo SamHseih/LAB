@@ -1,5 +1,4 @@
 package ccu.pllab.tcgen.ast;
- 
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +9,12 @@ import org.stringtemplate.v4.ST;
 import tudresden.ocl20.pivot.pivotmodel.Constraint;
 import ccu.pllab.tcgen.AbstractCLG.CLGGraph;
 import ccu.pllab.tcgen.AbstractConstraint.CLGConstraint;
+import ccu.pllab.tcgen.AbstractConstraint.CLGObjectNode;
 import ccu.pllab.tcgen.AbstractConstraint.CLGVariableNode;
 import ccu.pllab.tcgen.clg.CLGNode;
 import ccu.pllab.tcgen.clg.ConstraintNode;
 import ccu.pllab.tcgen.clg2path.CriterionFactory.Criterion;
+import ccu.pllab.tcgen.exe.main.Main;
 import ccu.pllab.tcgen.libs.TemplateFactory;
 import ccu.pllab.tcgen.libs.node.INode;
 import ccu.pllab.tcgen.libs.pivotmodel.type.Classifier;
@@ -29,7 +30,8 @@ public class VariableExp extends ASTNode {
 
 	public VariableExp(Constraint obj, String name, Classifier type, String state) {
 		super(obj);
-		assert state.equals("precondition") || state.equals("postcondition") || state.equals("both") || state.equals("invariant");
+		assert state.equals("precondition") || state.equals("postcondition") || state.equals("both")
+				|| state.equals("invariant");
 		this.name = name;
 		this.type = type;
 		this.state = state;
@@ -38,7 +40,7 @@ public class VariableExp extends ASTNode {
 	}
 
 	public String getVariableName() {
-	
+
 		return this.name;
 	}
 
@@ -66,7 +68,7 @@ public class VariableExp extends ASTNode {
 
 	@Override
 	public CLGNode toCLG(Criterion criterion) {
-		
+
 		assert this.getType().equals(TypeFactory.getInstance().getClassifier("Boolean"));
 		return new ConstraintNode(this.getConstraint(), this);
 	}
@@ -81,9 +83,9 @@ public class VariableExp extends ASTNode {
 
 	@Override
 	public String toOCL() {
-	
+
 		if (this.getState().equals("precondition")) {
-			return this.getVariableName() +"@pre";
+			return this.getVariableName() + "@pre";
 		} else {
 			return this.getVariableName();
 		}
@@ -168,26 +170,22 @@ public class VariableExp extends ASTNode {
 	@Override
 	public CLGGraph OCL2CLG() {
 		String type = this.getType().toString();
-		CLGVariableNode variableConstraint =new CLGVariableNode(this.name,type);
-		assert this.getType().equals(TypeFactory.getInstance().getClassifier("Boolean")); 
+		CLGVariableNode variableConstraint = new CLGObjectNode(this.name, Main.typeTable.get(type, null), -1);
+		assert this.getType().equals(TypeFactory.getInstance().getClassifier("Boolean"));
 		CLGGraph constraintgraph = new CLGGraph(variableConstraint);
 		return constraintgraph;
 	}
 
 	@Override
 	public CLGConstraint CLGConstraint() {
-		
+
 		if (this.getState().equals("precondition")) {
-			CLGConstraint VariableConstraint=new CLGVariableNode(this.getVariableName()+"@pre"); 
+			CLGConstraint VariableConstraint = new CLGObjectNode(this.getVariableName() + "@pre");
 			return VariableConstraint;
 		} else {
-			CLGConstraint VariableConstraint=new CLGVariableNode(this.getVariableName()); 
+			CLGConstraint VariableConstraint = new CLGObjectNode(this.getVariableName());
 			return VariableConstraint;
 		}
 	}
-
-	
-
-
 
 }

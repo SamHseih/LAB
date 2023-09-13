@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.clg2path;
 
- 
 public class CriterionNotMeetException extends Exception {
 
 	/**

@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.facade;
 
- 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -34,11 +33,13 @@ public class Main {
 
 		try {
 			File config_file = new File(config_file_path);
-			FacadeConfig facade_config = new FacadeConfig(new URL("file:" + output_folder_path), new URL("file:" + uml_resource_path), new URL("file:" + log4j_property_path));
+			FacadeConfig facade_config = new FacadeConfig(new URL("file:" + output_folder_path),
+					new URL("file:" + uml_resource_path), new URL("file:" + log4j_property_path));
 			Facade facade = new Facade(facade_config);
 			facade.loadModel(new File(uml_model_path), new File(ocl_model_path), true, config_file);
 			facade.genTestCases();
-		} catch (IOException | JSONException | EclipseException | TemplateException | ModelAccessException | tudresden.ocl20.pivot.parser.ParseException e) {
+		} catch (IOException | JSONException | EclipseException | TemplateException | ModelAccessException
+				| tudresden.ocl20.pivot.parser.ParseException e) {
 			throw new IllegalStateException(e);
 		}
 	}

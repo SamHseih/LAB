@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs.pivotmodel.type;
 
- 
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.ast;
 
- 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,24 +20,21 @@ public abstract class PropertyCallExp extends ASTNode {
 	}
 
 	public String getPropertyName() {
-		if(name.equals("mod"))
-		{
-	
+		if (name.equals("mod")) {
+
 			return "%";
 		}
-		if(name.equals("and"))
-		{
-	
+		if (name.equals("and")) {
+
 			return "&&";
 		}
-		if(name.equals("or"))
-		{
-	
+		if (name.equals("or")) {
+
 			return "||";
 		}
 		return name;
 	}
-	
+
 	public void setPropertyName(String str) {
 		this.name = str;
 	}
@@ -55,10 +51,7 @@ public abstract class PropertyCallExp extends ASTNode {
 	}
 
 	public ASTNode getSourceExp() {
-		
-	
-		
-	
+
 		return source;
 	}
 

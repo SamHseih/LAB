@@ -1,5 +1,4 @@
 package ccu.pllab.tcgen.libs.pivotmodel;
- 
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,25 +73,19 @@ public class ClassDiagInfo {
 	 * :[{"name":"limit","type":"Integer"}],"methodList"
 	 * :[{"argList":[],"name":"isAvailable"
 	 * ,"ret_type":"Boolean"},{"argList":[{"name"
-	 * :"student","type":"Student"}],"name"
-	 * :"canRegister","ret_type":"Boolean"},{
-	 * "argList":[{"name":"student","type":
-	 * "Student"}],"name":"register","ret_type"
+	 * :"student","type":"Student"}],"name" :"canRegister","ret_type":"Boolean"},{
+	 * "argList":[{"name":"student","type": "Student"}],"name":"register","ret_type"
 	 * :"void"},{"argList":[{"name":"increasement"
-	 * ,"type":"Integer"}],"name":"increaseLimit"
-	 * ,"ret_type":"void"},{"argList":[
+	 * ,"type":"Integer"}],"name":"increaseLimit" ,"ret_type":"void"},{"argList":[
 	 * {"name":"newLimit","type":"Integer"}],"name"
 	 * :"setLimit","ret_type":"Boolean"}]},
 	 * {"name":"Student","attrList":[],"methodList"
-	 * :[{"argList":[{"name":"instructor"
-	 * ,"type":"Teacher"}],"name":"setInstructor"
-	 * ,"ret_type":"void"},{"argList":[
-	 * {"name":"laboratory","type":"Laboratory"}]
+	 * :[{"argList":[{"name":"instructor" ,"type":"Teacher"}],"name":"setInstructor"
+	 * ,"ret_type":"void"},{"argList":[ {"name":"laboratory","type":"Laboratory"}]
 	 * ,"name":"setLaboratory","ret_type":"void"}]}], "association":[
 	 * {"name":instruct
 	 * "roleList":[{"name":"students","type":"Teacher"},{"name":"instructor"
-	 * ,"type":"Student"}]},
-	 * {"name":contains"roleList":[{"name":"students","type"
+	 * ,"type":"Student"}]}, {"name":contains"roleList":[{"name":"students","type"
 	 * :"Laboratory"},{"name":"laboratory","type":"Student"}]},
 	 * {"name":guide"roleList"
 	 * :[{"name":"labortory","type":"guide"},{"name":"instructor"
@@ -135,9 +128,11 @@ public class ClassDiagInfo {
 				if (end.getType().equals(clazz)) {
 					if (asc.getRoleList().indexOf(end) == 0) {
 						;
-						attOfClass.add(new Association(asc.getName(), asc.getRoleList().get(1), asc.getRoleList().get(0)));
+						attOfClass.add(
+								new Association(asc.getName(), asc.getRoleList().get(1), asc.getRoleList().get(0)));
 					} else {
-						attOfClass.add(new Association(asc.getName(), asc.getRoleList().get(0), asc.getRoleList().get(1)));
+						attOfClass.add(
+								new Association(asc.getName(), asc.getRoleList().get(0), asc.getRoleList().get(1)));
 					}
 				}
 			}

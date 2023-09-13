@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs;
 
- 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,7 +20,8 @@ public class TemplateFactory {
 	public static ST getTemplate(String name) {
 		if (gINSTANCE == null) {
 			try {
-				InputStreamReader isr = new InputStreamReader(TemplateFactory.class.getResourceAsStream("/ast2ecl.stg"));
+				InputStreamReader isr = new InputStreamReader(
+						TemplateFactory.class.getResourceAsStream("/ast2ecl.stg"));
 				BufferedReader br = new BufferedReader(isr);
 				StringWriter sr = new StringWriter();
 				PrintWriter pr = new PrintWriter(sr);

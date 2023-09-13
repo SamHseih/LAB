@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs.clpresultparse;
 
- 
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -17,7 +16,7 @@ public class EvalAscElm extends ResultBaseVisitor<AscInstance> {
 	public EvalAscElm(Model clsInfo) {
 		mClsDiagInfo = clsInfo;
 	}
- 
+
 	@Override
 	public AscInstance visitAscElm(AscElmContext ctx) {
 		AscInstance asc = new AscInstance();
@@ -36,7 +35,8 @@ public class EvalAscElm extends ResultBaseVisitor<AscInstance> {
 
 			Integer id = Integer.valueOf(ctx.INTEGER(i).getText());
 
-			ImmutableTriple<String, String, Integer> roleInsn = new ImmutableTriple<String, String, Integer>(role.getName(), role.getType(), id);
+			ImmutableTriple<String, String, Integer> roleInsn = new ImmutableTriple<String, String, Integer>(
+					role.getName(), role.getType(), id);
 			asc.getRoleList().add(roleInsn);
 		}
 

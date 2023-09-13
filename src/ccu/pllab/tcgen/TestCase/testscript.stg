@@ -1,6 +1,6 @@
 group testscript-group;
 
-testscript(testCasePackage, classPackage, classList, class_name, method_name,new_method_name, ret_type, ret_val, case_no, target_obj, arg_list, assert, sys_decl, sys_init, asc_init, sys_cleanup, is_ReturnClass, return_void, is_constructor, is_array,is_bound,obj_list,exception) ::= <<
+testscript(testCasePackage, classPackage, classList, class_name, method_name,new_method_name, ret_type, ret_val, case_no, target_obj, arg_list, assert, sys_decl, sys_init, asc_init, sys_cleanup, return_baseType, return_void, return_array, is_constructor,is_bound,obj_list,exception) ::= <<
 
 <classList:importClasses()>
 
@@ -8,10 +8,9 @@ testscript(testCasePackage, classPackage, classList, class_name, method_name,new
 	public void test<new_method_name><case_no>() {
 		<sys_decl>
 <if(is_constructor)>
-	
 		try {
 			<sys_init>
-			assertEquals(<obj_list>,<target_obj>.toString());
+			assertEquals(<obj_list>, <target_obj>.toString());
 			
 			
 		} catch (<exception> e) {
@@ -22,25 +21,34 @@ testscript(testCasePackage, classPackage, classList, class_name, method_name,new
 		try {
 			<sys_init>
 			<target_obj>.<method_name>(<arg_list>);
-			assertEquals(<obj_list>,<target_obj>.toString());
+			assertEquals(<obj_list>, <target_obj>.toString());
 		} catch (<exception> e) {
 			fail();
 		}		
 	<else>
-		<if(is_ReturnClass)>
-			try {
-		    	<sys_init>
-				assertEquals(<ret_val>.toString(),<target_obj>.<method_name>(<arg_list>).toString());
-			} catch (<exception> e) {
-				fail();
-			}
+		<if(return_array)>
+		try {
+			<sys_init>
+			assertArrayEquals(<ret_val>, <target_obj>.<method_name>(<arg_list>));
+		} catch (<exception> e) {
+			fail();
+		}
 		<else>
-			try {
-		    	<sys_init>
-				assertEquals(<ret_val>,<target_obj>.<method_name>(<arg_list>));
-			} catch (<exception> e) {
-				fail();
-			}
+			<if(return_baseType)>
+		try {
+			<sys_init>
+			assertEquals(<ret_val>, <target_obj>.<method_name>(<arg_list>));
+		} catch (<exception> e) {
+			fail();
+		}	
+			<else>
+		try {
+			<sys_init>
+			assertEquals(<ret_val>, <target_obj>.<method_name>(<arg_list>).toString());
+		} catch (<exception> e) {
+			fail();
+		}
+			<endif>
 		<endif>
 	<endif>
 <endif>

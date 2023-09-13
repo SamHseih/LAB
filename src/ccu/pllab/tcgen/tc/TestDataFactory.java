@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.tc;
 
- 
 import java.util.ArrayList;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -42,7 +41,8 @@ public class TestDataFactory {
 	}
 
 	public TestData ConvResult2Data(Path path, String sCLPResult, boolean isInvalidated) {
-		TestData data = new TestData(mClsName, mMethodName, path.getId(), model.findClassInfoByName(mClsName).findMethod(mMethodName).getName().equals(mClsName));
+		TestData data = new TestData(mClsName, mMethodName, path.getId(),
+				model.findClassInfoByName(mClsName).findMethod(mMethodName).getName().equals(mClsName));
 		data.setInvalidate(isInvalidated);
 		if (path.getASTNodes().get(0).getConstraint().getKind().getName().equals("precondition")) {
 			data.setPreconditionName(path.getASTNodes().get(0).getConstraint().getName());
@@ -57,48 +57,48 @@ public class TestDataFactory {
 		ArrayList<String> stateList = clpState.getObjList();
 		for (String str : stateList) {
 			ObjectInstance obj = ParseObj(str);
-			ArrayList<Triple<String, String, String>> Attrlist =obj.getAttrValueList();
-			ArrayList<Triple<String, String, String>> templist =new ArrayList<Triple<String, String, String>>();
-			for(Triple<String, String, String> Attr:Attrlist){
-				if(Attr.getMiddle().startsWith("collection")){
-					if(Attr.getMiddle().endsWith("Integer")){
-						String[] tempString=Attr.getRight().substring(1, Attr.getRight().length()-1).split(",",2);
-						templist.add(new ImmutableTriple<String, String, String>(Attr.getLeft(),Attr.getMiddle(),"new ArrayList<Integer>(Arrays.asList("+tempString[1]+"))"));
-					}
-					else if(Attr.getMiddle().endsWith("String")){
-						String tempStringList=Attr.getRight();
-						tempStringList=tempStringList.substring(tempStringList.indexOf(",")+1, Attr.getRight().length()-1);
-						String[] splitvalueList=tempStringList.split("]");
-						tempStringList="";
-						for(int i=0;i<splitvalueList.length;i++){
-							if(i>0)
-							{
-								tempStringList+=",";
+			ArrayList<Triple<String, String, String>> Attrlist = obj.getAttrValueList();
+			ArrayList<Triple<String, String, String>> templist = new ArrayList<Triple<String, String, String>>();
+			for (Triple<String, String, String> Attr : Attrlist) {
+				if (Attr.getMiddle().startsWith("collection")) {
+					if (Attr.getMiddle().endsWith("Integer")) {
+						String[] tempString = Attr.getRight().substring(1, Attr.getRight().length() - 1).split(",", 2);
+						templist.add(new ImmutableTriple<String, String, String>(Attr.getLeft(), Attr.getMiddle(),
+								"new ArrayList<Integer>(Arrays.asList(" + tempString[1] + "))"));
+					} else if (Attr.getMiddle().endsWith("String")) {
+						String tempStringList = Attr.getRight();
+						tempStringList = tempStringList.substring(tempStringList.indexOf(",") + 1,
+								Attr.getRight().length() - 1);
+						String[] splitvalueList = tempStringList.split("]");
+						tempStringList = "";
+						for (int i = 0; i < splitvalueList.length; i++) {
+							if (i > 0) {
+								tempStringList += ",";
 							}
 							String[] splitvalue = splitvalueList[i].substring(1).split(",");
-							String tempString ="\"";
-							for(int count=1;count<splitvalue.length;count++){
+							String tempString = "\"";
+							for (int count = 1; count < splitvalue.length; count++) {
 								tempString += ((char) Integer.parseInt(splitvalue[count]));
 							}
-							tempString+="\"";
-							tempStringList+=tempString;
+							tempString += "\"";
+							tempStringList += tempString;
 						}
-						templist.add(new ImmutableTriple<String, String, String>(Attr.getLeft(),Attr.getMiddle(),"new ArrayList<Integer>(Arrays.asList("+tempStringList+"))"));
+						templist.add(new ImmutableTriple<String, String, String>(Attr.getLeft(), Attr.getMiddle(),
+								"new ArrayList<Integer>(Arrays.asList(" + tempStringList + "))"));
 					}
-				}
-				else if(Attr.getMiddle().equals("String")){
-					String[] splitvalue = Attr.getRight().substring(1, Attr.getRight().length()-1).split(",");
-					String tempString ="\"";
-					for(int count=1;count<splitvalue.length;count++){
+				} else if (Attr.getMiddle().equals("String")) {
+					String[] splitvalue = Attr.getRight().substring(1, Attr.getRight().length() - 1).split(",");
+					String tempString = "\"";
+					for (int count = 1; count < splitvalue.length; count++) {
 						tempString += ((char) Integer.parseInt(splitvalue[count]));
 					}
-					tempString+="\"";
-					templist.add(new ImmutableTriple<String, String, String>(Attr.getLeft(),Attr.getMiddle(),tempString));
-				}
-				else{
+					tempString += "\"";
+					templist.add(
+							new ImmutableTriple<String, String, String>(Attr.getLeft(), Attr.getMiddle(), tempString));
+				} else {
 					templist.add(Attr);
 				}
-				
+
 			}
 			obj.setAttrValueList(templist);
 			data.getPreObjList().add(obj);
@@ -109,51 +109,51 @@ public class TestDataFactory {
 			AscInstance asc = ParseAsc(str);
 			data.getPreAscList().add(asc);
 		}
-  
+
 		// 2. decompose poststate
 		clpState = clpRet.getPostState();
 		stateList = clpState.getObjList();
 		for (String str : stateList) {
 			ObjectInstance obj = ParseObj(str);
-			ArrayList<Triple<String, String, String>> Attrlist =obj.getAttrValueList();
-			ArrayList<Triple<String, String, String>> templist =new ArrayList<Triple<String, String, String>>();
-			for(Triple<String, String, String> Attr:Attrlist){
-				if(Attr.getMiddle().startsWith("collection")){
-					if(Attr.getMiddle().endsWith("Integer")){
-						String[] tempString=Attr.getRight().substring(1, Attr.getRight().length()-1).split(",",2);
-						templist.add(new ImmutableTriple<String, String, String>(Attr.getLeft(),Attr.getMiddle(),"new ArrayList<Integer>(Arrays.asList("+tempString[1]+"))"));
-					}
-					else if(Attr.getMiddle().endsWith("String")){
-						String tempStringList=Attr.getRight();
-						tempStringList=tempStringList.substring(tempStringList.indexOf(",")+1, Attr.getRight().length()-1);
-						String[] splitvalueList=tempStringList.split("]");
-						tempStringList="";
-						for(int i=0;i<splitvalueList.length;i++){
-							if(i>0)
-							{
-								tempStringList+=",";
+			ArrayList<Triple<String, String, String>> Attrlist = obj.getAttrValueList();
+			ArrayList<Triple<String, String, String>> templist = new ArrayList<Triple<String, String, String>>();
+			for (Triple<String, String, String> Attr : Attrlist) {
+				if (Attr.getMiddle().startsWith("collection")) {
+					if (Attr.getMiddle().endsWith("Integer")) {
+						String[] tempString = Attr.getRight().substring(1, Attr.getRight().length() - 1).split(",", 2);
+						templist.add(new ImmutableTriple<String, String, String>(Attr.getLeft(), Attr.getMiddle(),
+								"new ArrayList<Integer>(Arrays.asList(" + tempString[1] + "))"));
+					} else if (Attr.getMiddle().endsWith("String")) {
+						String tempStringList = Attr.getRight();
+						tempStringList = tempStringList.substring(tempStringList.indexOf(",") + 1,
+								Attr.getRight().length() - 1);
+						String[] splitvalueList = tempStringList.split("]");
+						tempStringList = "";
+						for (int i = 0; i < splitvalueList.length; i++) {
+							if (i > 0) {
+								tempStringList += ",";
 							}
 							String[] splitvalue = splitvalueList[i].substring(1).split(",");
-							String tempString ="\"";
-							for(int count=1;count<splitvalue.length;count++){
+							String tempString = "\"";
+							for (int count = 1; count < splitvalue.length; count++) {
 								tempString += ((char) Integer.parseInt(splitvalue[count]));
 							}
-							tempString+="\"";
-							tempStringList+=tempString;
+							tempString += "\"";
+							tempStringList += tempString;
 						}
-						templist.add(new ImmutableTriple<String, String, String>(Attr.getLeft(),Attr.getMiddle(),"new ArrayList<Integer>(Arrays.asList("+tempStringList+"))"));
+						templist.add(new ImmutableTriple<String, String, String>(Attr.getLeft(), Attr.getMiddle(),
+								"new ArrayList<Integer>(Arrays.asList(" + tempStringList + "))"));
 					}
-				}
-				else if(Attr.getMiddle().equals("String")){
-					String[] splitvalue = Attr.getRight().substring(1, Attr.getRight().length()-1).split(",");
-					String tempString ="\"";
-					for(int count=1;count<splitvalue.length;count++){
+				} else if (Attr.getMiddle().equals("String")) {
+					String[] splitvalue = Attr.getRight().substring(1, Attr.getRight().length() - 1).split(",");
+					String tempString = "\"";
+					for (int count = 1; count < splitvalue.length; count++) {
 						tempString += ((char) Integer.parseInt(splitvalue[count]));
 					}
-					tempString+="\"";
-					templist.add(new ImmutableTriple<String, String, String>(Attr.getLeft(),Attr.getMiddle(),tempString));
-				}
-				else{
+					tempString += "\"";
+					templist.add(
+							new ImmutableTriple<String, String, String>(Attr.getLeft(), Attr.getMiddle(), tempString));
+				} else {
 					templist.add(Attr);
 				}
 			}
@@ -173,40 +173,40 @@ public class TestDataFactory {
 		data.setSelfID(ParseArgSelf(arg.getSelf()));
 		// 3.2. ret
 		ImmutablePair<String, String> argRet = ParseArgRet(arg.getRet());
-		if(argRet.getLeft().startsWith("collection")){
-			if(argRet.getLeft().endsWith("Integer")){
-				String[] tempString=argRet.getRight().substring(1, argRet.getRight().length()-1).split(",",2);
-				argRet=new ImmutablePair<String, String>(argRet.getLeft(),"new ArrayList<Integer>(Arrays.asList("+tempString[1]+"))");
-			}
-			else if(argRet.getLeft().endsWith("String")){
-				String tempStringList=argRet.getRight();
-				tempStringList=tempStringList.substring(tempStringList.indexOf(",")+1, argRet.getRight().length()-1);
-				String[] splitvalueList=tempStringList.split("]");
-				tempStringList="";
-				for(int i=0;i<splitvalueList.length;i++){
-					if(i>0)
-					{
-						tempStringList+=",";
+		if (argRet.getLeft().startsWith("collection")) {
+			if (argRet.getLeft().endsWith("Integer")) {
+				String[] tempString = argRet.getRight().substring(1, argRet.getRight().length() - 1).split(",", 2);
+				argRet = new ImmutablePair<String, String>(argRet.getLeft(),
+						"new ArrayList<Integer>(Arrays.asList(" + tempString[1] + "))");
+			} else if (argRet.getLeft().endsWith("String")) {
+				String tempStringList = argRet.getRight();
+				tempStringList = tempStringList.substring(tempStringList.indexOf(",") + 1,
+						argRet.getRight().length() - 1);
+				String[] splitvalueList = tempStringList.split("]");
+				tempStringList = "";
+				for (int i = 0; i < splitvalueList.length; i++) {
+					if (i > 0) {
+						tempStringList += ",";
 					}
 					String[] splitvalue = splitvalueList[i].substring(1).split(",");
-					String tempString ="\"";
-					for(int count=1;count<splitvalue.length;count++){
+					String tempString = "\"";
+					for (int count = 1; count < splitvalue.length; count++) {
 						tempString += ((char) Integer.parseInt(splitvalue[count]));
 					}
-					tempString+="\"";
-					tempStringList+=tempString;
+					tempString += "\"";
+					tempStringList += tempString;
 				}
-				argRet=new ImmutablePair<String, String>(argRet.getLeft(),"new ArrayList<Integer>(Arrays.asList("+tempStringList+"))");
+				argRet = new ImmutablePair<String, String>(argRet.getLeft(),
+						"new ArrayList<Integer>(Arrays.asList(" + tempStringList + "))");
 			}
-		}
-		else if(argRet.getLeft().equals("String")){
-			String[] splitvalue = argRet.getRight().substring(1, argRet.getRight().length()-1).split(",");
-			String tempString ="\"";
-			for(int count=1;count<splitvalue.length;count++){
+		} else if (argRet.getLeft().equals("String")) {
+			String[] splitvalue = argRet.getRight().substring(1, argRet.getRight().length() - 1).split(",");
+			String tempString = "\"";
+			for (int count = 1; count < splitvalue.length; count++) {
 				tempString += ((char) Integer.parseInt(splitvalue[count]));
 			}
-			tempString+="\"";
-			argRet=new ImmutablePair<String, String>(argRet.getLeft(),tempString);
+			tempString += "\"";
+			argRet = new ImmutablePair<String, String>(argRet.getLeft(), tempString);
 		}
 		data.setRet(argRet);
 		// 3.3. arglist
@@ -217,44 +217,41 @@ public class TestDataFactory {
 		for (int i = 0; i < argValueList.size(); i++) {
 			ImmutablePair<String, String> argInfo = argInfoList.get(i);
 			String argValue = ParseArgArg(argValueList.get(i));
-			if(argInfo.getRight().startsWith("collection")){
-				if(argInfo.getRight().endsWith("Integer")){
-					String[] tempString=argValue.substring(1, argValue.length()/2).split(",",2);
-					argValue="new ArrayList<Integer>(Arrays.asList("+tempString[1]+"))";
-				}
-				else if(argInfo.getRight().endsWith("String")){
-					String tempStringList=argValue;
-					tempStringList=tempStringList.substring(tempStringList.indexOf(",")+1, argValue.length()/2);
-					String[] splitvalueList=tempStringList.split("]");
-					tempStringList="";
-					for(int j=0;j<splitvalueList.length;j++){
-						if(j>0)
-						{
-							tempStringList+=",";
+			if (argInfo.getRight().startsWith("collection")) {
+				if (argInfo.getRight().endsWith("Integer")) {
+					String[] tempString = argValue.substring(1, argValue.length() / 2).split(",", 2);
+					argValue = "new ArrayList<Integer>(Arrays.asList(" + tempString[1] + "))";
+				} else if (argInfo.getRight().endsWith("String")) {
+					String tempStringList = argValue;
+					tempStringList = tempStringList.substring(tempStringList.indexOf(",") + 1, argValue.length() / 2);
+					String[] splitvalueList = tempStringList.split("]");
+					tempStringList = "";
+					for (int j = 0; j < splitvalueList.length; j++) {
+						if (j > 0) {
+							tempStringList += ",";
 						}
 						String[] splitvalue = splitvalueList[j].substring(1).split(",");
-						String tempString ="\"";
-						for(int count=1;count<splitvalue.length;count++){
+						String tempString = "\"";
+						for (int count = 1; count < splitvalue.length; count++) {
 							tempString += ((char) Integer.parseInt(splitvalue[count]));
 						}
-						tempString+="\"";
-						tempStringList+=tempString;
+						tempString += "\"";
+						tempStringList += tempString;
 					}
-					argValue="new ArrayList<Integer>(Arrays.asList("+tempStringList+"))";
+					argValue = "new ArrayList<Integer>(Arrays.asList(" + tempStringList + "))";
 				}
-			}
-			else if(argInfo.getRight().equals("String")){
+			} else if (argInfo.getRight().equals("String")) {
 				String[] splitvalue = argValue.replaceAll("\\[|\\]", "").split(",");
-				argValue ="\"";
-				for(int count=1;count<splitvalue.length/2;count++){
+				argValue = "\"";
+				for (int count = 1; count < splitvalue.length / 2; count++) {
 					argValue += ((char) Integer.parseInt(splitvalue[count]));
 				}
-				argValue +="\"";
-			}
-			else{
+				argValue += "\"";
+			} else {
 				argValue = argValue.replaceAll("\\[|\\]", "").split(",")[0];
 			}
-			ImmutableTriple<String, String, String> elm = new ImmutableTriple<String, String, String>(argInfo.getLeft(), argInfo.getRight(), argValue);
+			ImmutableTriple<String, String, String> elm = new ImmutableTriple<String, String, String>(argInfo.getLeft(),
+					argInfo.getRight(), argValue);
 			data.getArgList().add(elm);
 		}
 

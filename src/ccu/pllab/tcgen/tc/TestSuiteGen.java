@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.tc;
 
-  
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -59,7 +58,8 @@ public class TestSuiteGen {
 
 		// C. testcase and builders are resident in configurable package
 		// 1. generate builder to testcase folder
-		String builderString = BuilderGen.genBuilder(mClsDiagInfo, config.getTestCasePackage(), config.getABSTestCaseFolder().getAbsolutePath());
+		String builderString = BuilderGen.genBuilder(mClsDiagInfo, config.getTestCasePackage(),
+				config.getABSTestCaseFolder().getAbsolutePath());
 
 		// generate all test cases
 		for (TestData testData : mTestDataList) {
@@ -71,7 +71,8 @@ public class TestSuiteGen {
 
 	// will return the name of the generated test case class
 	private String genTestCase(TestData data, TCGenConfig config) {
-		String testCaseName = String.format("Test%s_%s_c%s", config.getTargetClass(), config.getTargetMethod(), data.getPathID());
+		String testCaseName = String.format("Test%s_%s_c%s", config.getTargetClass(), config.getTargetMethod(),
+				data.getPathID());
 
 		// 3. generate association instantiations
 		String ascString = BuilderGen.genAscSetter(data);
@@ -127,7 +128,7 @@ public class TestSuiteGen {
 
 		// G. from model
 		template.setAttribute("ret_type", data.getRet().getLeft());
-	
+
 		// H. auto inc
 		template.setAttribute("case_no", String.valueOf(data.getPathID()));
 
