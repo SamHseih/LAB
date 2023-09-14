@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.srcNodeVisitor;
 
- 
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -24,7 +23,7 @@ public class ForInitizersVisitor extends JAVA2CLG implements SrcNodeVisit {
 		AssignmentVisitor visitor = new AssignmentVisitor();
 		node.accept(visitor);
 		constraint = visitor.getConstraint();
-		clgGraph =visitor.getCLGGraph();
+		clgGraph = visitor.getCLGGraph();
 		return false;
 	}
 

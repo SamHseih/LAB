@@ -1,40 +1,68 @@
 package ccu.pllab.tcgen.AbstractConstraint;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
-import org.antlr.v4.parse.ANTLRParser.ruleReturns_return;
-import org.stringtemplate.v4.compiler.STParser.template_return;
-
-import ccu.pllab.tcgen.exe.main.Main;
-
-
-//import ccu.pllab.tcgen.ACLG2path.CriterionFactory.Criterion;
+import ccu.pllab.tcgen.AbstractType.BooleanType;
+import ccu.pllab.tcgen.AbstractType.DoubleType;
+import ccu.pllab.tcgen.AbstractType.FloatType;
+import ccu.pllab.tcgen.AbstractType.IntType;
+import ccu.pllab.tcgen.AbstractType.RealType;
+import ccu.pllab.tcgen.AbstractType.StringType;
+import ccu.pllab.tcgen.AbstractType.VariableType;
+import ccu.pllab.tcgen.AbstractType.VoidType;
+import ccu.pllab.tcgen.SymbolTable.SymbolTable;
+import ccu.pllab.tcgen.pathCLPFinder.CLPInfo;
 
 public class CLGOperatorNode extends CLGConstraint {
 	private String operator;
-	private String type;
+	private String name; // 描述這Operator結果的
+	private VariableType type; // 此節點
 	private CLGConstraint leftOperand;
 	private CLGConstraint rightOperand;
-	private boolean fromIterateExp=false;
-	private boolean boundary=false;
-	private  CLGOperatorNode useclone;
+	private boolean fromIterateExp = false;
+	private boolean boundary = false;
+	private CLGOperatorNode useclone;
 	private String cloneConId;
+	private boolean isAssign = false;
+
 	public CLGOperatorNode(String operation) {
 		super();
-		switch(operation)
-		{
+		switch (operation) {
 		case "||":
 		case "or":
-		this.operator = "||";
-		break;
+			this.operator = "||";
+			break;
 		case "&&":
 		case "and":
 			this.operator = "&&";
 			break;
 		default:
-			this.operator=operation;
+			this.operator = operation;
 		}
-		this.type = "";
+		this.type = new VoidType();
+		leftOperand = null;
+		rightOperand = null;
+		this.name = "Result_" + this.getConstraintId();
+	}
+
+	public CLGOperatorNode(String operation, boolean isassign) {
+		super();
+		switch (operation) {
+		case "||":
+		case "or":
+			this.operator = "||";
+			break;
+		case "&&":
+		case "and":
+			this.operator = "&&";
+			break;
+		default:
+			this.operator = operation;
+		}
+		this.type = new VoidType();
+		this.isAssign = isassign;
 		leftOperand = null;
 		rightOperand = null;
 	}
@@ -42,7 +70,7 @@ public class CLGOperatorNode extends CLGConstraint {
 	public CLGOperatorNode() {
 		super();
 		this.operator = "";
-		this.type = "";
+		this.type = new VoidType();
 		leftOperand = null;
 		rightOperand = null;
 	}
@@ -71,53 +99,60 @@ public class CLGOperatorNode extends CLGConstraint {
 		return this.rightOperand;
 	}
 
-	public void setType(String type) {
+	public void setType(VariableType type) {
 		this.type = type;
 	}
 
-	public String getType() {
+	public String getName() {
+		return this.name;
+	}
+
+	public VariableType getType() {
 		return this.type;
 	}
-	
-	public void setFromIterateExp() {
-		this.fromIterateExp=true;
+
+	public void setAssignTrue() {
+		this.isAssign = true;
 	}
-	
+
+	public boolean getAssign() {
+		return this.isAssign;
+	}
+
+	public void setFromIterateExp() {
+		this.fromIterateExp = true;
+	}
+
 	public boolean getFromIterateExp() {
 		return this.fromIterateExp;
 	}
-	
+
 	public void setBoundary() {
-		this.boundary=true;
+		this.boundary = true;
 	}
-	
+
 	public boolean getBoundary() {
 		return this.boundary;
 	}
-	
-	private void setUseClone(CLGOperatorNode node)
-	{
-		this.useclone=node;
+
+	private void setUseClone(CLGOperatorNode node) {
+		this.useclone = node;
 	}
 
-	public CLGOperatorNode getUseClone()
-	{
+	public CLGOperatorNode getUseClone() {
 		return this.useclone;
 	}
-	
-	private void setCloneCID(String id)
-	{
-		this.cloneConId=id;
+
+	private void setCloneCID(String id) {
+		this.cloneConId = id;
 	}
 
-	public String getCloneCID()
-	{
+	public String getCloneCID() {
 		return this.cloneConId;
 	}
-	
+
 	public void negation() {
 		/* criteria */
-
 		if (this.operator.equals("==")) {
 			this.operator = "<>";
 		} else if (this.operator.equals("!=")) {
@@ -130,7 +165,7 @@ public class CLGOperatorNode extends CLGConstraint {
 			this.operator = "<";
 		} else if (this.operator.equals("<=")) {
 			this.operator = ">";
-		} else if (this.operator.equals("&&")) {
+		} else if (this.operator.equals("&&") || this.operator.equals("and")) {
 			this.operator = "||";
 			CLGConstraint opClass = new CLGOperatorNode();
 			if (this.leftOperand.getClass().equals(opClass.getClass())) {
@@ -143,34 +178,8 @@ public class CLGOperatorNode extends CLGConstraint {
 				((CLGOperatorNode) newRightCons).negation();
 				this.rightOperand = newRightCons;
 			}
-		} else if (this.operator.equals("and")) {
-			this.operator = "or";
-			CLGConstraint opClass = new CLGOperatorNode();
-			if (this.leftOperand.getClass().equals(opClass.getClass())) {
-				CLGConstraint newLeftCons = this.leftOperand.clone();
-				((CLGOperatorNode) newLeftCons).negation();
-				this.leftOperand = newLeftCons;
-			}
-			if (this.rightOperand.getClass().equals(opClass.getClass())) {
-				CLGConstraint newRightCons = this.rightOperand.clone();
-				((CLGOperatorNode) newRightCons).negation();
-				this.rightOperand = newRightCons;
-			}
-		}else if (this.operator.equals("||")) {
+		} else if (this.operator.equals("||") || this.operator.equals("or")) {
 			this.operator = "&&";
-			CLGConstraint opClass = new CLGOperatorNode();
-			if (this.leftOperand.getClass().equals(opClass.getClass())) {
-				CLGConstraint newLeftCons = this.leftOperand.clone();
-				((CLGOperatorNode) newLeftCons).negation();
-				this.leftOperand = newLeftCons;
-			}
-			if (this.rightOperand.getClass().equals(opClass.getClass())) {
-				CLGConstraint newRightCons = this.rightOperand.clone();
-				((CLGOperatorNode) newRightCons).negation();
-				this.rightOperand = newRightCons;
-			}
-		}else if (this.operator.equals("or")) {
-			this.operator = "and";
 			CLGConstraint opClass = new CLGOperatorNode();
 			if (this.leftOperand.getClass().equals(opClass.getClass())) {
 				CLGConstraint newLeftCons = this.leftOperand.clone();
@@ -190,657 +199,198 @@ public class CLGOperatorNode extends CLGConstraint {
 		if (this.operator.equals("!=")) {
 			this.operator = "<>";
 		}
-		String info="";//改過
-		if(leftOperand!=null)
-			info+=leftOperand.getImgInfo();
-		if(rightOperand!=null)
-			info+=this.operator +rightOperand.getImgInfo();
-			return info;
-		//return leftOperand.getImgInfo() + this.operator + rightOperand.getImgInfo();
+		String info = "";// 改過
+		if (leftOperand != null)
+			info += leftOperand.getImgInfo();
+		if (rightOperand != null)
+			info += this.operator + rightOperand.getImgInfo();
+		return info;
+		// return leftOperand.getImgInfo() + this.operator + rightOperand.getImgInfo();
 	}
 
 	@Override
-	public String getCLPInfo() {
+	public CLPInfo getCLPInfo(HashMap<String, Integer> variableSet, HashMap<String, Boolean> containKey) {
 		String new_op = "";
-		/*if(Main.boundary_analysis&&this.boundary&&(this.operator.equals(">=")||this.operator.equals("<="))&&Main.changeBoundary)
-		{
-				new_op="#=";
-				
-		}
-		else*/
+
 		switch (this.operator) {
 		case "==":
-			new_op = "#=";
+			new_op = "=";
 			break;
 		case "!=":
-			new_op = "#\\=";
+			new_op = "\\=";
+
 			break;
 		case "<>":
-			new_op = "#\\=";
+			new_op = "\\=";
 			break;
 		case "<":
-			new_op = "#<";
+			new_op = "<";
 			break;
 		case ">":
-			new_op = "#>";
+			new_op = ">";
 			break;
 		case "<=":
-			
-			if(Main.boundary_analysis&&this.boundary&&Main.changeBoundary)
-				new_op = "#=";
-			//else if(Main.boundary_analysis)
-			//	new_op = "#<";
-			else
-			new_op = "#=<";
+			new_op = "=<";
 			break;
 		case ">=":
-			if(Main.boundary_analysis&&this.boundary&&Main.changeBoundary)
-				new_op = "#=";
-			//else if(Main.boundary_analysis)
-			//	new_op = "#>";
-			else
-			new_op = "#>=";
+			new_op = ">=";
 			break;
 		case "&&":
-			new_op = ",";
+			new_op = ",\n";
 			break;
 		case "||":
 		case "or":
 			new_op = " or ";
 			break;
 		case "=":
-			
-			if (rightOperand instanceof CLGLiteralNode) {
-				//if (((CLGLiteralNode) rightOperand).getType().toLowerCase() != "string")
-				//{
-				new_op = "#=";
-					if (((CLGLiteralNode) rightOperand).getValue().contains("\"") || ((CLGLiteralNode) rightOperand).getValue().contains("true")||((CLGLiteralNode) rightOperand).getValue().contains("false")) 
-						new_op = "=";
-					if(((CLGLiteralNode) rightOperand).getValue().equals("[]"))
-						new_op = "=";
-				//	} else {
-				//		new_op = "#=";
-				//		this.operator="#=";
-				//	}
-			//	}
-			//	else {
-			//		new_op = "=";
-				}
-			/*} else if (rightOperand instanceof CLGVariableNode) {
-				new_op = "=";//改+再改0527
-				this.operator="=";
-			} else {
-
-				if (rightOperand instanceof CLGOperatorNode) {
-				/*	if (((CLGOperatorNode) rightOperand).getRightOperand() instanceof CLGLiteralNode) {
-						CLGConstraint tempCLGOperatorConstraint = ((CLGOperatorNode) rightOperand).getRightOperand();
-						if (((CLGLiteralNode) tempCLGOperatorConstraint).getType() != "String" ) {
-							new_op = "#=";
-							this.operator="#=";
-						}
-//我改
-					} else {
-						new_op = "=";
-					}
-				}*/ else {
-					new_op = "#=";
-					//this.operator="#=";
-				}
-			//}
+			new_op = "=";
 			break;
 		default:
 			new_op = this.operator;
 			break;
 		}
 
-		/* rDign */
-		if(this.leftOperand instanceof CLGMethodInvocationNode)
-		{
-			if(new_op=="#\\=")
-				return "";
-			if(this.rightOperand.getCLPInfo().equals("true"))
-			return leftOperand.getCLPInfo();
-		}
-		if (this.leftOperand instanceof CLGOperatorNode) {
-			if (((CLGOperatorNode) this.leftOperand).getOperator().equals("%")) {
-				//if (!this.operator.equals("==") ) {
-					return this.leftOperand.getCLPInfo() + "," + "Remainder"
-							+ "),Remainder"+new_op+this.rightOperand.getCLPInfo();/* TCSE help */
-				//} else {
-				//	return this.leftOperand.getCLPInfo() + "," + this.rightOperand.getCLPInfo() + ")";
-				//}
-
-			}
-			
-			/* rDign */
-		} else if (this.rightOperand!=null &&this.rightOperand instanceof CLGOperatorNode) {
-
-			if (((CLGOperatorNode) this.rightOperand).getOperator().equals("%")) {
-				if (!this.operator.equals("==")) {
-					return this.rightOperand.getCLPInfo() + "," + this.leftOperand.getCLPInfo()
-							+ ")";/* TCSE help */
-				} else {
-					return this.rightOperand.getCLPInfo() + "," + this.leftOperand.getCLPInfo() + ")";
-				}
-			}
+		if (this.operator.equals("not")) {
+			this.negConstraint();
+			return this.rightOperand.getCLPInfo(variableSet, containKey);
 		}
 
+		// 因應不同type，將Operator 改成符合type 的 Operator。
+		new_op = changeOperatorForType(new_op);
+
+		if (this.type instanceof StringType) {
+
+			CLPInfo leftinfo = this.leftOperand != null ? this.leftOperand.getCLPInfo(variableSet, containKey)
+					: new CLPInfo();
+			CLPInfo rightinfo = this.rightOperand != null ? this.rightOperand.getCLPInfo(variableSet, containKey)
+					: new CLPInfo();
+
+			// string compare
+			if ((new_op.equals("=") || new_op.equals("\\=") || new_op.equals(">=") || new_op.equals("=<")
+					|| new_op.equals(">") || new_op.equals("<"))) {
+				return stringCompareCLP(new_op, leftinfo, rightinfo, variableSet);
+			}
+
+			if (this.operator.equals("+") && this.type instanceof StringType) {
+				// 看成是 leftOperand.concat(rightOperand)
+				ArrayList<CLGConstraint> argList = new ArrayList<>();
+				argList.add(this.rightOperand);
+				CLGObjectNode leftOp2Obj = null;
+				leftOp2Obj = new CLGObjectNode(leftinfo.getReturnCLP());
+				leftOp2Obj.setType(new StringType());
+				CLGMethodInvocationNode modCLGNode = new CLGMethodInvocationNode(this.leftOperand, new StringType(),
+						"concat", argList);
+
+				return modCLGNode.getCLPInfo(variableSet, containKey);
+			}
+		}
+
+		// operator %
 		if (this.operator.equals("%")) {
+			// 看成是 leftOperand.mod(rightOperand)
+			ArrayList<CLGConstraint> argList = new ArrayList<>();
+			argList.add(this.rightOperand);
+			CLGObjectNode leftOp2Obj = new CLGObjectNode(this.leftOperand.getConstraintName());
+			CLGMethodInvocationNode modCLGNode = new CLGMethodInvocationNode(leftOp2Obj, new IntType(), "mod", argList);
+			ArrayList<String> methodCall = new ArrayList<String>();
+			methodCall.addAll(this.leftOperand.getCLPInfo(variableSet, containKey).getMethodCallCLP());
+			methodCall.addAll(this.rightOperand.getCLPInfo(variableSet, containKey).getMethodCallCLP());
 
-			/* rFact */
-			/* TCSE help */
-			return "o_mod(" + this.leftOperand.getCLPInfo() + "," + this.rightOperand.getCLPInfo();
+			// modCLGNode.getCLPInfo 只能呼叫一次，不然在轉CLP時限制式節點id對不上
+			CLPInfo clpinfo = modCLGNode.getCLPInfo(variableSet, containKey);
+			methodCall.addAll(clpinfo.getMethodCallCLP());
+			return new CLPInfo(clpinfo.getReturnCLP(), methodCall);
+			// return modCLGNode.getCLPInfo(clpStr, variableSet);
+		}
+
+		if (this.operator.equals("||")) {
+			if (this.rightOperand != null) {
+				if (leftOperand != null) {
+					// .getCLPInfo 只能呼叫一次，不然在轉CLP時限制式節點id對不上
+					CLPInfo left_clpinfo = this.leftOperand.getCLPInfo(variableSet, containKey);
+					CLPInfo right_clpinfo = this.rightOperand.getCLPInfo(variableSet, containKey);
+
+					String return_str = "((" + left_clpinfo.getReturnCLP() + ");(" + right_clpinfo.getReturnCLP()
+							+ "))";
+
+					ArrayList<String> methodcallList = new ArrayList<String>();
+					// 條件可能需要修改
+					if (left_clpinfo.getMethodCallCLP().toString().length() > 0)
+						methodcallList.addAll(left_clpinfo.getMethodCallCLP());
+					if (right_clpinfo.getMethodCallCLP().toString().length() > 0)
+						methodcallList.addAll(right_clpinfo.getMethodCallCLP());
+
+					return new CLPInfo(return_str, methodcallList);
+
+//					return "(" + this.leftOperand.getCLPInfo(clpStr, variableSet) + ";"
+//							+ this.rightOperand.getCLPInfo(clpStr, variableSet) + ")";
+				} else
+					return this.rightOperand.getCLPInfo(variableSet, containKey);
+			} else
+				return this.leftOperand.getCLPInfo(variableSet, containKey);
 		} else {
 
-			if (this.operator.equals("||")) {
-				if(this.rightOperand!=null)
-				{
-					if(leftOperand!=null)
-				return "(" + this.leftOperand.getCLPInfo() + ";" + this.rightOperand.getCLPInfo() + ")";
-					else
-						return  this.rightOperand.getCLPInfo();
-				}
-				else
-					return  this.leftOperand.getCLPInfo();
+			CLPInfo leftinfo = new CLPInfo();
+			CLPInfo rightinfo = new CLPInfo();
+			if (this.leftOperand != null)
+				leftinfo = this.leftOperand.getCLPInfo(variableSet, containKey);
+			if (this.rightOperand != null) {
+
+				rightinfo = this.rightOperand.getCLPInfo(variableSet, containKey);
+				ArrayList<String> methodcall = new ArrayList<String>();
+				methodcall.addAll(leftinfo.getMethodCallCLP());
+				methodcall.addAll(rightinfo.getMethodCallCLP());
+
+				if (new_op.equals("+") || new_op.equals("-") || new_op.equals("not")) {
+					return new CLPInfo(/* "(" + */(leftinfo.getReturnCLP().length() > 0 ? leftinfo.getReturnCLP() : " ")
+							+ new_op + rightinfo.getReturnCLP() /* + ")" */, methodcall);
 				} else {
 
-				if (this.rightOperand instanceof CLGOperatorNode && this.operator.equals("=")) {
+					return new CLPInfo(
+							/* "(" + */(leftinfo.getReturnCLP().length() > 0 ? leftinfo.getReturnCLP() + new_op : " ")
+									+ rightinfo.getReturnCLP() /* + ")" */,
+							methodcall);
+				}
 
-					if (((CLGOperatorNode) this.rightOperand).getOperator().equals("%")) {
-						return this.leftOperand.getCLPInfo() + new_op + "Remainder";
-					}
-				}
-				String left;
-				if(this.leftOperand!=null)
-				left=this.leftOperand.getCLPInfo();
-				else
-					left="";
-				String right="";
-				if(this.rightOperand!=null)
-				{
-				right=this.rightOperand.getCLPInfo();
-			//	return this.leftOperand.getCLPInfo() + new_op + this.rightOperand.getCLPInfo();
-				String  returnString="";
-				if(!(this.operator.equals("and")||this.operator.equals("or")))
-				{
-				if(left.contains("["))
-				{
-					if(left.contains("]["))
-					{
-						//System.out.println("left:"+left);
-						int indexRow;
-						if(Main.indexMap.containsKey("IndexRow"))
-						{
-							indexRow=Main.indexMap.get("IndexRow");
-							Main.indexMap.put("IndexRow", Main.indexMap.get("IndexRow")+1);
-						}
-						else
-						{
-							indexRow=1;
-							Main.indexMap.put("IndexRow", 2);
-						}
-						returnString+="IndexRow"+indexRow+"#=";
-						if(left.contains("it"))
-							returnString+=left.substring(left.indexOf("[")+1,left.indexOf("]"))+",\n";
-						else
-						returnString+=left.substring(left.indexOf("[")+1,left.indexOf("[")+2).toUpperCase()+left.substring(left.indexOf("[")+2,left.indexOf("]"))+",\n";
-						returnString+="array_list(";
-						String leftArray="";
-						if(Main.msort && !left.contains("_pre"))
-							leftArray+=left.substring(0, left.indexOf("["))+"_pre";
-						else
-							leftArray+=left.substring(0, left.indexOf("["));
-						returnString+=leftArray+",Temp"+leftArray+"),\n";//array_list(Data,TempData),\n
-						int arrayRow;
-						if(Main.arrayMap.containsKey("ArrayRow"))
-						{
-							arrayRow=Main.arrayMap.get("ArrayRow");
-							Main.arrayMap.put("ArrayRow", Main.arrayMap.get("ArrayRow")+1);
-						}
-						else
-						{
-							arrayRow=1;
-							Main.arrayMap.put("ArrayRow", 2);
-						}
-						returnString+="findelement(Temp"+leftArray+",ArrayRow"+arrayRow+",IndexRow"+indexRow+"),\n";//findelement(TempData,ArrayRow1,IndexRow1),
-						
-						int index;
-						if(Main.indexMap.containsKey("Index"))
-						{
-							index=Main.indexMap.get("Index");
-							Main.indexMap.put("Index", Main.indexMap.get("Index")+1);
-						}
-						else
-						{
-							index=1;
-							Main.indexMap.put("Index", 2);
-						}
-						returnString+="Index"+index+"#=";
-						String col=left.substring(left.lastIndexOf("[")+1,left.lastIndexOf("]"));
-						if(col.contains("it"))
-							returnString+=col+",\n";
-						else
-							returnString+=col.substring(0,1).toUpperCase()+col.substring(1)+",\n";
-						int array;
-						if(Main.arrayMap.containsKey("Array"))
-						{
-							array=Main.arrayMap.get("Array");
-							Main.arrayMap.put("Array", Main.arrayMap.get("Array")+1);
-						}
-						else
-						{
-							array=1;
-							Main.arrayMap.put("Array", 2);
-						}
-						returnString+="array_list(ArrayRow"+arrayRow+",Array"+array+"),\n";//array_list(ArrayRow1,Array1),
-						int element;
-						if(Main.arrayMap.containsKey("Element"))
-						{
-							element=Main.arrayMap.get("Element");
-							Main.arrayMap.put("Element", Main.arrayMap.get("Element")+1);
-						}
-						else
-						{
-							element=1;
-							Main.arrayMap.put("Element", 2);
-						}
-						returnString+="findelement(Array"+array+",Element"+element+",Index"+index+"),\n";//findelement(Array1,Element1,Index1),
-						returnString=returnString.replaceAll("it2", "i2t");
-						left="Element"+element;
-						/*returnString+="IndexRow#=";
-						if(left.contains("it"))
-							returnString+=left.substring(left.indexOf("[")+1,left.indexOf("]"))+",\n";
-						else
-						returnString+=left.substring(left.indexOf("[")+1,left.indexOf("[")+2).toUpperCase()+left.substring(left.indexOf("[")+2,left.indexOf("]"))+",\n";
-						returnString+="arg(IndexRow,";
-						if(Main.msort && !left.contains("_pre"))
-							returnString+=left.substring(0, left.indexOf("["))+"_pre";
-						else
-						returnString+=left.substring(0, left.indexOf("["));
-						
-						returnString+=",ArrayRowi),\n";
-						returnString+="Index#=";
-						String col=left.substring(left.lastIndexOf("[")+1,left.lastIndexOf("]"));
-						if(col.contains("it"))
-							returnString+=col+",\n";
-						else
-							returnString+=col.substring(0,1).toUpperCase()+col.substring(1)+",\n";
-						returnString+="arg(Index,ArrayRowi,Arrayi),\n";
-					//	returnString=returnString.replaceAll("it", "It");
-						returnString=returnString.replaceAll("it2", "i2t");
-						left="Arrayi";*/
-					}
-					else
-					{
-						int arrayIndex;
-						if(Main.indexMap.containsKey("Index"))
-						{
-							arrayIndex=Main.indexMap.get("Index");
-							Main.indexMap.put("Index", Main.indexMap.get("Index")+1);
-						}
-						else
-						{
-							arrayIndex=1;
-							Main.indexMap.put("Index", 2);
-						}
-						returnString+="Index"+arrayIndex+"#=";
-						if(left.contains("it"))
-							returnString+=left.substring(left.indexOf("[")+1,left.indexOf("]"))+",\n";
-						else
-						returnString+=left.substring(left.indexOf("[")+1,left.indexOf("[")+2).toUpperCase()+left.substring(left.indexOf("[")+2,left.indexOf("]"))+",\n";
-						if(left.contains("ArrayData"))
-							returnString+="dcl_1dInt_array(ArrayData,Size_pre),\n";
-						returnString+="findelement(";
-						if(Main.msort && !left.contains("_pre"))
-							returnString+=left.substring(0, left.indexOf("["))+"_pre";
-						else
-						returnString+=left.substring(0, left.indexOf("["));
-						//returnString+=",Index"+arrayIndex+",";
-						int element;
-						if(Main.arrayMap.containsKey("Element"))
-						{
-							element=Main.arrayMap.get("Element");
-							Main.arrayMap.put("Element", Main.arrayMap.get("Element")+1);
-						}
-						else
-						{
-							element=1;
-							Main.arrayMap.put("Element", 2);
-						}
-						returnString+=",Element"+element+",Index"+arrayIndex+"),\n";
-						
-						/*returnString+="arg(Index"+ArrayIndex+",";
-						if(Main.msort && !left.contains("_pre"))
-							returnString+=left.substring(0, left.indexOf("["))+"_pre";
-						else
-						returnString+=left.substring(0, left.indexOf("["));
-						returnString+=",Element";
-						
-						int element;
-						if(Main.arrayMap.containsKey("Element"))
-						{
-							element=Main.arrayMap.get("Element");
-							Main.arrayMap.put("Element", element+1);
-						}
-						else
-						{
-							element=1;
-							Main.arrayMap.put("Element", 1);
-						}
-						returnString+=element+"),\n";*/
-						left="Element"+element;
-						
-						
-				/*	returnString+="Index#=";
-					if(left.contains("it"))
-						returnString+=left.substring(left.indexOf("[")+1,left.indexOf("]"))+",\n";
-					else
-					returnString+=left.substring(left.indexOf("[")+1,left.indexOf("[")+2).toUpperCase()+left.substring(left.indexOf("[")+2,left.indexOf("]"))+",\n";
-					//returnString=returnString.replace("@", "");
-					//returnString=returnString.replace("()", "_pre");
-			/*		returnString+="findelement(";//0117 me
-					if(Main.msort && !left.contains("_pre"))
-						returnString+=left.substring(0, left.indexOf("["))+"_pre";
-					else
-					returnString+=left.substring(0, left.indexOf("["));
-					
-					returnString+=",Arrayi,Index),\n";
-					left="Arrayi";*/
-					}
-				}
-				if(right.contains("["))
-				{
-					if(right.contains("]["))
-					{
-						int indexRow;
-						if(Main.indexMap.containsKey("IndexRow"))
-						{
-							indexRow=Main.indexMap.get("IndexRow");
-							Main.indexMap.put("IndexRow", Main.indexMap.get("IndexRow")+1);
-						}
-						else
-						{
-							indexRow=1;
-							Main.indexMap.put("IndexRow", 2);
-						}
-						returnString+="IndexRow"+indexRow+"#=";
-						String row=right.substring(right.indexOf("[")+1,right.indexOf("]"));
-						if(row.contains("it"))
-							returnString+=row+",\n"; 
-						else
-						returnString+=row.substring(0,1).toUpperCase()+row.substring(1)+",\n";
-						returnString+="array_list(";
-						String rightArray="";
-						if(Main.msort && !right.contains("_pre"))
-							returnString+=right.substring(0, right.indexOf("["))+"_pre";
-						else
-						returnString+=right.substring(0, right.indexOf("["));
-						
-						returnString+=rightArray+",Temp"+rightArray+"),\n";//array_list(Data,TempData),\n
-						int arrayRow;
-						if(Main.arrayMap.containsKey("ArrayRow"))
-						{
-							arrayRow=Main.arrayMap.get("ArrayRow");
-							Main.arrayMap.put("ArrayRow", Main.arrayMap.get("ArrayRow")+1);
-						}
-						else
-						{
-							arrayRow=1;
-							Main.arrayMap.put("ArrayRow", 2);
-						}
-						returnString+="findelement(Temp"+rightArray+",ArrayRow"+arrayRow+",IndexRow"+indexRow+"),\n";//findelement(TempData,ArrayRow1,IndexRow1),
-						int index;
-						if(Main.indexMap.containsKey("Index"))
-						{
-							index=Main.indexMap.get("Index");
-							Main.indexMap.put("Index", Main.indexMap.get("Index")+1);
-						}
-						else
-						{
-							index=1;
-							Main.indexMap.put("Index", 2);
-						}
-						returnString+="Index"+index+"#=";
-						String col=right.substring(right.lastIndexOf("[")+1,right.lastIndexOf("]"));
-						if(col.contains("it"))
-							returnString+=col+",\n";
-						else
-							returnString+=col.substring(0,1).toUpperCase()+col.substring(1)+",\n";
-						int array;
-						if(Main.arrayMap.containsKey("Array"))
-						{
-							array=Main.arrayMap.get("Array");
-							Main.arrayMap.put("Array", Main.arrayMap.get("Array")+1);
-						}
-						else
-						{
-							array=1;
-							Main.arrayMap.put("Array", 2);
-						}
-						returnString+="array_list(ArrayRow"+arrayRow+",Array"+array+"),\n";//array_list(ArrayRow1,Array1),
-						int element;
-						if(Main.arrayMap.containsKey("Element"))
-						{
-							element=Main.arrayMap.get("Element");
-							Main.arrayMap.put("Element", Main.arrayMap.get("Element")+1);
-						}
-						else
-						{
-							element=1;
-							Main.arrayMap.put("Element", 2);
-						}
-						returnString+="findelement(Array"+array+",Element"+element+",Index"+index+"),\n";//findelement(Array1,Element1,Index1),
-						returnString=returnString.replaceAll("it2", "i2t");
-						right="Element"+element;
-						//System.out.println("right:"+right);
-					/*	returnString+="IndexRow#=";
-						String row=right.substring(right.indexOf("[")+1,right.indexOf("]"));
-						if(row.contains("it"))
-							returnString+=row+",\n"; 
-						else
-						returnString+=row.substring(0,1).toUpperCase()+row.substring(1)+",\n";
-						returnString+="arg(IndexRow,";
-						if(Main.msort && !right.contains("_pre"))
-							returnString+=right.substring(0, right.indexOf("["))+"_pre";
-						else
-						returnString+=right.substring(0, right.indexOf("["));
-						
-						returnString+=",ArrayRowi),\n";
-						returnString+="Index#=";
-						String col=right.substring(right.lastIndexOf("[")+1,right.lastIndexOf("]"));
-						if(col.contains("it"))
-							returnString+=col+",\n";
-						else
-							returnString+=col.substring(0,1).toUpperCase()+col.substring(1)+",\n";
-						returnString+="arg(Index,ArrayRowi,Arrayi),\n";
-						returnString=returnString.replaceAll("it2", "i2t");
-						right="Arrayi";*/
-					}
-					else
-					{
-						int arrayIndex;
-						if(Main.indexMap.containsKey("Index"))
-						{
-							arrayIndex=Main.indexMap.get("Index");
-							Main.indexMap.put("Index", Main.indexMap.get("Index")+1);
-						}
-						else
-						{
-							arrayIndex=1;
-							Main.indexMap.put("Index", 2);
-						}
-					//	returnString+="Index"+arrayIndex+"#=";
-						if(right.contains("it"))
-						{
-						//	System.out.println("testRight:"+right);
-							String indexArray=right.substring(right.indexOf("[")+1);
-							if(!indexArray.contains("["))
-							{
-							returnString+="Index"+arrayIndex+"#=";
-							returnString+=right.substring(right.indexOf("[")+1,right.indexOf("]"))+",\n";
-							}
-							else
-							{
-								indexArray=right.substring(right.lastIndexOf("[")+1,right.indexOf("]"));
-								
-								returnString+="Index"+Main.indexMap.get("Index")+"#="+indexArray+",\n";
-								
-								returnString+="findelement(ArrayIndex,Element"+Main.arrayMap.get("Element")+",Index"+Main.indexMap.get("Index")+"),\n";
-										Main.indexMap.put("Index", Main.indexMap.get("Index")+1);
-								returnString+="Index"+arrayIndex+"#=Element"+Main.arrayMap.get("Element")+",\n";
-								Main.arrayMap.put("Element", Main.arrayMap.get("Element")+1);
-							}
-						}
-							else
-							{
-								returnString+="Index"+arrayIndex+"#=";
-								returnString+=right.substring(right.indexOf("[")+1,right.indexOf("[")+2).toUpperCase()+right.substring(right.indexOf("[")+2,right.indexOf("]"))+",\n";
-							}
-								returnString+="findelement(";
-						returnString+=right.substring(0, right.indexOf("["));
-						int element;
-						if(Main.arrayMap.containsKey("Element"))
-						{
-							element=Main.arrayMap.get("Element");
-							Main.arrayMap.put("Element", Main.arrayMap.get("Element")+1);
-						}
-						else
-						{
-							element=1;
-							Main.arrayMap.put("Element", 2);
-						}
-						returnString+=",Element"+element+",Index"+arrayIndex+"),\n";
-						right="Element"+element;
-					/*returnString+="Index#=";
-					if(right.contains("it"))
-					returnString+=right.substring(right.indexOf("[")+1,right.indexOf("]"))+",\n";
-					else
-						returnString+=right.substring(right.indexOf("[")+1,right.indexOf("[")+2).toUpperCase()+right.substring(right.indexOf("[")+2,right.indexOf("]"))+",\n";
-					returnString+="findelement(";
-					returnString+=right.substring(0, right.indexOf("["));
-					returnString+=",Arrayi,Index),\n";
-					right="Arrayi";*/
-					}
-				}
-				//returnString=returnString.replaceAll("it", "It");
-				}
-				if(new_op.equals("+")||new_op.equals("-")||new_op.equals("*")||new_op.equals("/"))
-					return returnString+"("+left+new_op+right+")";
-				/*String  returnString="";
-				if(this.operator.equals(">")||this.operator.equals("<")||this.operator.equals(">=")||this.operator.equals("<=")||this.operator.equals("==")||this.operator.equals("!="))
-				{
-					if((this.leftOperand instanceof CLGVariableNode)&&((CLGVariableNode) this.leftOperand).getConstraint() instanceof CLGOperatorNode)
-						returnString+=((CLGVariableNode) this.leftOperand).getConstraint().getCLPInfo()+",";
-					if((this.rightOperand instanceof CLGVariableNode)&&((CLGVariableNode) this.rightOperand).getConstraint() instanceof CLGOperatorNode)
-						returnString+=((CLGVariableNode) this.rightOperand).getConstraint().getCLPInfo()+",";
-					returnString+="\n";
-				}*/
-				return returnString+left+ new_op +right;
-				}
-				else
-					return left;
-			}
+			} else
+				return this.leftOperand.getCLPInfo(variableSet, containKey);
 		}
 	}
-	
-	@Override
-	public  ArrayList<String> getInvCLPInfo()
-	{
-		ArrayList<String> variable=new ArrayList<String>();
-		String new_op = "";
-		switch (this.operator) {
-		case "==":
-			new_op = "#=";
-			break;
-		case "!=":
-			new_op = "#\\=";
-			break;
-		case "<>":
-			new_op = "#\\=";
-			break;
-		case "<":
-			new_op = "#<";
-			break;
-		case ">":
-			new_op = "#>";
-			break;
-		case "<=":
-			new_op = "#=<";
-			break;
-		case ">=":
-			new_op = "#>=";
-			break;
-		case "&&":
-			new_op = ",";
-			break;
-		case "||":
-		case "or":
-			new_op = " or ";
-			break;
-		case "=":
-			if (rightOperand instanceof CLGLiteralNode) {
-				if (((CLGLiteralNode) rightOperand).getType().toLowerCase() != "string")
-					if (((CLGLiteralNode) rightOperand).getValue().contains("\"")) {
-						new_op = "=";
-					} else {
-						new_op = "#=";
-					}
-				else {
-					new_op = "=";
-				}
-			} else if (rightOperand instanceof CLGVariableNode) {
-				new_op = "#=";//改
-			} else {
 
-				if (rightOperand instanceof CLGOperatorNode) {
-					if (((CLGOperatorNode) rightOperand).getRightOperand() instanceof CLGLiteralNode) {
-						CLGConstraint tempCLGOperatorConstraint = ((CLGOperatorNode) rightOperand).getRightOperand();
-						if (((CLGLiteralNode) tempCLGOperatorConstraint).getType() != "String") {
-							new_op = "#=";
-						}
-//我改
-					} else {
-						new_op = "=";
-					}
-				} else {
-					new_op = "#=";
-				}
-			}
-			break;
-		default:
-			new_op = this.operator;
-			break;
-		}
-				variable.addAll(this.leftOperand.getInvCLPInfo());
-				if(this.rightOperand!=null)
-				variable.addAll(this.rightOperand.getInvCLPInfo());
-				return variable;
-			
-	}
 	@Override
 	public CLGConstraint clone() {
 		String newOp = new String(this.operator);
 		CLGConstraint cons = new CLGOperatorNode(newOp);
-		
-		if(this.leftOperand!=null)
-		((CLGOperatorNode) cons).setLeftOperand(this.leftOperand.clone());
-		if(this.rightOperand!=null)//我加
-		((CLGOperatorNode) cons).setRightOperand(this.rightOperand.clone());
+
+		if (this.leftOperand != null)
+			((CLGOperatorNode) cons).setLeftOperand(this.leftOperand.clone());
+		if (this.rightOperand != null)// 我加
+			((CLGOperatorNode) cons).setRightOperand(this.rightOperand.clone());
 		((CLGOperatorNode) cons).setType(this.type);
 		cons.setCloneId(this.getConstraintId());
-		((CLGOperatorNode) cons).setBoundary();
+		if (this.getBoundary())
+			((CLGOperatorNode) cons).setBoundary();
 		((CLGOperatorNode) cons).setUseClone(this);
 		((CLGOperatorNode) cons).setCloneCID(this.getConstraintId());
+
+		if (this.getFromIterateExp())
+			((CLGOperatorNode) cons).setFromIterateExp();
+
+		if (this.isAssign == true)
+			((CLGOperatorNode) cons).setAssignTrue();
 		return cons;
 	}
 
-	public String getConstraintImg() {
+	public String getConstraintImg(HashMap<String, Integer> variableSet) {
 		String result = "";
-		result += (this.getConstraintId() + " "
-				+ String.format("[shape=\"ecllipse\", label=\"%s\",style = \"filled\",fillcolor = \"white\",xlabel=\"[%s]\"]" + "\n", this.getOperator(), this.getConstraintId()));
-		result += (this.leftOperand.getConstraintId() + " " + String.format("[shape=\"ecllipse\", label=\"%s\",style = \"filled\",fillcolor = \"white\",xlabel=\"[%s]\"]" + "\n",
+		result += (this.getConstraintId() + " " + String.format(
+				"[shape=\"ecllipse\", label=\"%s\",style = \"filled\",fillcolor = \"white\",xlabel=\"[%s]\"]" + "\n",
+				this.getOperator(), this.getConstraintId()));
+		result += (this.leftOperand.getConstraintId() + " " + String.format(
+				"[shape=\"ecllipse\", label=\"%s\",style = \"filled\",fillcolor = \"white\",xlabel=\"[%s]\"]" + "\n",
 				this.leftOperand.getImgInfo(), this.leftOperand.getConstraintId()));
-		result += (this.rightOperand.getConstraintId() + " " + String.format("[shape=\"ecllipse\", label=\"%s\",style = \"filled\",fillcolor = \"white\",xlabel=\"[%s]\"]" + "\n",
+		result += (this.rightOperand.getConstraintId() + " " + String.format(
+				"[shape=\"ecllipse\", label=\"%s\",style = \"filled\",fillcolor = \"white\",xlabel=\"[%s]\"]" + "\n",
 				this.rightOperand.getImgInfo(), this.rightOperand.getConstraintId()));
 
 		result += this.getConstraintId() + "->" + this.leftOperand.getConstraintId() + "\n";
@@ -851,7 +401,13 @@ public class CLGOperatorNode extends CLGConstraint {
 	}
 
 	@Override
-	public String getCLPValue() {
+	public String getCLPValue() {// 好像只處理 it = ... 之類的，函式呼叫裡使用的參數好像沒處理
+		if (this.leftOperand != null) {
+			if (this.rightOperand != null)
+				return this.leftOperand.getCLPValue() + this.operator + this.rightOperand.getCLPValue();
+			else
+				return this.leftOperand.getCLPValue();
+		}
 		return null;
 	}
 
@@ -862,55 +418,213 @@ public class CLGOperatorNode extends CLGConstraint {
 	}
 
 	@Override
-	public String getLocalVariable() {
+	public void renameCLPValue(int count) {
 		// TODO Auto-generated method stub
-		if( this.leftOperand!=null ) {       //System.out.println(this.leftOperand.getCLPInfo()+" AAA " );
-			if( this.rightOperand!=null )    //System.out.println(this.rightOperand.getCLPInfo() +"  DC_P" );
-				return this.leftOperand.getLocalVariable() + "," +this.rightOperand.getLocalVariable();
-			else return this.leftOperand.getLocalVariable();		
-		}
-		return null;
+
 	}
+
 	@Override
 	public void negConstraint() {
 		this.negation();
-		this.leftOperand.negConstraint();
-		this.rightOperand.negConstraint();
+		if (this.leftOperand != null)
+			this.leftOperand.negConstraint();
+		if (this.rightOperand != null)
+			this.rightOperand.negConstraint();
 	}
+
 	@Override
-	public void preconditionAddPre()
-	{
-		if(this.leftOperand!=null)
-			this.leftOperand.preconditionAddPre();
-		if(this.rightOperand!=null)
-			this.rightOperand.preconditionAddPre();
+	public void preconditionAddPre(SymbolTable sym, String methodName) {
+		if (this.leftOperand != null)
+			this.leftOperand.preconditionAddPre(sym, methodName);
+		if (this.rightOperand != null)
+			this.rightOperand.preconditionAddPre(sym, methodName);
 	}
+
 	@Override
-	public void postconditionAddPre()
-	{
-		if(this.operator.equals("||")||this.operator.equals("&&"))
-		{
-		//	System.out.println("testOperator:"+this.operator);
-		//	if(this.leftOperand!=null)
-			this.leftOperand.postconditionAddPre();
-			//if(this.rightOperand!=null)
-			this.rightOperand.postconditionAddPre();
-		}
-		else if(this.operator.equals("="))
-		{
-			this.addpostpre(this.rightOperand);
+	public String getConstraintName() {
+
+		String leftstr = "";
+		String rightstr = "";
+		if (this.leftOperand != null)
+			leftstr += this.leftOperand.getConstraintName();
+		if (this.rightOperand != null)
+			rightstr += this.rightOperand.getConstraintName();
+
+		return leftstr + this.operator + rightstr;
+	}
+
+	@Override
+	public CLGConstraint addPre() {
+		if (this.leftOperand != null)
+			this.leftOperand = this.leftOperand.addPre();
+		if (this.rightOperand != null)
+			this.rightOperand = this.rightOperand.addPre();
+		return this;
+	}
+
+	
+	@Override
+	public void renameUseVar(HashMap<String, Integer> variableSet, HashSet<String> defineVariableSet, boolean isMethodCLP) {
+		if (this.getOperator().equals("=")) {
+			if (!(this.rightOperand instanceof CLGMethodInvocationNode
+					&& ((CLGMethodInvocationNode) this.rightOperand).getMethodName().equals("dcl_array"))) {
+				if (this.getRightOperand() != null)
+					this.getRightOperand().renameUseVar(variableSet, defineVariableSet, isMethodCLP);
+				if (this.getLeftOperand() != null)
+					this.getLeftOperand().renameDefVar(variableSet, defineVariableSet, isMethodCLP);
+			}
+		} else {
+			if (this.getLeftOperand() != null)
+				this.getLeftOperand().renameUseVar(variableSet, defineVariableSet, isMethodCLP);
+			if (this.getRightOperand() != null)
+				this.getRightOperand().renameUseVar(variableSet, defineVariableSet, isMethodCLP);
+
 		}
 	}
-	public void addpostpre(CLGConstraint node)
-	{
-		if(node instanceof CLGOperatorNode)
-		{
-				addpostpre(((CLGOperatorNode)node).getLeftOperand());
-				addpostpre(((CLGOperatorNode)node).getRightOperand());
+
+	private String changeOperatorForType(String op) {
+
+		String returnOP = op;
+
+		// compare or assign
+		if (returnOP.equals("=") || returnOP.equals("\\=") || returnOP.equals(">=") || returnOP.equals("=<")
+				|| returnOP.equals(">") || returnOP.equals("<"))
+
+			if (this.type instanceof BooleanType) {
+				returnOP = "#" + returnOP;
+			} else if (this.type instanceof IntType) {
+				returnOP = "#" + returnOP;
+			} else if (this.type instanceof FloatType || this.type instanceof DoubleType) {
+				returnOP = "$" + returnOP;
+			} else if (this.type instanceof StringType) {
+				returnOP = op;
+			} else {
+				returnOP = op;
+			}
+
+		return returnOP;
+	}
+
+	private CLPInfo stringCompareCLP(String op, CLPInfo leftclpinfo, CLPInfo rightclpinfo,
+			HashMap<String, Integer> variableSet) {
+
+		String opCLPString = "";
+
+		switch (op) {
+		case "=":
+			opCLPString = "ocl_string_equals";
+			break;
+		case "\\=":
+			opCLPString = "ocl_string_not_equals";
+			break;
+		case ">=":
+			opCLPString = "ocl_string_greater_equals";
+			break;
+		case ">":
+			opCLPString = "ocl_string_greater_than";
+			break;
+		case "=<":
+			opCLPString = "ocl_string_less_equals";
+			break;
+		case "<":
+			opCLPString = "ocl_string_less_than";
+			break;
+
+		default:
+			opCLPString = op;
 		}
-		else if(node instanceof CLGVariableNode)
-		{
-			((CLGVariableNode)node).postconditionAddPre();;
+
+		boolean isMethodCall = false;
+		String leftstr = leftclpinfo.getReturnCLP();
+		String rightstr = rightclpinfo.getReturnCLP();
+
+		String returnstr = opCLPString + "(" + leftstr + "," + rightstr + ", 1)";
+
+		ArrayList<String> methodcall = new ArrayList<String>();
+		methodcall.addAll(leftclpinfo.getMethodCallCLP());
+		methodcall.addAll(rightclpinfo.getMethodCallCLP());
+
+		return new CLPInfo(returnstr, methodcall);
+	}
+
+	@Override
+	public ArrayList<String> getLocalVar() {
+		ArrayList<String> retList = new ArrayList<>();
+		if (this.getLeftOperand() != null)
+			retList.addAll(this.getLeftOperand().getLocalVar());
+		if (this.getRightOperand() != null)
+			retList.addAll(this.getRightOperand().getLocalVar());
+		return retList;
+	}
+
+	@Override
+	public VariableType getCLPVarType() {
+		VariableType retType;
+		retType = this.leftOperand.getCLPVarType();
+		if (retType != null)
+			return retType;
+		else {
+			retType = this.rightOperand.getCLPVarType();
+			return retType;
 		}
+	}
+
+	@Override
+	public void renameWithMap(HashMap<String, String> attMap) {
+
+		if (this.getLeftOperand() != null)
+			this.getLeftOperand().renameWithMap(attMap);
+		if (this.getRightOperand() != null)
+			this.getRightOperand().renameWithMap(attMap);
+	}
+
+	@Override
+	public String getOriginalConName() {
+		if (this.leftOperand instanceof CLGLiteralNode && this.leftOperand instanceof CLGLiteralNode
+				&& ((CLGLiteralNode) this.leftOperand).getValue().contains("acc")
+				&& ((CLGLiteralNode) this.leftOperand).getValue().equals("true"))
+			return "";
+		else {
+			String str = "";
+			if (this.leftOperand != null)
+				str += this.leftOperand.getOriginalConName();
+
+			str += this.operator;
+
+			if (this.rightOperand != null)
+				str += this.rightOperand.getOriginalConName();
+
+			return str;
+		}
+	}
+
+	@Override
+	public String getItNum() {
+		if (this.leftOperand instanceof CLGObjectNode && this.operator.equals("<=")) {
+			String itName = ((CLGObjectNode) this.leftOperand).getName();
+			if (itName.equals("it"))
+				return "1";
+			if (itName.contains("it")) {
+				return itName.substring(itName.indexOf("it") + 2);
+			}
+		}
+		return "";
+	}
+
+	@Override
+	public void reverseVarFlag(HashMap<String, Integer> variableSet) {
+		if (this.getOperator().equals("=") && !(this.rightOperand instanceof CLGMethodInvocationNode
+				&& ((CLGMethodInvocationNode) this.rightOperand).getMethodName().equals("dcl_array"))) {
+			this.getLeftOperand().reverseDefVar(variableSet);
+		}
+		this.reverseMethodDefVar(variableSet);
+	}
+
+	@Override
+	protected void reverseMethodDefVar(HashMap<String, Integer> variableSet) {
+		if (this.leftOperand != null)
+			this.leftOperand.reverseMethodDefVar(variableSet);
+		if (this.rightOperand != null)
+			this.rightOperand.reverseMethodDefVar(variableSet);
 	}
 }

@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.clg2path;
 
- 
 import java.util.List;
 
 import org.json.JSONException;

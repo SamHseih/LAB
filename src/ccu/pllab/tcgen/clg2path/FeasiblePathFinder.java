@@ -1,5 +1,4 @@
 package ccu.pllab.tcgen.clg2path;
- 
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -29,7 +28,7 @@ public class FeasiblePathFinder {
 
 	public Path getNextPath() {
 		while (path_queue.size() > 0 && !criterion.meetRequirement()) {
-			
+
 			List<CLGNode> path = path_queue.remove();
 			if (isCompletePath(path)) {
 				List<CLGNode> copy_node_list = new ArrayList<CLGNode>();

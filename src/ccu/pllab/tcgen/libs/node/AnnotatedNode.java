@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs.node;
 
- 
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,8 +30,8 @@ public abstract class AnnotatedNode implements INode {
 	public final String getAttribute(String key) {
 		return this.attributes.optString(key);
 	}
-	
-	public String getAtt(){
+
+	public String getAtt() {
 		return this.attributes.toString();
 	}
 

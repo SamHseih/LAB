@@ -44,7 +44,7 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 
 		for (int i = 0; i < pnode.size(); i++) {
 			for (int j = 0; j < dup.size(); j++) {
-				if (((CLGNode) dup.get(j).getDefineNode()).equals(pnode.get(i))) { //def start
+				if (((CLGNode) dup.get(j).getDefineNode()).equals(pnode.get(i))) { // def start
 					ArrayList<CLGNode> arrclg = new ArrayList<CLGNode>();
 					for (int i11 = 0; i11 < pnode.size(); i11++) {
 						arrclg.add(pnode.get(i11));
@@ -52,7 +52,7 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 					for (int arrco = 0; arrco <= i; arrco++) {
 						arrclg.remove(0);
 					}
-					//arrclg-> def 之後 clg 節點
+					// arrclg-> def 之後 clg 節點
 					if (arrclg.contains(((CLGNode) dup.get(j).getUseNode())))
 						if (((CLGNode) dup.get(j).getUseNode()).equals(pnode.get(i + 1))) {
 							if (!pathDUP.contains(dup.get(j)))
@@ -106,7 +106,8 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 	public void parseDefUse(CLGOperatorNode clgnode) {
 		if (clgnode.getRightOperand() instanceof CLGOperatorNode) {
 			parseDefUse((CLGOperatorNode) clgnode.getRightOperand());
-		} else if (clgnode.getRightOperand() instanceof CLGVariableNode) {
+		} else if (clgnode.getRightOperand() instanceof CLGObjectNode
+				|| clgnode.getRightOperand() instanceof CLGClassNode) {
 			if (!use.contains(((CLGVariableNode) clgnode.getRightOperand()).getName())) {
 				String useste = ((CLGVariableNode) clgnode.getRightOperand()).getName();
 				// useste=useste.replaceAll("result", "self");
@@ -154,7 +155,8 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 
 		if (clgnode.getLeftOperand() instanceof CLGOperatorNode) {
 			parseDefUse((CLGOperatorNode) clgnode.getLeftOperand());
-		} else if (clgnode.getLeftOperand() instanceof CLGVariableNode) {
+		} else if (clgnode.getLeftOperand() instanceof CLGObjectNode
+				|| clgnode.getLeftOperand() instanceof CLGClassNode) {
 			String strop = clgnode.getOperator();
 			strop = strop.replaceAll(" ", "");
 			if (strop.equals("=")) {
@@ -240,23 +242,22 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 
 	public ArrayList<DUP> dupGenerate(CLGGraph clg, String classname, String methodname) {
 		ArrayList<Integer> consnum = new ArrayList<Integer>();
-		Set<Integer> numset = clg.getConstraintCollection()
-				.keySet();/* for(obj o: collection<obj>) -> enhanceFor */
+		Set<Integer> numset = clg.getConstraintCollection().keySet();/* for(obj o: collection<obj>) -> enhanceFor */
 		Iterator iterator = numset.iterator();
 		while (iterator.hasNext()) {
 			consnum.add((Integer) iterator.next());
 		}
 		// define
-		//2020-05-08 dai -> alldef & alldefindex 之後好像用不到
-		//ArrayList<String> alldef = new ArrayList<String>(); // final all def~
+		// 2020-05-08 dai -> alldef & alldefindex 之後好像用不到
+		// ArrayList<String> alldef = new ArrayList<String>(); // final all def~
 		// 20200503 dai
 		// ArrayList<String> alldef415;// = new ArrayList<String>();
 		ArrayList<ArrayList<String>> def415 = new ArrayList<ArrayList<String>>();// every
 																					// node
 																					// def
 		// --------------------
-		//2020-05-08 dai -> alldef & alldefindex 之後好像用不到
-		//ArrayList<Integer> alldefindex = new ArrayList<Integer>();
+		// 2020-05-08 dai -> alldef & alldefindex 之後好像用不到
+		// ArrayList<Integer> alldefindex = new ArrayList<Integer>();
 		// --
 		ArrayList<String> checkdefin = new ArrayList<String>();
 		// use
@@ -320,11 +321,11 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 		// -----------------------------------------------
 		for (int defsize = 0; defsize < def415.size(); defsize++) {
 			for (int defsize1 = 0; defsize1 < def415.get(defsize).size(); defsize1++) {
-				//2020-05-08 dai -> alldef & alldefindex 之後好像用不到
-				/*if (!alldef.contains(def415.get(defsize).get(defsize1))) {
-					alldef.add(def415.get(defsize).get(defsize1));
-					alldefindex.add(1);
-				}*/
+				// 2020-05-08 dai -> alldef & alldefindex 之後好像用不到
+				/*
+				 * if (!alldef.contains(def415.get(defsize).get(defsize1))) {
+				 * alldef.add(def415.get(defsize).get(defsize1)); alldefindex.add(1); }
+				 */
 				String strdef = def415.get(defsize).get(defsize1);
 				strdef = strdef.replaceAll("self.", "");
 				checkdefin.add(strdef); // 703
@@ -332,7 +333,7 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 		}
 
 		// -----------end for defsize------------------
-		//System.out.println("" + alldefindex);
+		// System.out.println("" + alldefindex);
 		// System.out.println("703 "+alldefindex);
 
 		// ------------find num of the define------------
@@ -347,7 +348,7 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 		// System.out.println(" 79 size = "+defsizecount);
 		// ---------------------------build gen---------------------------
 		int defbit = 0;
-		//2020-05-08 dai -> saveposition 之後的用不到
+		// 2020-05-08 dai -> saveposition 之後的用不到
 		ArrayList<Integer> saveposition = new ArrayList<Integer>();
 		for (int i = 0; i < def415.size(); i++) {
 			ArrayList<Integer> reggen315 = new ArrayList<Integer>();
@@ -359,18 +360,19 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 					reggen315.set(defbit, 1);
 					defbit++;
 					gen315.add(reggen315);
-					//2020-05-08 dai -> saveposition 之後的用不到
-					//saveposition.add(i); // 2020-05-04 block index
+					// 2020-05-08 dai -> saveposition 之後的用不到
+					// saveposition.add(i); // 2020-05-04 block index
 				}
 			} else {
 				gen315.add(reggen315);
-				//2020-05-08 dai -> saveposition 之後的用不到
-				//saveposition.add(i);
+				// 2020-05-08 dai -> saveposition 之後的用不到
+				// saveposition.add(i);
 			}
 		} // end for i
-		//2020-05-08 dai -> saveposition 之後的用不到
-		System.out.println("all gen= " + gen315 + /*" \n position = " + saveposition +*/ "\n gen size= " + gen315.size());
-		//System.out.println("416.620 all gen= "+gen315+" \n position =
+			// 2020-05-08 dai -> saveposition 之後的用不到
+		System.out.println(
+				"all gen= " + gen315 + /* " \n position = " + saveposition + */ "\n gen size= " + gen315.size());
+		// System.out.println("416.620 all gen= "+gen315+" \n position =
 		// "+saveposition+"\n gen size= "+gen315.size());
 		// ---------------------------end bulid gen---------------------------
 
@@ -490,22 +492,21 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 
 				// 2020-05-04 dai try -> 之後code 好像沒使用 regprenode
 				/*
-				 * if(clgnode.getPredecessor().get(j) instanceof
-				 * CLGConnectionNode){ CLGConnectionNode connode1 =
+				 * if(clgnode.getPredecessor().get(j) instanceof CLGConnectionNode){
+				 * CLGConnectionNode connode1 =
 				 * (CLGConnectionNode)clgnode.getPredecessor().get(j) ;
 				 * 
 				 * for(int k=0;k<connode1.getPredecessor().size();k++){
 				 * if(connode1.getPredecessor().get(k) instanceof CLGStartNode){
-				 * regprenode.add(0); } else if(connode1.getPredecessor().get(k)
-				 * instanceof CLGConnectionNode){ //connode1 =
+				 * regprenode.add(0); } else if(connode1.getPredecessor().get(k) instanceof
+				 * CLGConnectionNode){ //connode1 =
 				 * (CLGConnectionNode)connode1.getPredecessor().get(k) ; } else
-				 * if(connode1.getPredecessor().get(k) instanceof
-				 * CLGConstraintNode){ CLGConstraintNode inpre =
+				 * if(connode1.getPredecessor().get(k) instanceof CLGConstraintNode){
+				 * CLGConstraintNode inpre =
 				 * (CLGConstraintNode)connode1.getPredecessor().get(k);
 				 * regprenode.add(inpre.getXLabelId()); } } } else
-				 * if(clgnode.getPredecessor().get(j) instanceof
-				 * CLGConstraintNode){ CLGConstraintNode inpre =
-				 * (CLGConstraintNode)clgnode.getPredecessor().get(j);
+				 * if(clgnode.getPredecessor().get(j) instanceof CLGConstraintNode){
+				 * CLGConstraintNode inpre = (CLGConstraintNode)clgnode.getPredecessor().get(j);
 				 * regprenode.add(inpre.getXLabelId()); }
 				 */ // 2020-05-04 dai try
 
@@ -627,7 +628,7 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 
 		ArrayList<String> usarr = new ArrayList<String>();
 		ArrayList<Integer> usint = new ArrayList<Integer>();
-		
+
 		for (int i = 0; i < regin315.size(); i++) {
 			ArrayList<Integer> inregin = new ArrayList<Integer>();
 			inregin = regin315.get(i);
@@ -639,7 +640,7 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 							us33 = us33.replaceAll("self@pre.", "");
 							us33 = us33.replaceAll("@pre", "");
 							us33 = us33.replaceAll("self.", "");
-							us33 = us33.replaceAll("_pre", "");//20200701 dai
+							us33 = us33.replaceAll("_pre", "");// 20200701 dai
 
 							if (checkdefin.get(j).equals(us33)) {// 703
 								String strdupvar = "";
@@ -653,7 +654,8 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 									strdupvar = us33 + "_" + c;
 								}
 								// recordposi 和 consnum 兩者限制式List，I 是 use ， J 是 def
-								DUP dup = new DUP(strdupvar, clg.getConstraintNodeById(recordposi.get(j)), clg.getConstraintNodeById(consnum.get(i)));
+								DUP dup = new DUP(strdupvar, clg.getConstraintNodeById(recordposi.get(j)),
+										clg.getConstraintNodeById(consnum.get(i)));
 								listdup316.add(dup);
 							}
 						}
@@ -666,13 +668,14 @@ public class CLGReachingDefinitionAnalyzer extends CLGGraph {
 		for (int i = 0; i < this.hashtable.size(); i++) {
 			aa += this.hashtable.get(i) + "\n";
 		}
-		//DataWriter.writeInfo(aa, "hashtable", "java", DataWriter.output_folder_path, "hashtable");
+		// DataWriter.writeInfo(aa, "hashtable", "java", DataWriter.output_folder_path,
+		// "hashtable");
 		return listdup316;
 	}
-	
-	//20200701 dai
+
+	// 20200701 dai
 	public ArrayList<Hashtable> gethashTable() {
 		return this.hashtable;
-	} 
+	}
 
 }

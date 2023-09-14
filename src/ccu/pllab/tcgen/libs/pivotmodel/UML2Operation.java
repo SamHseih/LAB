@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs.pivotmodel;
 
- 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -88,64 +87,54 @@ public class UML2Operation extends Operation implements Predicate {
 		this.postconstraints.add(constr);
 	}
 
-public CLGGraph getCLG(Criterion criterion) { 
-		
+	public CLGGraph getCLG(Criterion criterion) {
+
 		CLGGraph preconstraints = new CLGGraph();
 		CLGGraph postconstraints = new CLGGraph();
 		for (Constraint constraint : this.getPreConstraints()) {
 
-			
-			preconstraints=constraint.OCL2CLG();
-			
-		} 
-		for (Constraint constraint : this.getPostConstraints()) {
-			  
-			postconstraints=constraint.OCL2CLG();
-			
+			preconstraints = constraint.OCL2CLG();
+
 		}
-		if(preconstraints.getConstraintCollection().size() ==0)
-		{
+		for (Constraint constraint : this.getPostConstraints()) {
+
+			postconstraints = constraint.OCL2CLG();
+
+		}
+		if (preconstraints.getConstraintCollection().size() == 0) {
 			return postconstraints;
 		}
-		
+
 		preconstraints.graphAnd(postconstraints);
 
-	
-		
 		return preconstraints;
 	}
 
+	public CLGGraph getInvalidCLG(Criterion criterion) {
 
-public CLGGraph getInvalidCLG(Criterion criterion) {
-	
-	CLGGraph nodes = new CLGGraph();
- 
-	
-	for (Constraint constraint : this.getPreConstraints()) {
-		Constraint invalid_constraint = (Constraint) constraint.clone();
-		OperationCallExp not_spec = new OperationCallExp(constraint.getConstraint(), constraint.getSpecification().clone(), "not", TypeFactory.getInstance().getClassifier("Boolean"), false);
-		invalid_constraint.setSpecification(not_spec);
-	
-		nodes=invalid_constraint.OCL2CLG();
-		
-		
-		
-		for(Constraint sub_constraint : this.getPreConstraints()) {
-			if(constraint.equals(sub_constraint)) {
-				continue; 
+		CLGGraph nodes = new CLGGraph();
+
+		for (Constraint constraint : this.getPreConstraints()) {
+			Constraint invalid_constraint = (Constraint) constraint.clone();
+			OperationCallExp not_spec = new OperationCallExp(constraint.getConstraint(),
+					constraint.getSpecification().clone(), "not", TypeFactory.getInstance().getClassifier("Boolean"),
+					false);
+			invalid_constraint.setSpecification(not_spec);
+
+			nodes = invalid_constraint.OCL2CLG();
+
+			for (Constraint sub_constraint : this.getPreConstraints()) {
+				if (constraint.equals(sub_constraint)) {
+					continue;
+				}
+
+				nodes.graphAnd(sub_constraint.OCL2CLG());
 			}
-	
-			
-			nodes.graphAnd(sub_constraint.OCL2CLG());
+
 		}
-				
-	
+
+		return nodes;
 	}
-
-
-
-	return nodes;
-}
 
 	@Override
 	public String getPredicateName(Map<String, String> templateArgs) {
@@ -161,7 +150,8 @@ public CLGGraph getInvalidCLG(Criterion criterion) {
 		if (templateArgs.get("result_name") != null) {
 			result_name = templateArgs.get("result_name");
 		}
-		return String.format("method_body_%s_%s(%s, %s, %s)", this.getOwner().getName(), this.getName(), instances_name, vars_name, result_name);
+		return String.format("method_body_%s_%s(%s, %s, %s)", this.getOwner().getName(), this.getName(), instances_name,
+				vars_name, result_name);
 	}
 
 	@Override
@@ -212,7 +202,8 @@ public CLGGraph getInvalidCLG(Criterion criterion) {
 		result += "\n\tnth1(1, NewVars, Self),";
 		result += "\n\tnth1(2, Self, SelfPost),";
 		result += "\n\tocl_attributeCall(_, \"" + this.getRetType() + "\", \"type\", SelfPost, uml_obj),";
-		result += "\n\tocl_attributeCall(_, \"" + this.getRetType() + "\", \"name\", SelfPost, \"" + this.getRetType() + "\").";
+		result += "\n\tocl_attributeCall(_, \"" + this.getRetType() + "\", \"name\", SelfPost, \"" + this.getRetType()
+				+ "\").";
 		return result;
 	}
 
@@ -269,29 +260,21 @@ public CLGGraph getInvalidCLG(Criterion criterion) {
 		return changedPropertyCallExprs;
 	}
 
-	public ArrayList<String>  roger() {
+	public ArrayList<String> roger() {
 		final ArrayList<String> changedPropertyCallExprs = new ArrayList<String>();
 
 		for (Constraint constraint : this.postconstraints) {
 			for (Entry<String, Set<PropertyCallExp>> e : constraint.getChangedProperties().entrySet()) {
-				for(PropertyCallExp a : e.getValue())
-					
-					
-					
+				for (PropertyCallExp a : e.getValue())
+
 					changedPropertyCallExprs.add(a.toString());
-			
-				
-				
+
 			}
 		}
-		
-		
-		
-		
+
 		return changedPropertyCallExprs;
 	}
-	
-	
+
 	public List<Set<PropertyCallExp>> getChangedPropertiesOrderByParameters() {
 		final HashMap<String, Set<PropertyCallExp>> changedPropertyCallExprs = this.getChangedProperties();
 		List<Set<PropertyCallExp>> list = new ArrayList<Set<PropertyCallExp>>();

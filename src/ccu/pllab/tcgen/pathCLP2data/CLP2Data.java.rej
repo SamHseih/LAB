@@ -1,0 +1,20 @@
+diff a/src/ccu/pllab/tcgen/pathCLP2data/CLP2Data.java b/src/ccu/pllab/tcgen/pathCLP2data/CLP2Data.java	(rejected hunks)
+@@ -265,15 +265,11 @@
+ 		List<CompoundTerm> ArgSeq = null;
+ 		try {
+ 			// File dir = new File("../Examples/"+ sDName + "CLP/" + sDName + ".ecl");
+-			/*20210329�R���A�]�����ӷ|���sĶ�Ltest constraints���U��/reserved method.ecl
+-			 * �Pclg method CLP���U���Umethod clp(�i�ഫ��|�A�ϥ��O�U�禡CLP
+-			 * �T�w���v�T�i�R
+-			 */
+ 			/* �sĶ�򥻨禡�I�s */
+-			/*File all = new File("Examples/All.ecl");
+-			this.compile(all);*/
++			File all = new File("Examples/All.ecl");
++			this.compile(all);
+ 			/* �sĶ�n���檺sd2clp��ocl2clp */
+-			/*File dir = new File("Examples/" + sdName + "CLP");
++			File dir = new File("Examples/" + sdName + "CLP");
+ 			String[] filenames;
+ 			if (dir.isDirectory()) {
+ 				filenames = dir.list();

@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.pathCLP2data;
 
-
 public class SolvingFailException extends Exception {
 
 	/**
@@ -12,11 +11,10 @@ public class SolvingFailException extends Exception {
 	public SolvingFailException(String path) {
 		this.path = path;
 	}
- 
+
 	@Override
 	public String getMessage() {
 		return path + " failed";
 	}
 
 }
- 

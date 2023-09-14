@@ -2,8 +2,13 @@
 package ccu.pllab.tcgen.oclRunner;
 //�o�����O�N�Ojava���Yimport�������A�]��.g4�ɻPOclParser.java�O�s�����Y�A�ҥH���ઽ���bOclParser.java�W�Kimport�A�@���s�ɴN�|�Q�~���A�]���p�G�nimport���ɭԡA�b@header���Y�[
 	import ccu.pllab.tcgen.AbstractSyntaxTree.*;
+	import ccu.pllab.tcgen.SymbolTable.*;
+	import ccu.pllab.tcgen.AbstractType.*;
+	import ccu.pllab.tcgen.CBTCGUtility.Utility;
+	import ccu.pllab.tcgen.exe.main.*;
 	import java.util.ArrayList;
 	import java.util.Set;
+	
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -134,16 +139,6 @@ public interface OclListener extends ParseTreeListener {
 	 */
 	void exitUnaryExpression(@NotNull OclParser.UnaryExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link OclParser#calculator}.
-	 * @param ctx the parse tree
-	 */
-	void enterCalculator(@NotNull OclParser.CalculatorContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link OclParser#calculator}.
-	 * @param ctx the parse tree
-	 */
-	void exitCalculator(@NotNull OclParser.CalculatorContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link OclParser#propertyCall}.
 	 * @param ctx the parse tree
 	 */
@@ -163,16 +158,6 @@ public interface OclListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBooleanExp(@NotNull OclParser.BooleanExpContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link OclParser#qualifiers}.
-	 * @param ctx the parse tree
-	 */
-	void enterQualifiers(@NotNull OclParser.QualifiersContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link OclParser#qualifiers}.
-	 * @param ctx the parse tree
-	 */
-	void exitQualifiers(@NotNull OclParser.QualifiersContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link OclParser#timeExpression}.
 	 * @param ctx the parse tree
@@ -324,15 +309,15 @@ public interface OclListener extends ParseTreeListener {
 	 */
 	void exitCollectionItem(@NotNull OclParser.CollectionItemContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link OclParser#collectionKind}.
+	 * Enter a parse tree produced by {@link OclParser#localVariableLists}.
 	 * @param ctx the parse tree
 	 */
-	void enterCollectionKind(@NotNull OclParser.CollectionKindContext ctx);
+	void enterLocalVariableLists(@NotNull OclParser.LocalVariableListsContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link OclParser#collectionKind}.
+	 * Exit a parse tree produced by {@link OclParser#localVariableLists}.
 	 * @param ctx the parse tree
 	 */
-	void exitCollectionKind(@NotNull OclParser.CollectionKindContext ctx);
+	void exitLocalVariableLists(@NotNull OclParser.LocalVariableListsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link OclParser#letExpression}.
 	 * @param ctx the parse tree
@@ -363,6 +348,16 @@ public interface OclListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPackageName(@NotNull OclParser.PackageNameContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OclParser#construtorCall}.
+	 * @param ctx the parse tree
+	 */
+	void enterConstrutorCall(@NotNull OclParser.ConstrutorCallContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OclParser#construtorCall}.
+	 * @param ctx the parse tree
+	 */
+	void exitConstrutorCall(@NotNull OclParser.ConstrutorCallContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link OclParser#ifExpression}.
 	 * @param ctx the parse tree
@@ -433,6 +428,16 @@ public interface OclListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpression(@NotNull OclParser.ExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OclParser#localVariableList}.
+	 * @param ctx the parse tree
+	 */
+	void enterLocalVariableList(@NotNull OclParser.LocalVariableListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OclParser#localVariableList}.
+	 * @param ctx the parse tree
+	 */
+	void exitLocalVariableList(@NotNull OclParser.LocalVariableListContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link OclParser#relationalExpressions}.
 	 * @param ctx the parse tree
@@ -513,6 +518,16 @@ public interface OclListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDeclarator(@NotNull OclParser.DeclaratorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OclParser#literalIndex}.
+	 * @param ctx the parse tree
+	 */
+	void enterLiteralIndex(@NotNull OclParser.LiteralIndexContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OclParser#literalIndex}.
+	 * @param ctx the parse tree
+	 */
+	void exitLiteralIndex(@NotNull OclParser.LiteralIndexContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link OclParser#collectionType}.
 	 * @param ctx the parse tree

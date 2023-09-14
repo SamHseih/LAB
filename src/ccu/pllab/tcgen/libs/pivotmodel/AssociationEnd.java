@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs.pivotmodel;
 
- 
 public class AssociationEnd {
 	private int lower;
 
@@ -9,7 +8,7 @@ public class AssociationEnd {
 	private String type;
 
 	private String unique;
-	
+
 	private int upper;
 
 	public int getLower() {
@@ -27,15 +26,15 @@ public class AssociationEnd {
 	public int getUpper() {
 		return upper;
 	}
-	
-	public void setUnique(String unique){
-		this.unique=unique;
+
+	public void setUnique(String unique) {
+		this.unique = unique;
 	}
-	
-	public String getUnique(){
+
+	public String getUnique() {
 		return this.unique;
 	}
-	
+
 	public void setLower(int lower) {
 		this.lower = lower;
 	}

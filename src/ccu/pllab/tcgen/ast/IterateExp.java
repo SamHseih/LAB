@@ -20,11 +20,11 @@ import ccu.pllab.tcgen.libs.node.NodeVisitHandler;
 import ccu.pllab.tcgen.libs.node.StackFrontier;
 import ccu.pllab.tcgen.libs.pivotmodel.type.TypeFactory;
 import ccu.pllab.tcgen.AbstractConstraint.CLGLiteralNode;
+import ccu.pllab.tcgen.AbstractConstraint.CLGObjectNode;
 import ccu.pllab.tcgen.AbstractConstraint.CLGOperatorNode;
 import ccu.pllab.tcgen.AbstractConstraint.CLGConstraint;
 import ccu.pllab.tcgen.AbstractConstraint.CLGVariableNode;;
 
- 
 public class IterateExp extends LoopExp {
 
 	private ASTNode accInitExp;
@@ -59,50 +59,66 @@ public class IterateExp extends LoopExp {
 
 	@Override
 	public CLGNode toCLG(Criterion criterion) {
-		IteratorExp size_value = new IteratorExp(this.getConstraint(), this.getSourceExp(), "size", TypeFactory.getInstance().getClassifier("Integer"));
-		VariableExp incresment_var = new VariableExp(this.getConstraint(), String.format("#IterateIndex%d", this.iterate_id), TypeFactory.getInstance().getClassifier("Integer"), this.getConstraint()
-				.getKind().getName());
+		IteratorExp size_value = new IteratorExp(this.getConstraint(), this.getSourceExp(), "size",
+				TypeFactory.getInstance().getClassifier("Integer"));
+		VariableExp incresment_var = new VariableExp(this.getConstraint(),
+				String.format("#IterateIndex%d", this.iterate_id), TypeFactory.getInstance().getClassifier("Integer"),
+				this.getConstraint().getKind().getName());
 		// IterateIndex = 0
-		CLGNode clgIndexInit = new ConstraintNode(this.getConstraint(), new OperationCallExp(this.getConstraint(), incresment_var.clone(), "=", TypeFactory.getInstance().getClassifier("Boolean"), false, new LiteralExp(this.getConstraint(), TypeFactory.getInstance().getClassifier("Integer"), "1")));
+		CLGNode clgIndexInit = new ConstraintNode(this.getConstraint(),
+				new OperationCallExp(this.getConstraint(), incresment_var.clone(), "=",
+						TypeFactory.getInstance().getClassifier("Boolean"), false,
+						new LiteralExp(this.getConstraint(), TypeFactory.getInstance().getClassifier("Integer"), "1")));
 		// IterateAccumulator = accumulator initial value
-		VariableExp acc_var = new VariableExp(this.getConstraint(), String.format("#IterateAcc%d", this.iterate_id), this.getType(), this.getConstraint().getKind().getName());
-		OperationCallExp equal_acc = new OperationCallExp(this.getConstraint(), acc_var, "=", TypeFactory.getInstance().getClassifier("Boolean"), false, this.accInitExp);
+		VariableExp acc_var = new VariableExp(this.getConstraint(), String.format("#IterateAcc%d", this.iterate_id),
+				this.getType(), this.getConstraint().getKind().getName());
+		OperationCallExp equal_acc = new OperationCallExp(this.getConstraint(), acc_var, "=",
+				TypeFactory.getInstance().getClassifier("Boolean"), false, this.accInitExp);
 		equal_acc.setAttribute("dummy_assign", Boolean.toString(true));
 		CLGNode clgAccInitNode = new ConstraintNode(this.getConstraint(), equal_acc);
 		ConnectionNode clgIterateConjunctionNode = new ConnectionNode(this.getConstraint());
 		// IterateIndex <= IterateColSize
-		OperationCallExp less_equal_collection_size_node = new OperationCallExp(this.getConstraint(), incresment_var.clone(), "<=", TypeFactory.getInstance().getClassifier("Boolean"), false,
-				size_value);
-		ConstraintNode clgLessCollectionSizeNode = new ConstraintNode(this.getConstraint(), less_equal_collection_size_node);
+		OperationCallExp less_equal_collection_size_node = new OperationCallExp(this.getConstraint(),
+				incresment_var.clone(), "<=", TypeFactory.getInstance().getClassifier("Boolean"), false, size_value);
+		ConstraintNode clgLessCollectionSizeNode = new ConstraintNode(this.getConstraint(),
+				less_equal_collection_size_node);
 
 		// IterateElement = collection->at(IterateIndex)
-		VariableExp element = new VariableExp(this.getConstraint(), String.format("#IterateElement%d", this.iterate_id), TypeFactory.getInstance().getClassifier(this.getAttribute("iterator_type")),
+		VariableExp element = new VariableExp(this.getConstraint(), String.format("#IterateElement%d", this.iterate_id),
+				TypeFactory.getInstance().getClassifier(this.getAttribute("iterator_type")),
 				this.getConstraint().getKind().getName());
-		IteratorExp collection_postition = new IteratorExp(this.getConstraint(), this.getSourceExp(), "at", TypeFactory.getInstance().getClassifier(this.getAttribute("iterator_type")),
-				incresment_var.clone());
-		OperationCallExp element_equal = new OperationCallExp(this.getConstraint(), element.clone(), "=", TypeFactory.getInstance().getClassifier("Boolean"), false, collection_postition);
+		IteratorExp collection_postition = new IteratorExp(this.getConstraint(), this.getSourceExp(), "at",
+				TypeFactory.getInstance().getClassifier(this.getAttribute("iterator_type")), incresment_var.clone());
+		OperationCallExp element_equal = new OperationCallExp(this.getConstraint(), element.clone(), "=",
+				TypeFactory.getInstance().getClassifier("Boolean"), false, collection_postition);
 		element_equal.setAttribute("dummy_assign", Boolean.toString(true));
 		ConstraintNode clgElementPick = new ConstraintNode(this.getConstraint(), element_equal);
 
 		// IterateAccumulator = iterate body
-		OperationCallExp acc_equal_body = new OperationCallExp(this.getConstraint(), acc_var.clone(), "=", TypeFactory.getInstance().getClassifier("Boolean"), false,
-				renameAccAndElement(this.getBodyExp()));
+		OperationCallExp acc_equal_body = new OperationCallExp(this.getConstraint(), acc_var.clone(), "=",
+				TypeFactory.getInstance().getClassifier("Boolean"), false, renameAccAndElement(this.getBodyExp()));
 		acc_equal_body.setAttribute("dummy_assign", Boolean.toString(true));
 		ASTNode transform_equal_body = acc_equal_body.clone().toPreProcessing();
 		CLGNode clgAccEqualBodyNode = transform_equal_body.toCLG(criterion);
-		
+
 		// IterateIndex = IterateIndex + 1
-		CLGNode clgIndexInc = new ConstraintNode(this.getConstraint(), new OperationCallExp(this.getConstraint(), incresment_var.clone(), "=", TypeFactory.getInstance().getClassifier("Boolean"), false,
-				new OperationCallExp(this.getConstraint(), incresment_var.clone(), "+", TypeFactory.getInstance().getClassifier("Integer"), false, new LiteralExp(this.getConstraint(), TypeFactory.getInstance().getClassifier("Integer"), "1"))));
+		CLGNode clgIndexInc = new ConstraintNode(this.getConstraint(), new OperationCallExp(this.getConstraint(),
+				incresment_var.clone(), "=", TypeFactory.getInstance().getClassifier("Boolean"), false,
+				new OperationCallExp(this.getConstraint(), incresment_var.clone(), "+",
+						TypeFactory.getInstance().getClassifier("Integer"), false, new LiteralExp(this.getConstraint(),
+								TypeFactory.getInstance().getClassifier("Integer"), "1"))));
 
 		// IterateIndex > IterateColSize
-		OperationCallExp greater_collection_size_node = new OperationCallExp(this.getConstraint(), incresment_var.clone(), ">", TypeFactory.getInstance().getClassifier("Boolean"), false, size_value);
-		ConstraintNode clgGreaterCollectionSizeNode = new ConstraintNode(this.getConstraint(), greater_collection_size_node);
+		OperationCallExp greater_collection_size_node = new OperationCallExp(this.getConstraint(),
+				incresment_var.clone(), ">", TypeFactory.getInstance().getClassifier("Boolean"), false, size_value);
+		ConstraintNode clgGreaterCollectionSizeNode = new ConstraintNode(this.getConstraint(),
+				greater_collection_size_node);
 
 		// ResultAcc = IterateAccumulator
-		VariableExp result = new VariableExp(this.getConstraint(), String.format("#ResultAcc%d", this.iterate_id), ((ASTNode) this.getNextNodes().get(1)).getType(), this.getConstraint().getKind()
-				.getName());
-		OperationCallExp acc_equal_result_node = new OperationCallExp(this.getConstraint(), result, "=", TypeFactory.getInstance().getClassifier("Boolean"), false, acc_var.clone());
+		VariableExp result = new VariableExp(this.getConstraint(), String.format("#ResultAcc%d", this.iterate_id),
+				((ASTNode) this.getNextNodes().get(1)).getType(), this.getConstraint().getKind().getName());
+		OperationCallExp acc_equal_result_node = new OperationCallExp(this.getConstraint(), result, "=",
+				TypeFactory.getInstance().getClassifier("Boolean"), false, acc_var.clone());
 		acc_equal_result_node.setAttribute("dummy_assign", Boolean.toString(true));
 		ConstraintNode clgResultNode = new ConstraintNode(this.getConstraint(), acc_equal_result_node);
 
@@ -125,16 +141,18 @@ public class IterateExp extends LoopExp {
 
 	@Override
 	public IterateExp clone() {
-		IterateExp n = new IterateExp(this.getConstraint(), this.getSourceExp().clone(), this.getPropertyName(), this.getAccInitExp(), this.getBodyExp().clone());
+		IterateExp n = new IterateExp(this.getConstraint(), this.getSourceExp().clone(), this.getPropertyName(),
+				this.getAccInitExp(), this.getBodyExp().clone());
 		n.setAttributes(this.getAttributes());
 		return n;
 	}
 
 	@Override
 	public String toOCL() {
-		String result = this.getSourceExp() + "->iterate(" + this.getAttribute("iterator_name") + ":" + this.getAttribute("iterator_type") + ";" + this.getAttribute("result_name") + ":"
+		String result = this.getSourceExp() + "->iterate(" + this.getAttribute("iterator_name") + ":"
+				+ this.getAttribute("iterator_type") + ";" + this.getAttribute("result_name") + ":"
 				+ this.getAttribute("result_name") + "=" + this.getAccInitExp() + "|" + this.getBodyExp() + ")";
-    
+
 		return result;
 	}
 
@@ -160,9 +178,12 @@ public class IterateExp extends LoopExp {
 	public String getEntirePredicate(Map<String, String> template_args) {
 		ST tpl = TemplateFactory.getTemplate("ocl_iterate_operation_body");
 		tpl.add("node_identifier", this.getId());
-		tpl.add("collection_predicate", this.getSourceExp().getPredicateName(new HashMap<String, String>()).replaceAll("\\(.*\\)", ""));
-		tpl.add("acc_init_predicate", this.getAccInitExp().getPredicateName(new HashMap<String, String>()).replaceAll("\\(.*\\)", ""));
-		tpl.add("acc_iteration_predicate", this.getBodyExp().getPredicateName(new HashMap<String, String>()).replaceAll("\\(.*\\)", ""));
+		tpl.add("collection_predicate",
+				this.getSourceExp().getPredicateName(new HashMap<String, String>()).replaceAll("\\(.*\\)", ""));
+		tpl.add("acc_init_predicate",
+				this.getAccInitExp().getPredicateName(new HashMap<String, String>()).replaceAll("\\(.*\\)", ""));
+		tpl.add("acc_iteration_predicate",
+				this.getBodyExp().getPredicateName(new HashMap<String, String>()).replaceAll("\\(.*\\)", ""));
 		for (Map.Entry<String, String> entry : template_args.entrySet()) {
 			tpl.add(entry.getKey(), entry.getValue());
 		}
@@ -181,15 +202,20 @@ public class IterateExp extends LoopExp {
 	}
 
 	private ASTNode renameAccAndElement(ASTNode bodyExp) {
-		GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER, new StackFrontier<ASTNode>());
+		GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER,
+				new StackFrontier<ASTNode>());
 		dfs.traverse(bodyExp, new NodeVisitHandler<ASTNode>() {
 
 			@Override
 			public void visit(ASTNode current_node) {
-				if (current_node instanceof VariableExp && ((VariableExp) current_node).getVariableName().equals(IterateExp.this.getAttribute("iterator_name"))) {
-					((VariableExp) current_node).setVariableName(String.format("IterateElement%d", IterateExp.this.iterate_id));
-				} else if (current_node instanceof VariableExp && ((VariableExp) current_node).getVariableName().equals(IterateExp.this.getAttribute("result_name"))) {
-					((VariableExp) current_node).setVariableName(String.format("IterateAcc%d", IterateExp.this.iterate_id));
+				if (current_node instanceof VariableExp && ((VariableExp) current_node).getVariableName()
+						.equals(IterateExp.this.getAttribute("iterator_name"))) {
+					((VariableExp) current_node)
+							.setVariableName(String.format("IterateElement%d", IterateExp.this.iterate_id));
+				} else if (current_node instanceof VariableExp && ((VariableExp) current_node).getVariableName()
+						.equals(IterateExp.this.getAttribute("result_name"))) {
+					((VariableExp) current_node)
+							.setVariableName(String.format("IterateAcc%d", IterateExp.this.iterate_id));
 				}
 			}
 		});
@@ -198,140 +224,136 @@ public class IterateExp extends LoopExp {
 
 	@Override
 	public CLGGraph OCL2CLG() {
-		IteratorExp size_value = new IteratorExp(this.getConstraint(), this.getSourceExp(), "size", TypeFactory.getInstance().getClassifier("Integer"));
-		VariableExp incresment_var = new VariableExp(this.getConstraint(), String.format("IterateIndex%d", this.iterate_id), TypeFactory.getInstance().getClassifier("Integer"), this.getConstraint()
-				.getKind().getName());
+		IteratorExp size_value = new IteratorExp(this.getConstraint(), this.getSourceExp(), "size",
+				TypeFactory.getInstance().getClassifier("Integer"));
+		VariableExp incresment_var = new VariableExp(this.getConstraint(),
+				String.format("IterateIndex%d", this.iterate_id), TypeFactory.getInstance().getClassifier("Integer"),
+				this.getConstraint().getKind().getName());
 		// IterateIndex = 0
-		CLGConstraint Left = new CLGVariableNode(incresment_var.toOCL());
+		CLGConstraint Left = new CLGObjectNode(incresment_var.toOCL());
 		CLGConstraint Right = new CLGLiteralNode("1");
 		CLGOperatorNode IterateIndex = new CLGOperatorNode();
 		IterateIndex.setLeftOperand(Left);
 		IterateIndex.setOperator("=");
 		IterateIndex.setRightOperand(Right);
-		CLGGraph clgIndexInit =new CLGGraph(IterateIndex);
+		CLGGraph clgIndexInit = new CLGGraph(IterateIndex);
 
 		// IterateAccumulator = accumulator initial value
-		VariableExp acc_var = new VariableExp(this.getConstraint(), String.format("IterateAcc%d", this.iterate_id), this.getType(), this.getConstraint().getKind().getName());
-		OperationCallExp equal_acc = new OperationCallExp(this.getConstraint(), acc_var, "=", TypeFactory.getInstance().getClassifier("Boolean"), false, this.accInitExp);
-		
+		VariableExp acc_var = new VariableExp(this.getConstraint(), String.format("IterateAcc%d", this.iterate_id),
+				this.getType(), this.getConstraint().getKind().getName());
+		OperationCallExp equal_acc = new OperationCallExp(this.getConstraint(), acc_var, "=",
+				TypeFactory.getInstance().getClassifier("Boolean"), false, this.accInitExp);
+
 		equal_acc.setAttribute("dummy_assign", Boolean.toString(true));
-		CLGConstraint Leftinit = new CLGVariableNode(acc_var.toOCL());
+		CLGConstraint Leftinit = new CLGObjectNode(acc_var.toOCL());
 		CLGConstraint accInitExp = new CLGLiteralNode(this.accInitExp.toOCL());
 		CLGOperatorNode IterateAccumulator = new CLGOperatorNode();
 		IterateAccumulator.setLeftOperand(Leftinit);
 		IterateAccumulator.setOperator("=");
 		IterateAccumulator.setRightOperand(accInitExp);
-		
-		CLGGraph clgAccInitNode =new CLGGraph(IterateAccumulator);
 
-	
+		CLGGraph clgAccInitNode = new CLGGraph(IterateAccumulator);
+
 		// IterateIndex <= IterateColSize
-		OperationCallExp less_equal_collection_size_node = new OperationCallExp(this.getConstraint(), incresment_var.clone(), "<=", TypeFactory.getInstance().getClassifier("Boolean"), false,
-				size_value);
-		
-		CLGConstraint size_value_constraint = new CLGVariableNode(size_value.toOCL());
+		OperationCallExp less_equal_collection_size_node = new OperationCallExp(this.getConstraint(),
+				incresment_var.clone(), "<=", TypeFactory.getInstance().getClassifier("Boolean"), false, size_value);
+
+		CLGConstraint size_value_constraint = new CLGObjectNode(size_value.toOCL());
 		CLGOperatorNode LessCollectionSize = new CLGOperatorNode();
 		LessCollectionSize.setLeftOperand(Left);
 		LessCollectionSize.setOperator("<=");
 		LessCollectionSize.setRightOperand(size_value_constraint);
-		CLGGraph clgLessCollectionSizeNode =new CLGGraph(LessCollectionSize);
-		
-		
+		CLGGraph clgLessCollectionSizeNode = new CLGGraph(LessCollectionSize);
+
 		// IterateElement = collection->at(IterateIndex) 1
-		VariableExp element = new VariableExp(this.getConstraint(), String.format("IterateElement%d", this.iterate_id), TypeFactory.getInstance().getClassifier(this.getAttribute("iterator_type")),
+		VariableExp element = new VariableExp(this.getConstraint(), String.format("IterateElement%d", this.iterate_id),
+				TypeFactory.getInstance().getClassifier(this.getAttribute("iterator_type")),
 				this.getConstraint().getKind().getName());
-		IteratorExp collection_postition = new IteratorExp(this.getConstraint(), this.getSourceExp(), "at", TypeFactory.getInstance().getClassifier(this.getAttribute("iterator_type")),
-				incresment_var.clone());
-		OperationCallExp element_equal = new OperationCallExp(this.getConstraint(), element.clone(), "=", TypeFactory.getInstance().getClassifier("Boolean"), false, collection_postition);
+		IteratorExp collection_postition = new IteratorExp(this.getConstraint(), this.getSourceExp(), "at",
+				TypeFactory.getInstance().getClassifier(this.getAttribute("iterator_type")), incresment_var.clone());
+		OperationCallExp element_equal = new OperationCallExp(this.getConstraint(), element.clone(), "=",
+				TypeFactory.getInstance().getClassifier("Boolean"), false, collection_postition);
 		element_equal.setAttribute("dummy_assign", Boolean.toString(true));
-		
-	
-	
+
 		CLGOperatorNode ElementPick = new CLGOperatorNode();
-		
-		CLGConstraint ElementPick_left = new CLGVariableNode(element.clone().toOCL());
-		CLGConstraint ElementPick_right = new CLGVariableNode(collection_postition.toOCL());
-		
+
+		CLGConstraint ElementPick_left = new CLGObjectNode(element.clone().toOCL());
+		CLGConstraint ElementPick_right = new CLGObjectNode(collection_postition.toOCL());
+
 		ElementPick.setOperator("=");
 		ElementPick.setLeftOperand(ElementPick_left);
 		ElementPick.setRightOperand(ElementPick_right);
-		
-		CLGGraph clgElementPick =new CLGGraph(ElementPick);
-		
-	
+
+		CLGGraph clgElementPick = new CLGGraph(ElementPick);
 
 		// IterateAccumulator = iterate body
-		OperationCallExp acc_equal_body = new OperationCallExp(this.getConstraint(), acc_var.clone(), "=", TypeFactory.getInstance().getClassifier("Boolean"), false,
-				renameAccAndElement(this.getBodyExp()));
+		OperationCallExp acc_equal_body = new OperationCallExp(this.getConstraint(), acc_var.clone(), "=",
+				TypeFactory.getInstance().getClassifier("Boolean"), false, renameAccAndElement(this.getBodyExp()));
 		acc_equal_body.setAttribute("dummy_assign", Boolean.toString(true));
-		
-	
-		ASTNode transform_equal_body = acc_equal_body.clone().toPreProcessing();	
-		
-	
-		
+
+		ASTNode transform_equal_body = acc_equal_body.clone().toPreProcessing();
+
 		CLGGraph clgAccEqualBodyNode = transform_equal_body.OCL2CLG();
 		// IterateIndex = IterateIndex + 1
 		CLGOperatorNode IndexInc = new CLGOperatorNode();
-		
+
 		IndexInc.setLeftOperand(Left);
 		IndexInc.setOperator("+");
 		IndexInc.setRightOperand(Right);
-		
+
 		CLGOperatorNode ALLIndexInc = new CLGOperatorNode();
 		ALLIndexInc.setLeftOperand(Left);
 		ALLIndexInc.setOperator("=");
 		ALLIndexInc.setRightOperand(IndexInc);
-		
-		CLGGraph clgIndexInc =new CLGGraph(ALLIndexInc);
+
+		CLGGraph clgIndexInc = new CLGGraph(ALLIndexInc);
 
 		// IterateIndex > IterateColSize 1
-		OperationCallExp greater_collection_size_node = new OperationCallExp(this.getConstraint(), incresment_var.clone(), ">", TypeFactory.getInstance().getClassifier("Boolean"), false, size_value);
-		
+		OperationCallExp greater_collection_size_node = new OperationCallExp(this.getConstraint(),
+				incresment_var.clone(), ">", TypeFactory.getInstance().getClassifier("Boolean"), false, size_value);
 
 		CLGOperatorNode GreaterCollectionSizeNode = new CLGOperatorNode();
-		
-		CLGConstraint GreaterCollectionSizeNode_left = new CLGVariableNode(incresment_var.clone().toOCL());
-		CLGConstraint GreaterCollectionSizeNode_Right= new CLGVariableNode(size_value.toOCL());
-		
+
+		CLGConstraint GreaterCollectionSizeNode_left = new CLGObjectNode(incresment_var.clone().toOCL());
+		CLGConstraint GreaterCollectionSizeNode_Right = new CLGObjectNode(size_value.toOCL());
+
 		GreaterCollectionSizeNode.setOperator(">");
 		GreaterCollectionSizeNode.setLeftOperand(GreaterCollectionSizeNode_left);
 		GreaterCollectionSizeNode.setRightOperand(GreaterCollectionSizeNode_Right);
-		
-		CLGGraph clgGreaterCollectionSizeNode =new CLGGraph(GreaterCollectionSizeNode);
+
+		CLGGraph clgGreaterCollectionSizeNode = new CLGGraph(GreaterCollectionSizeNode);
 
 		// ResultAcc = IterateAccumulator 1
-		VariableExp result = new VariableExp(this.getConstraint(), String.format("ResultAcc%d", this.iterate_id), ((ASTNode) this.getNextNodes().get(1)).getType(), this.getConstraint().getKind()
-				.getName());
-		OperationCallExp acc_equal_result_node = new OperationCallExp(this.getConstraint(), result, "=", TypeFactory.getInstance().getClassifier("Boolean"), false, acc_var.clone());
+		VariableExp result = new VariableExp(this.getConstraint(), String.format("ResultAcc%d", this.iterate_id),
+				((ASTNode) this.getNextNodes().get(1)).getType(), this.getConstraint().getKind().getName());
+		OperationCallExp acc_equal_result_node = new OperationCallExp(this.getConstraint(), result, "=",
+				TypeFactory.getInstance().getClassifier("Boolean"), false, acc_var.clone());
 		acc_equal_result_node.setAttribute("dummy_assign", Boolean.toString(true));
-			
+
 		CLGOperatorNode acc_equal_result_node_constraint = new CLGOperatorNode();
-		
-		CLGConstraint ResultNode_left = new CLGVariableNode(result.toOCL());
-		CLGConstraint acc_var_Right = new CLGVariableNode(acc_var.clone().toOCL());
+
+		CLGConstraint ResultNode_left = new CLGObjectNode(result.toOCL());
+		CLGConstraint acc_var_Right = new CLGObjectNode(acc_var.clone().toOCL());
 		acc_equal_result_node_constraint.setOperator("=");
 		acc_equal_result_node_constraint.setLeftOperand(ResultNode_left);
 		acc_equal_result_node_constraint.setRightOperand(acc_var_Right);
-		
-		CLGGraph clgResultNode =new CLGGraph(acc_equal_result_node_constraint);
-		
+
+		CLGGraph clgResultNode = new CLGGraph(acc_equal_result_node_constraint);
+
 		//////////////////////////////////////////////////
 		clgAccInitNode.graphAnd(clgIndexInit);
-		
+
 		clgLessCollectionSizeNode.graphAnd(clgElementPick);
 		clgLessCollectionSizeNode.graphAnd(clgAccEqualBodyNode);
 		clgLessCollectionSizeNode.graphAnd(clgIndexInc);
 		clgLessCollectionSizeNode.graphClosure();
-		
+
 		clgAccInitNode.graphAnd(clgLessCollectionSizeNode);
-		
+
 		clgGreaterCollectionSizeNode.graphAnd(clgResultNode);
-		
+
 		clgAccInitNode.graphAnd(clgGreaterCollectionSizeNode);
-		
-	
-		
+
 		return clgAccInitNode;
 	}
 
@@ -340,6 +362,5 @@ public class IterateExp extends LoopExp {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 }

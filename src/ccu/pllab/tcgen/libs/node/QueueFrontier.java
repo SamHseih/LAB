@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.libs.node;
 
- 
 import java.util.LinkedList;
 import java.util.Queue;
 

@@ -1,8 +1,7 @@
 package ccu.pllab.tcgen.ecl2data;
 
-
 public class SolvingFailException extends Exception {
- 
+
 	/**
 	 * 
 	 */

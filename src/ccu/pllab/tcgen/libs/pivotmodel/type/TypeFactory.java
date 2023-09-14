@@ -1,5 +1,4 @@
 package ccu.pllab.tcgen.libs.pivotmodel.type;
- 
 
 import ccu.pllab.tcgen.libs.pivotmodel.Model;
 import ccu.pllab.tcgen.libs.pivotmodel.UML2Class;

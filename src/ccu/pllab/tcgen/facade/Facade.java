@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.facade;
 
- 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,6 +28,7 @@ import tudresden.ocl20.pivot.parser.ParseException;
 import tudresden.ocl20.pivot.pivotmodel.Constraint;
 import tudresden.ocl20.pivot.standalone.facade.StandaloneFacade;
 import tudresden.ocl20.pivot.tools.template.exception.TemplateException;
+import ccu.pllab.tcgen.AbstractType.TypeTable;
 import ccu.pllab.tcgen.ast.ASTNode;
 import ccu.pllab.tcgen.ast.ASTUtil;
 import ccu.pllab.tcgen.clg.CLGNode;
@@ -101,7 +101,8 @@ public class Facade {
 		print_writer.flush();
 
 		for (UML2Class clazz : context.getClasses()) {
-			GraphVisitor<ASTNode> bfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER, new QueueFrontier<ASTNode>());
+			GraphVisitor<ASTNode> bfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER,
+					new QueueFrontier<ASTNode>());
 			NodeVisitHandler<ASTNode> predicate_pool_adder = new NodeVisitHandler<ASTNode>() {
 
 				@Override
@@ -129,28 +130,29 @@ public class Facade {
 				UML2Operation uml2op = (UML2Operation) op;
 				predicate_pool.add(uml2op);
 				bfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER, new QueueFrontier<ASTNode>());
-				for (ASTNode constraint : uml2op.getPreConstraints()) {					
+				for (ASTNode constraint : uml2op.getPreConstraints()) {
 					bfs.traverse(constraint, predicate_pool_adder);
-					System.out.println("preCons: "+constraint.toOCL());
+					System.out.println("preCons: " + constraint.toOCL());
 				}
 				bfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER, new QueueFrontier<ASTNode>());
-				for (ASTNode constraint : uml2op.getPostConstraints()) {					
+				for (ASTNode constraint : uml2op.getPostConstraints()) {
 					bfs.traverse(constraint, predicate_pool_adder);
-					System.out.println("postCons: "+constraint.toOCL());
+					System.out.println("postCons: " + constraint.toOCL());
 				}
 			}
 		}
 
 		final Map<String, String> tpl_arg = new HashMap<String, String>();
 		List<Predicate> predicates = new ArrayList<Predicate>(predicate_pool);
-		
+
 		Collections.sort(predicates, new Comparator<Predicate>() {
 			@Override
 			public int compare(Predicate arg0, Predicate arg1) {
 				String name1 = arg0.getPredicateName(tpl_arg);
 				String name2 = arg1.getPredicateName(tpl_arg);
 				if (name1.startsWith("n_") && name2.startsWith("n_")) {
-					return Integer.compare(Integer.parseInt(name1.split("_")[1]), Integer.parseInt(name2.split("_")[1]));
+					return Integer.compare(Integer.parseInt(name1.split("_")[1]),
+							Integer.parseInt(name2.split("_")[1]));
 				} else {
 					return name1.compareTo(name2);
 				}
@@ -169,24 +171,27 @@ public class Facade {
 		this.hook.writeFile(string_writer.toString(), ast_predicate_file);
 	}
 
-	public Model loadModel(File uml_file, File ocl_file, boolean isStandalone, File config_file) throws IOException, TemplateException, ModelAccessException, ParseException, JSONException {
+	public Model loadModel(File uml_file, File ocl_file, boolean isStandalone, File config_file, TypeTable typeTab)
+			throws IOException, TemplateException, ModelAccessException, ParseException, JSONException {
 		class_diag_to_json = new ClassDiagToJson(uml_file);
 		class_diag_info = new ClassDiagInfo(class_diag_to_json);
 		context = new Model(class_diag_info);
 		TypeFactory.getInstance().setModel(context);
 		ASTUtil ast_util = new ASTUtil();
 		DresdenOCLASTtoInternelAST ast_constructor = new DresdenOCLASTtoInternelAST(ast_util, context);
-		context.attachConstraints(ast_constructor.parseOclTreeNodeFromPivotModel(this.loadModelStandalone(uml_file, ocl_file)));
+		context.attachConstraints(
+				ast_constructor.parseOclTreeNodeFromPivotModel(this.loadModelStandalone(uml_file, ocl_file)));
 		this.hook.when_gen_ast_graph(context, config);
 		detail_config_list = parseConfigFile(config_file, context);
-		this.hook.when_gen_clg_graph(context, config, detail_config_list);
+		this.hook.when_gen_clg_graph(context, config, detail_config_list, typeTab);
 		this.hook.when_gen_invalid_ast_graph(context, config);
 		this.hook.when_gen_invalid_clg_graph(context, config, detail_config_list);
 
 		return context;
 	}
 
-	private List<Constraint> loadModelStandalone(File uml_file, File ocl_file) throws TemplateException, ModelAccessException, IOException, ParseException {
+	private List<Constraint> loadModelStandalone(File uml_file, File ocl_file)
+			throws TemplateException, ModelAccessException, IOException, ParseException {
 		StandaloneFacade.INSTANCE.initialize(this.config.getLog4jPropertyURL());
 		model = StandaloneFacade.INSTANCE.loadUMLModel(uml_file, new File(config.getUmlResourcesURL().getFile()));
 		return StandaloneFacade.INSTANCE.parseOclConstraints(model, ocl_file);
@@ -219,14 +224,16 @@ public class Facade {
 		fw.close();
 	}
 
-	private void genPathEcl(FileWriter fw, TestDataFactory testDataFactory, UML2Operation target_method_instance, List<TestData> testDatas, CoverageCriterion criterion, FeasiblePathFinder pathFinder)
+	private void genPathEcl(FileWriter fw, TestDataFactory testDataFactory, UML2Operation target_method_instance,
+			List<TestData> testDatas, CoverageCriterion criterion, FeasiblePathFinder pathFinder)
 			throws IOException, EclipseException {
 		Path path;
 		int failure_count = 0;
 		int path_count = 0;
 		while ((path = pathFinder.getNextPath()) != null && failure_count < this.config.getFailTrialTime()) {
 
-			if (criterion.isVisitedInfeasiblePath(path.getCLGNodes()) || criterion.isVisitedFeasiblePath(path.getCLGNodes())) {
+			if (criterion.isVisitedInfeasiblePath(path.getCLGNodes())
+					|| criterion.isVisitedFeasiblePath(path.getCLGNodes())) {
 				break;
 			}
 			path_count++;
@@ -250,7 +257,8 @@ public class Facade {
 				}
 			}
 			for (Path pathVariants : path.getBoundaryCombinationVariants()) {
-				File test_path_clp_file = new File(this.config.getOutputFolder().getFile(), pathVariants.getPredicateName() + ".ecl");
+				File test_path_clp_file = new File(this.config.getOutputFolder().getFile(),
+						pathVariants.getPredicateName() + ".ecl");
 				CreateObject createObject = new CreateObject(context, pathVariants, this.config);
 				write_test_case_predicate(pathVariants, test_path_clp_file, createObject);
 				ecl2data.compile(test_path_clp_file);
@@ -264,12 +272,17 @@ public class Facade {
 				}
 				Date beforeSolvingTime = new Date();
 				try {
-					String testDataInParsableFormat = ECLiPSeCompoundTerm.toParsableFormat(ecl2data.solvingCSP(pathVariants.getPredicateName(), this.config.getSolvingTimeout()));
+					String testDataInParsableFormat = ECLiPSeCompoundTerm.toParsableFormat(
+							ecl2data.solvingCSP(pathVariants.getPredicateName(), this.config.getSolvingTimeout()));
 					Date afterSolvingTime = new Date();
-					File test_data_file = new File(this.config.getOutputFolder().getFile(), String.format("%s%s" + File.separatorChar + String.format("%s_data.txt", pathVariants.getPredicateName()),
-							target_method_instance.getOwner().getName(), target_method_instance.getName()));
+					File test_data_file = new File(this.config.getOutputFolder().getFile(),
+							String.format(
+									"%s%s" + File.separatorChar
+											+ String.format("%s_data.txt", pathVariants.getPredicateName()),
+									target_method_instance.getOwner().getName(), target_method_instance.getName()));
 					this.hook.writeFile(testDataInParsableFormat, test_data_file);
-					testDatas.add(testDataFactory.ConvResult2Data(pathVariants, testDataInParsableFormat, this.config.isInvalidCase()));
+					testDatas.add(testDataFactory.ConvResult2Data(pathVariants, testDataInParsableFormat,
+							this.config.isInvalidCase()));
 					criterion.addFeasiblePath(path.getCLGNodes());
 					this.csp_path_list.add(path);
 					fw.append(Long.toString((afterSolvingTime.getTime() - beforeSolvingTime.getTime())) + "\n");
@@ -279,11 +292,15 @@ public class Facade {
 					Date afterSolvingTime = new Date();
 					failure_count++;
 					if (e instanceof SolvingTimeOutException) {
-						test_path_clp_file.renameTo(new File(test_path_clp_file.getParentFile(), "timeout_" + this.config.getSolvingTimeout() + "_" + test_path_clp_file.getName()));
+						test_path_clp_file.renameTo(new File(test_path_clp_file.getParentFile(),
+								"timeout_" + this.config.getSolvingTimeout() + "_" + test_path_clp_file.getName()));
 						fw.append(e.getMessage() + "\n");
 					} else {
-						test_path_clp_file.renameTo(new File(test_path_clp_file.getParentFile(), "fail_" + test_path_clp_file.getName()));
-						fw.append(e.getMessage() + String.format(" %d", (afterSolvingTime.getTime() - beforeSolvingTime.getTime())) + "\n");
+						test_path_clp_file.renameTo(
+								new File(test_path_clp_file.getParentFile(), "fail_" + test_path_clp_file.getName()));
+						fw.append(e.getMessage()
+								+ String.format(" %d", (afterSolvingTime.getTime() - beforeSolvingTime.getTime()))
+								+ "\n");
 					}
 					fw.flush();
 					System.err.println(e.getMessage());
@@ -295,7 +312,8 @@ public class Facade {
 			System.err.println("not meet criterion");
 		}
 		if (failure_count >= this.config.getFailTrialTime()) {
-			System.err.println("has fail over " + this.config.getFailTrialTime() + " times, please make sure that the model is validated");
+			System.err.println("has fail over " + this.config.getFailTrialTime()
+					+ " times, please make sure that the model is validated");
 		}
 		if (path_count == 0) {
 			System.err.println("can not find any path on graph");
@@ -306,11 +324,14 @@ public class Facade {
 		}
 	}
 
-	private void write_test_case_predicate(Path path, File test_path_clp_file, CreateObject createObject) throws IOException, EclipseException {
-		try (StringWriter string_writer = new StringWriter(); PrintWriter print_writer = new PrintWriter(string_writer)) {
+	private void write_test_case_predicate(Path path, File test_path_clp_file, CreateObject createObject)
+			throws IOException, EclipseException {
+		try (StringWriter string_writer = new StringWriter();
+				PrintWriter print_writer = new PrintWriter(string_writer)) {
 			print_writer.println(path.getEntirePredicate(new HashMap<String, String>()));
 			for (ASTNode node : path.getASTNodes()) {
-				GraphVisitor<ASTNode> bfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER, new QueueFrontier<ASTNode>());
+				GraphVisitor<ASTNode> bfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.PREORDER,
+						new QueueFrontier<ASTNode>());
 				bfs.traverse(node, new NodeVisitHandler<ASTNode>() {
 					@Override
 					public void visit(ASTNode current_node) {
@@ -322,7 +343,7 @@ public class Facade {
 				});
 			}
 			print_writer.println(createObject.getEntirePredicate(new HashMap<String, String>()));
-			System.out.println("test_path_clp_file name: "+test_path_clp_file);
+			System.out.println("test_path_clp_file name: " + test_path_clp_file);
 			this.hook.writeFile(string_writer.toString(), test_path_clp_file);
 		}
 	}
@@ -356,7 +377,8 @@ public class Facade {
 			this.config.readConfiguration(config.toString());
 			this.findFeasiblePathAndGetSolution();
 			Date afterSolvingTimeForAMethod = new Date();
-			fw.write(config.optString("target_class") + "::" + config.optString("target_method") + "," + (afterSolvingTimeForAMethod.getTime() - beforeSolvingTimeForAMethod.getTime()) + "\n");
+			fw.write(config.optString("target_class") + "::" + config.optString("target_method") + ","
+					+ (afterSolvingTimeForAMethod.getTime() - beforeSolvingTimeForAMethod.getTime()) + "\n");
 			fw.close();
 		}
 		Date afterSolvingTime = new Date();
@@ -367,7 +389,8 @@ public class Facade {
 		this.disconnectCLPSolver();
 	}
 
-	private static List<JSONObject> parseConfigFile(File config_file, Model context) throws FileNotFoundException, IOException, JSONException {
+	private static List<JSONObject> parseConfigFile(File config_file, Model context)
+			throws FileNotFoundException, IOException, JSONException {
 		BufferedReader reader = new BufferedReader(new FileReader(config_file));
 		String line = null;
 		StringBuilder stringBuilder = new StringBuilder();

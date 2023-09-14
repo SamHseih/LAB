@@ -17,7 +17,6 @@ import ccu.pllab.tcgen.libs.TemplateFactory;
 import ccu.pllab.tcgen.libs.node.INode;
 import ccu.pllab.tcgen.libs.pivotmodel.type.Classifier;
 
- 
 public class CollectionRange extends ASTNode {
 
 	private Classifier type;
@@ -111,7 +110,5 @@ public class CollectionRange extends ASTNode {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-
 
 }

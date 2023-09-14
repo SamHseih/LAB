@@ -1,5 +1,4 @@
 package ccu.pllab.tcgen.clg2path;
- 
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,10 +40,14 @@ public class AEMCriterion implements UMLCoverageCriterion {
 					asc2End.setName(asc.getRoleList().get(1).getName());
 					Association new_asc = new Association(asc.getName(), asc1End, asc2End);
 					JSONObject new_obj_config = new JSONObject();
-					new_obj_config.put(new_asc.getRoleList().get(0).getType(), new JSONObject("{\"" + FacadeConfig.CFG_RANGE_INSNS + "\":\"" + new_asc.getRoleList().get(0).getLower() + ".."
-							+ new_asc.getRoleList().get(0).getUpper() + "\"}"));
-					new_obj_config.put(asc.getRoleList().get(1).getType(), new JSONObject("{\"" + FacadeConfig.CFG_RANGE_INSNS + "\":\"" + new_asc.getRoleList().get(1).getLower() + ".."
-							+ new_asc.getRoleList().get(1).getUpper() + "\"}"));
+					new_obj_config.put(new_asc.getRoleList().get(0).getType(),
+							new JSONObject("{\"" + FacadeConfig.CFG_RANGE_INSNS + "\":\""
+									+ new_asc.getRoleList().get(0).getLower() + ".."
+									+ new_asc.getRoleList().get(0).getUpper() + "\"}"));
+					new_obj_config.put(asc.getRoleList().get(1).getType(),
+							new JSONObject("{\"" + FacadeConfig.CFG_RANGE_INSNS + "\":\""
+									+ new_asc.getRoleList().get(1).getLower() + ".."
+									+ new_asc.getRoleList().get(1).getUpper() + "\"}"));
 					JSONObject clone_cfg = new JSONObject(config.toString());
 					clone_cfg.put("objects", new_obj_config);
 					clone_cfg_list.add(clone_cfg);

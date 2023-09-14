@@ -2,51 +2,47 @@ package ccu.pllab.tcgen.sd2clg;
 
 import ccu.pllab.tcgen.AbstractCLG.CLGGraph;
 import ccu.pllab.tcgen.AbstractConstraint.*;
- 
 
-public class Transition{
+public class Transition {
 
 	private int id;
+	private String xmiID;
 	private CLGConstraint method;
 	private State source;
 	private State target;
 	private CLGConstraint guard;
-	private CLGGraph guardCLG;
-	
-	public Transition(int id, CLGConstraint method, State source, State target, CLGConstraint guard){
-		this.id=id;
-		this.method=method;
-		this.source=source;
-		this.target=target;
-		this.guard=guard;
+
+	public Transition(int id, String xmiID, CLGConstraint method, State source, State target, CLGConstraint guard) {
+		this.id = id;
+		this.xmiID = xmiID;
+		this.method = method;
+		this.source = source;
+		this.target = target;
+		this.guard = guard;
 	}
-	
-	public Transition(int id, CLGConstraint method, State source, State target, CLGGraph guardCLG){
-		this.id=id;
-		this.method=method;
-		this.source=source;
-		this.target=target;
-		this.guardCLG = guardCLG; 
-	}
-	
-	public int getId(){
+
+	public int getId() {
 		return this.id;
 	}
-	public CLGConstraint getMethod(){
+
+	public String getXmiID() {
+		return this.xmiID;
+	}
+
+	public CLGConstraint getMethod() {
 		return this.method;
 	}
-	public State getSource(){
+
+	public State getSource() {
 		return this.source;
 	}
-	public State getTarget(){
+
+	public State getTarget() {
 		return this.target;
 	}
-	public CLGConstraint getGuard(){
+
+	public CLGConstraint getGuard() {
 		return this.guard;
 	}
-	
-	//«Ø¶©¾Çªø AST2GLG()  20200329
-		public CLGGraph getGuardCLG(){
-			return this.guardCLG;
-		}
+
 }

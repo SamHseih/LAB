@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.ecl2data;
 
- 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -76,16 +75,17 @@ public class Ecl2Data {
 		}
 	}
 
-	public List<List<ECLiPSeCompoundTerm>> solvingCSP(final String pathName, int timeout) throws SolvingTimeOutException, SolvingFailException, IOException {
+	public List<List<ECLiPSeCompoundTerm>> solvingCSP(final String pathName, int timeout)
+			throws SolvingTimeOutException, SolvingFailException, IOException {
 		Exception eclipseException = null;
 		List<List<ECLiPSeCompoundTerm>> return_instance = new ArrayList<List<ECLiPSeCompoundTerm>>();
-		String target_predicate = String
-				.format("timeout((%s(Pre, Vars, Post), write_exdr(eclipse_to_java, Pre),write_exdr(eclipse_to_java, Vars), write_exdr(eclipse_to_java, Post), flush(eclipse_to_java)), %d, write_exdr(eclipse_to_java, [[timeout]])).",
-						pathName, timeout);
+		String target_predicate = String.format(
+				"timeout((%s(Pre, Vars, Post), write_exdr(eclipse_to_java, Pre),write_exdr(eclipse_to_java, Vars), write_exdr(eclipse_to_java, Post), flush(eclipse_to_java)), %d, write_exdr(eclipse_to_java, [[timeout]])).",
+				pathName, timeout);
 		String predicate = "timeout( ( testTriangleCategory(S_pre,Arg_pre,S,Arg,Result),write_exdr(eclipse_to_java,S_pre),write_exdr(eclipse_to_java,Arg_pre),write_exdr(eclipse_to_java,S),write_exdr(eclipse_to_java,Arg),write_exdr(eclipse_to_java,Result),flush(eclipse_to_java)),1,write_exdr(eclipse_to_java,[[timeout]])).";
-		String pred="testTriangleCategory(S_pre,Arg_pre,S,Arg,Result)";
+		String pred = "testTriangleCategory(S_pre,Arg_pre,S,Arg,Result)";
 		try {
-			
+
 //			System.out.println(target_predicate);
 			Ecl2Data.this.eclipse.rpc(target_predicate);
 //			Ecl2Data.this.eclipse.rpc(predicate);

@@ -1,6 +1,5 @@
 package ccu.pllab.tcgen.ast;
 
- 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import ccu.pllab.tcgen.AbstractConstraint.CLGConstraint;
 import ccu.pllab.tcgen.clg.CLGNode;
 import ccu.pllab.tcgen.clg.ConstraintNode;
 import ccu.pllab.tcgen.clg2path.CriterionFactory.Criterion;
+import ccu.pllab.tcgen.exe.main.Main;
 import ccu.pllab.tcgen.libs.TemplateFactory;
 import ccu.pllab.tcgen.libs.node.INode;
 import ccu.pllab.tcgen.libs.pivotmodel.type.Classifier;
@@ -41,22 +41,21 @@ public class LiteralExp extends ASTNode {
 
 	@Override
 	public CLGNode toCLG(Criterion criterion) {
-		
+
 		assert this.getType().equals(TypeFactory.getInstance().getClassifier("Boolean"));
-		
+
 		return new ConstraintNode(this.getConstraint(), this);
 	}
-	
 
 	@Override
 	public CLGGraph OCL2CLG() {
 		String StringType = this.type.toString();
-		CLGLiteralNode literalConstraint = new CLGLiteralNode(StringType,this.value);
+		CLGLiteralNode literalConstraint = new CLGLiteralNode(this.value, Main.typeTable.get(StringType, null));
 		assert this.getType().equals(TypeFactory.getInstance().getClassifier("Boolean"));
 		CLGGraph constraintgraph = new CLGGraph(literalConstraint);
-		
+
 		return constraintgraph;
-		
+
 	}
 
 	@Override
@@ -67,7 +66,7 @@ public class LiteralExp extends ASTNode {
 
 	@Override
 	public String toOCL() {
-	   
+
 		return this.getValue();
 	}
 
@@ -106,12 +105,12 @@ public class LiteralExp extends ASTNode {
 
 		} else if (this.getType().getName().equals("String")) {
 			char[] chartemp = this.getValue().toCharArray();
-			String tempstring ="[ "+chartemp.length;
-			for(char temp:chartemp){
-				tempstring += ", "+ (int)temp;
+			String tempstring = "[ " + chartemp.length;
+			for (char temp : chartemp) {
+				tempstring += ", " + (int) temp;
 			}
-			tempstring+="]";
-			tpl.add("value",tempstring);
+			tempstring += "]";
+			tpl.add("value", tempstring);
 		} else {
 			tpl.add("value", this.getValue());
 		}
@@ -125,32 +124,27 @@ public class LiteralExp extends ASTNode {
 	public ASTNode toDeMorgan() {
 		if (this.type.equals(TypeFactory.getInstance().getClassifier("Boolean"))) {
 			if (this.value.equals(Boolean.valueOf(true).toString())) {
-				return new LiteralExp(this.getConstraint(), TypeFactory.getInstance().getClassifier("Boolean"), Boolean.valueOf(false).toString());
+				return new LiteralExp(this.getConstraint(), TypeFactory.getInstance().getClassifier("Boolean"),
+						Boolean.valueOf(false).toString());
 			} else {
-				return new LiteralExp(this.getConstraint(), TypeFactory.getInstance().getClassifier("Boolean"), Boolean.valueOf(true).toString());
+				return new LiteralExp(this.getConstraint(), TypeFactory.getInstance().getClassifier("Boolean"),
+						Boolean.valueOf(true).toString());
 			}
 		} else {
-			return this; 
+			return this;
 		}
 	}
 
-	@Override 
+	@Override
 	public ASTNode toPreProcessing() {
 		return this;
-	} 
+	}
 
 	@Override
 	public CLGConstraint CLGConstraint() {
-		CLGConstraint LiteralConstraint=new CLGLiteralNode(this.getValue());
-		
-		
-		
+		CLGConstraint LiteralConstraint = new CLGLiteralNode(this.getValue());
+
 		return LiteralConstraint;
 	}
-
-	
-
-
-
 
 }
