@@ -1,4 +1,5 @@
 package ccu.pllab.tcgen.clg;
+ 
 
 import tudresden.ocl20.pivot.pivotmodel.Constraint;
 import ccu.pllab.tcgen.libs.node.INode;
@@ -19,13 +20,9 @@ public class ConnectionNode extends CLGNode {
 		this.setAttribute("graphviz_dfs_state", "explored");
 		String result = "";
 		if (this instanceof EndNode) {
-			result += (this.getId() + " " + String.format(
-					"[style=filled, fillcolor=black, shape=\"%s\", label=\"\", fixedsize=true, width=.2, height=.2]",
-					getShape()) + "\n");
+			result += (this.getId() + " " + String.format("[style=filled, fillcolor=black, shape=\"%s\", label=\"\", fixedsize=true, width=.2, height=.2]", getShape()) + "\n");
 		} else {
-			result += (this.getId() + " "
-					+ String.format("[shape=\"%s\", label=\"\", fixedsize=true, width=.2, height=.2]", getShape())
-					+ "\n");
+			result += (this.getId() + " " + String.format("[shape=\"%s\", label=\"\", fixedsize=true, width=.2, height=.2]", getShape()) + "\n");
 		}
 		for (INode it_child : this.getNextNodes()) {
 			CLGNode child = (CLGNode) it_child;

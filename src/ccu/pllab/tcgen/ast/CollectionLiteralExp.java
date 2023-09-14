@@ -16,6 +16,7 @@ import ccu.pllab.tcgen.clg2path.CriterionFactory.Criterion;
 import ccu.pllab.tcgen.libs.TemplateFactory;
 import ccu.pllab.tcgen.libs.node.INode;
 import ccu.pllab.tcgen.libs.pivotmodel.type.Classifier;
+ 
 
 public class CollectionLiteralExp extends ASTNode {
 

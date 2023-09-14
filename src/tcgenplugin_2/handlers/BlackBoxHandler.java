@@ -64,43 +64,24 @@ import ccu.pllab.tcgen.DataWriter.DataWriter;
 
 
 public class BlackBoxHandler extends AbstractHandler {
-	public static String CurrentEditorProjectPath; //存取當前選取Editor路徑
-	public static String CurrentEditorName;
-	public static String CurrentProjName;
-	public static String ClassName_TestModel_Coverage;
-	public static String coverageCriteria;
+	public static String CurrentEditorProjectPath;  //存取當前選取Editor路徑
+	public static String CurrentEditorName;  //存取當前選取Editor 名稱 Ex.Grade(去掉.ocl)(不含副檔名處理)
+	public static String CurrentProjName; //存取當前選取project路徑
+	public static String ClassName_TestModel_Coverage;  //測試覆蓋標準
+	public static String coverageCriteria; 
 	public static AbstractSyntaxTreeNode oclAst;
 	public static SymbolTable symbolTable;
 	public static BlackBoxLauncher blackBoxTest;
 	private File ocl,classUml;
 	
-/*	public BlackBoxHandler(String Projectname) {
-		CurrentEditorName = Projectname;
-		coverageCriteria = "DC";
-		ClassName_TestModel_Coverage = "Grade_BlackBox_DC";
-		CurrentProjName = "";
-		DataWriter.output_folder_path = "D:\\VersionSave\\Grade\\version 1\\";
-		DataWriter.Clg_output_path = "D:\\VersionSave\\Grade\\version 1\\test model\\";
-		DataWriter.testPath_output_path = "D:\\VersionSave\\Grade\\version 1\\test paths\\";
-		DataWriter.testCons_output_path = "D:\\VersionSave\\Grade\\version 1\\test constrains\\";
-		DataWriter.testData_output_path = "D:\\VersionSave\\Grade\\version 1\\test data\\";
-		DataWriter.initOutputPath();
-		Path CDumlPath = Paths.get("D:\\runtime-New_configuration\\Grade\\spec\\"+Projectname+".uml");
-		classUml = CDumlPath.toFile();
-		
-		Path OclPath = Paths.get("D:\\runtime-New_configuration\\Grade\\spec\\"+Projectname+".ocl");
-		ocl = OclPath.toFile();	
-		Main.criterion=Criterion.dc;
-		tcgenplugin_2.handlers.BlackBoxHandler.blackBoxTest = new BlackBoxLauncher(ocl, classUml);
-		tcgenplugin_2.handlers.BlackBoxHandler.blackBoxTest.genBlackBoxTestScripts_version();
-	}*/
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
-		CurrentEditorName = getCurrentFileRealPath().getName();
-		CurrentEditorName = getFileNameNoEx(CurrentEditorName);
-		coverageCriteria = "";
-		//獲取測試覆蓋標準
+		//宣告一個物件通用類別Object execute是自訂義name 可接受一個參數event例外事件  且此宣告 中可能有例外發生 
+			
+		CurrentEditorName = getCurrentFileRealPath().getName();	//目前編輯視窗中取的全檔名含副檔名
+		CurrentEditorName = getFileNameNoEx(CurrentEditorName);	//去掉副檔名
+		coverageCriteria = ""; 
+		//以下獲取測試覆蓋標準
 		try {
 			coverageCriteria = event.getCommand().getParameter("com.eclipse-tips.commands.CoverageCriteriaParameter").getName();
 			ClassName_TestModel_Coverage = CurrentEditorName + "_BlackBox_"+coverageCriteria;
@@ -109,7 +90,7 @@ public class BlackBoxHandler extends AbstractHandler {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-				
+
 		System.out.println("當前使用editor檔案名稱"+CurrentEditorName);
 //		try {
 //			
@@ -122,7 +103,8 @@ public class BlackBoxHandler extends AbstractHandler {
 		CurrentProjName = getCurrentFileRealPath().getProject().getName();
 		CurrentEditorProjectPath = CurrentEditorPath.substring(0, CurrentEditorPath.lastIndexOf("\\spec\\"+CurrentEditorName));
 		System.out.println("當前使用editor project資料夾路徑"+CurrentEditorProjectPath);
-		Main.TestType = "BlackBox";
+		Main.TestType = "BlackBox"; //測試類別字串 
+		// 設定路徑，寫入資料夾等等
 		DataWriter.output_folder_path = BlackBoxHandler.CurrentEditorProjectPath;
 		DataWriter.Clg_output_path = BlackBoxHandler.CurrentEditorProjectPath + "/test model/" + ClassName_TestModel_Coverage + "/";
 		DataWriter.testPath_output_path = BlackBoxHandler.CurrentEditorProjectPath + "/test paths/" + ClassName_TestModel_Coverage + "/";
@@ -180,9 +162,10 @@ public class BlackBoxHandler extends AbstractHandler {
 		return null;
 	}
 	
-	public static IFile getCurrentFileRealPath(){
-        IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-
+	public static IFile getCurrentFileRealPath(){ //確認當前工作台有在動作，也就是開著OCL分析器時?回傳IFile
+		//取得現在檔案位置路徑 IFile是處理檔案的Data type
+        IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow(); 
+        //win當前eclipse中的主要工作台的一個物件
         IWorkbenchPage page = win.getActivePage();
         if (page != null) {
             IEditorPart editor = page.getActiveEditor();
@@ -197,9 +180,9 @@ public class BlackBoxHandler extends AbstractHandler {
         return null;
 	}
 	
-	public static String getFileNameNoEx(String filename) {   
+	public static String getFileNameNoEx(String filename) {   //回傳純檔案的名稱，不包括副檔名
         if ((filename != null) && (filename.length() > 0)) {   
-            int dot = filename.lastIndexOf(".");   
+            int dot = filename.lastIndexOf(".");   //找檔名句號的位置
             if ((dot >-1) && (dot < (filename.length()))) {   
                 return filename.substring(0, dot);   
             }   

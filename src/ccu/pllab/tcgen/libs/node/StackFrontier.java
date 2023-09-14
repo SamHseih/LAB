@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.libs.node;
 
+ 
 import java.util.Stack;
 
 public class StackFrontier<T extends INode> implements Frontier<T> {

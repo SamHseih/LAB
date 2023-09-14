@@ -1,5 +1,7 @@
 package ccu.pllab.tcgen.srcNodeVisitor;
 
+
+ 
 import java.util.ArrayList;
 
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -10,31 +12,29 @@ import ccu.pllab.tcgen.AbstractCLG.CLGNode;
 import ccu.pllab.tcgen.AbstractCLG.CLGStartNode;
 import ccu.pllab.tcgen.AbstractConstraint.CLGConstraint;
 
-public class MethodDeclarationVisitor extends JAVA2CLG implements SrcNodeVisit {
+public class MethodDeclarationVisitor extends JAVA2CLG implements SrcNodeVisit{
 	CLGNode clgNode;
 
 	/*************************************************/
-	public boolean visit(MethodDeclaration node) {
-		clgNode = new CLGStartNode("", node.getName().toString());
-		// 儲存現在在走訪的函式名
-		JAVA2CLG.setvisitingMethod(node.getName().toString());
-		ArrayList<String> parameters = new ArrayList<String>();
-		for (Object o : node.parameters()) {
-			if (o instanceof SingleVariableDeclaration) {
-				parameters.add(((SingleVariableDeclaration) o).getName().toString());
-			}
+	public boolean visit(MethodDeclaration node){
+		clgNode = new CLGStartNode("",node.getName().toString());
+		ArrayList<String> parameters=new ArrayList<String>();
+		for(Object o:node.parameters()){
+			if(o instanceof SingleVariableDeclaration)
+			parameters.add(((SingleVariableDeclaration) o).getName().toString());
 		}
+		System.out.println(parameters);
+		( (CLGStartNode)clgNode).setMethodParameters(parameters);
 		return false;
 	}
-
+	
 	@Override
 	public CLGNode getNode() {
 		// TODO Auto-generated method stub
 		return clgNode;
 	}
-
-	public void setClassName(String className) {
-		((CLGStartNode) clgNode).setClassName(className);
+	public void setClassName(String className){
+		((CLGStartNode)clgNode).setClassName(className);
 	}
 
 	@Override

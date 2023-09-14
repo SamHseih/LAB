@@ -12,7 +12,6 @@ import org.stringtemplate.v4.ST;
 import tudresden.ocl20.pivot.pivotmodel.Constraint;
 import ccu.pllab.tcgen.AbstractCLG.CLGGraph;
 import ccu.pllab.tcgen.AbstractConstraint.CLGMethodInvocationNode;
-import ccu.pllab.tcgen.AbstractConstraint.CLGObjectNode;
 import ccu.pllab.tcgen.AbstractConstraint.CLGConstraint;
 import ccu.pllab.tcgen.AbstractConstraint.CLGVariableNode;
 import ccu.pllab.tcgen.clg.CLGNode;
@@ -22,6 +21,7 @@ import ccu.pllab.tcgen.libs.TemplateFactory;
 import ccu.pllab.tcgen.libs.node.INode;
 import ccu.pllab.tcgen.libs.pivotmodel.type.Classifier;
 import ccu.pllab.tcgen.libs.pivotmodel.type.TypeFactory;
+ 
 
 public class IteratorExp extends LoopExp {
 
@@ -49,7 +49,7 @@ public class IteratorExp extends LoopExp {
 
 	@Override
 	public CLGNode toCLG(Criterion criterion) {
-
+	
 		assert this.getType().equals(TypeFactory.getInstance().getClassifier("Boolean"));
 		return new ConstraintNode(this.getConstraint(), this);
 	}
@@ -60,8 +60,7 @@ public class IteratorExp extends LoopExp {
 		for (ASTNode p : parameters) {
 			new_params.add(p.clone());
 		}
-		IteratorExp n = new IteratorExp(this.getConstraint(), this.getSourceExp().clone(), this.getPropertyName(),
-				this.getType(), new_params);
+		IteratorExp n = new IteratorExp(this.getConstraint(), this.getSourceExp().clone(), this.getPropertyName(), this.getType(), new_params);
 		return n;
 	}
 
@@ -73,9 +72,9 @@ public class IteratorExp extends LoopExp {
 		result += "(";
 		result += StringUtils.join(this.getParameterExps(), ", ");
 		result += ")";
-
+		
 		return result;
-
+	
 	}
 
 	@Override
@@ -113,8 +112,7 @@ public class IteratorExp extends LoopExp {
 		if (this.getPropertyName().equals("one") || this.getPropertyName().equals("any")) {
 			ST tpl = TemplateFactory.getTemplate("ocl_collection_operation_" + this.getPropertyName() + "_body");
 			tpl.add("node_identifier", this.getId());
-			tpl.add("collection_predicate",
-					this.getSourceExp().getPredicateName(new HashMap<String, String>()).replaceAll("\\(.*\\)", ""));
+			tpl.add("collection_predicate", this.getSourceExp().getPredicateName(new HashMap<String, String>()).replaceAll("\\(.*\\)", ""));
 			tpl.add("isStatic", ASTUtil.isStatic(this.getConstraint()) && !ASTUtil.isConstructor(this.getConstraint()));
 			for (Map.Entry<String, String> entry : template_args.entrySet()) {
 				tpl.add(entry.getKey(), entry.getValue());
@@ -124,11 +122,9 @@ public class IteratorExp extends LoopExp {
 		ST tpl = TemplateFactory.getTemplate("ocl_collection_operation_body");
 		tpl.add("collection_type", this.getSourceExp().getType().getName().toLowerCase().split("\\(")[0]);
 		tpl.add("node_identifier", this.getId());
-		tpl.add("collection_predicate",
-				this.getSourceExp().getPredicateName(new HashMap<String, String>()).replaceAll("\\(.*\\)", ""));
+		tpl.add("collection_predicate", this.getSourceExp().getPredicateName(new HashMap<String, String>()).replaceAll("\\(.*\\)", ""));
 		if (this.getParameterExps().size() > 0) {
-			tpl.add("object_predicate", this.getParameterExps().get(0).getPredicateName(new HashMap<String, String>())
-					.replaceAll("\\(.*\\)", ""));
+			tpl.add("object_predicate", this.getParameterExps().get(0).getPredicateName(new HashMap<String, String>()).replaceAll("\\(.*\\)", ""));
 		}
 
 		tpl.add("operation_name", this.getPropertyName());
@@ -156,23 +152,21 @@ public class IteratorExp extends LoopExp {
 	@Override
 	public CLGGraph OCL2CLG() {
 		String type = this.getType().toString();
-		CLGVariableNode variableConstraint = new CLGObjectNode(type);
-		assert this.getType().equals(TypeFactory.getInstance().getClassifier("Boolean"));
+		CLGVariableNode variableConstraint =new CLGVariableNode(type);
+		assert this.getType().equals(TypeFactory.getInstance().getClassifier("Boolean")); 
 		CLGGraph constraintgraph = new CLGGraph(variableConstraint);
 		return constraintgraph;
 	}
 
 	@Override
 	public CLGConstraint CLGConstraint() {
-		// 20210216 盢methodInvocationNode把计эCLGConstraint,
-		// 把计эArrayList<CLGConstraint>
-		ArrayList<CLGConstraint> parametersList = new ArrayList<>();
-		for (ASTNode para : this.parameters)
-			parametersList.add(new CLGObjectNode(para.toString()));
-		CLGMethodInvocationNode IteratorConstraint = new CLGMethodInvocationNode(
-				new CLGObjectNode(this.getSourceExp().toString()), this.getPropertyName(), parametersList);
-
+		
+		CLGMethodInvocationNode IteratorConstraint=new CLGMethodInvocationNode(this.getSourceExp().toString(),this.getPropertyName(),this.parameters.toString());
+        
+	
 		return IteratorConstraint;
 	}
+
+
 
 }

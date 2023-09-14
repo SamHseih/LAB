@@ -2,13 +2,8 @@
 package ccu.pllab.tcgen.oclRunner;
 //�o�����O�N�Ojava���Yimport�������A�]��.g4�ɻPOclParser.java�O�s�����Y�A�ҥH���ઽ���bOclParser.java�W�Kimport�A�@���s�ɴN�|�Q�~���A�]���p�G�nimport���ɭԡA�b@header���Y�[
 	import ccu.pllab.tcgen.AbstractSyntaxTree.*;
-	import ccu.pllab.tcgen.SymbolTable.*;
-	import ccu.pllab.tcgen.AbstractType.*;
-	import ccu.pllab.tcgen.CBTCGUtility.Utility;
-	import ccu.pllab.tcgen.exe.main.*;
 	import java.util.ArrayList;
 	import java.util.Set;
-	
 
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -171,6 +166,18 @@ public class OclBaseListener implements OclListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterCalculator(@NotNull OclParser.CalculatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCalculator(@NotNull OclParser.CalculatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterPropertyCall(@NotNull OclParser.PropertyCallContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -190,6 +197,18 @@ public class OclBaseListener implements OclListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitBooleanExp(@NotNull OclParser.BooleanExpContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterQualifiers(@NotNull OclParser.QualifiersContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitQualifiers(@NotNull OclParser.QualifiersContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -375,13 +394,13 @@ public class OclBaseListener implements OclListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLocalVariableLists(@NotNull OclParser.LocalVariableListsContext ctx) { }
+	@Override public void enterCollectionKind(@NotNull OclParser.CollectionKindContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLocalVariableLists(@NotNull OclParser.LocalVariableListsContext ctx) { }
+	@Override public void exitCollectionKind(@NotNull OclParser.CollectionKindContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -418,18 +437,6 @@ public class OclBaseListener implements OclListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPackageName(@NotNull OclParser.PackageNameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterConstrutorCall(@NotNull OclParser.ConstrutorCallContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitConstrutorCall(@NotNull OclParser.ConstrutorCallContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -514,18 +521,6 @@ public class OclBaseListener implements OclListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitExpression(@NotNull OclParser.ExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLocalVariableList(@NotNull OclParser.LocalVariableListContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLocalVariableList(@NotNull OclParser.LocalVariableListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -622,18 +617,6 @@ public class OclBaseListener implements OclListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDeclarator(@NotNull OclParser.DeclaratorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLiteralIndex(@NotNull OclParser.LiteralIndexContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLiteralIndex(@NotNull OclParser.LiteralIndexContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

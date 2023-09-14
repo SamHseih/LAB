@@ -1,119 +1,108 @@
 package ccu.pllab.tcgen.AbstractSyntaxTree;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 import ccu.pllab.tcgen.AbstractConstraint.*;
-import ccu.pllab.tcgen.AbstractType.TypeTable;
-import ccu.pllab.tcgen.SymbolTable.SymbolTable;
 import ccu.pllab.tcgen.ASTGraph.ASTGraphNode;
 import ccu.pllab.tcgen.AbstractCLG.CLGGraph;
 
-public class PackageExp extends AbstractSyntaxTreeNode {
+public class PackageExp extends AbstractSyntaxTreeNode{
 	String packageName;
-	ArrayList<AbstractSyntaxTreeNode> context = new ArrayList<AbstractSyntaxTreeNode>();
-
-	public PackageExp(String packageName) {
-		super();// 呼叫AbstractSyntaxTreeNode()
-		this.packageName = packageName;
+	ArrayList<AbstractSyntaxTreeNode> context=new ArrayList<AbstractSyntaxTreeNode>();
+	
+	public PackageExp(String packageName)
+	{
+		super();//呼叫AbstractSyntaxTreeNode()
+		this.packageName=packageName;
 	}
-
-	public ArrayList<AbstractSyntaxTreeNode> getTreeNode() {
+	
+	public ArrayList<AbstractSyntaxTreeNode> getTreeNode()
+	{
 		return this.context;
 	}
-
-	public void addTreeChildNode(AbstractSyntaxTreeNode... childNode) {
-		for (AbstractSyntaxTreeNode node : childNode)
-			this.context.add(node);
+	
+	public void addTreeChildNode(AbstractSyntaxTreeNode ...  childNode)
+	{
+		for(AbstractSyntaxTreeNode node:childNode)
+		this.context.add(node);
 	}
-
-	/*
-	 * @Override public String addOperatorType(){return "";}
-	 * 
-	 * /*@Override public void addAllNodeType(String type){}
-	 * 
-	 * @Override public void putAttributeToHashMap(HashMap<String,String> table){}
-	 * 
-	 * @Override public void takeHashMapKeyValue(HashMap<String,String> table){}
-	 * 
-	 * @Override public void addSelfOrResultType(String className){}
-	 */
-
+	
+	/*@Override
+	public String addOperatorType(){return "";}
+	
+	/*@Override
+	public void addAllNodeType(String type){}
+	
 	@Override
-	public void addVariableType(TypeTable typeTable, String methodName) {
+	public void putAttributeToHashMap(HashMap<String,String> table){}
+	
+	@Override
+	public  void takeHashMapKeyValue(HashMap<String,String> table){}
+	
+	@Override
+	public void addSelfOrResultType(String className){}*/
+	
+	@Override
+	public void addVariableType(SymbolTable symbolTable,String methodName)
+	{}
+	
+	@Override
+	public void changeAssignToEqual(){}
+	
+	@Override
+	public String childNodeInfo(){return "";}
+	
+	@Override
+	public String ASTInformation()
+	{
+		return "\""+"("+this.getID()+")"+this.packageName+"\"";
 	}
-
+	
 	@Override
-	public void changeAssignToEqual() {
-	}
-
+	public void conditionChangeAssignToEqual() {}
+	
 	@Override
-	public String childNodeInfo() {
-		return "";
-	}
-
+	public  CLGConstraint AST2CLG(){return null;}
+	
 	@Override
-	public String ASTInformation() {
-		return "\"" + "(" + this.getID() + ")" + this.packageName + "\"";
-	}
-
+	public  CLGConstraint AST2CLG(boolean boundaryAnalysis){return null;}
+	
 	@Override
-	public void conditionChangeAssignToEqual() {
-	}
-
+	public  String NodeToString(){return "";}
+	
 	@Override
-	public CLGConstraint AST2CLG(SymbolTable sym, String methodName, boolean isCondition) {
-		return null;
-	}
-
-//	@Override
-//	public String NodeToString() {
-//		return "";
-//	}
-
-	@Override
-	public final void toGraphViz() {// 一個遞迴函式，來畫AST圖
-		String astInformation = this.ASTInformation();
-		for (AbstractSyntaxTreeNode oneChild : this.context) {
-			System.out.println(astInformation + "->" + oneChild.ASTInformation());
-			oneChild.toGraphViz();// 遞迴
+	public final void toGraphViz() 
+	{//一個遞迴函式，來畫AST圖
+		String astInformation=this.ASTInformation();
+		for(AbstractSyntaxTreeNode oneChild:this.context)
+		{
+			System.out.println(astInformation+"->"+oneChild.ASTInformation());
+			oneChild.toGraphViz();//遞迴
 		}
 	}
-
 	@Override
-	public String AST2CLP(String attribute, String method) {
-		return "";
-	}
-
+	public String AST2CLP(String attribute,String method) {return "";}
 	@Override
-	public void preconditionAddPre() {
-		for (AbstractSyntaxTreeNode node : this.context)
+	public  void preconditionAddPre() {
+		for(AbstractSyntaxTreeNode node:this.context)
 			node.preconditionAddPre();
 	}
-
 	@Override
-	public void postconditionAddPre() {
-		for (AbstractSyntaxTreeNode node : this.context)
-			node.postconditionAddPre();
+	public  void postconditionAddPre() {
+		for(AbstractSyntaxTreeNode node:this.context)
+			node.postconditionAddPre();	
 	}
-
 	@Override
-	public void demoganOperator() {
-	}
-
+	public void demoganOperator(){}
 	@Override
-	public String demonganAST2CLP(String attribute, String argument) {
-		return "";
-	}
-
+	public String demonganAST2CLP(String attribute,String argument) {return "";}
 	@Override
-	public ASTGraphNode AST2ASTGraph() {
-		return null;
-	}
-
+	public ASTGraphNode AST2ASTGraph() {return null;}
 	@Override
-	public AbstractSyntaxTreeNode ASTclone() {
+	public AbstractSyntaxTreeNode ASTclone()
+	{
 		return null;
 	}
 }

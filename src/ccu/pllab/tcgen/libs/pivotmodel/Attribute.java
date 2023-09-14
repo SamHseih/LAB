@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.libs.pivotmodel;
 
+ 
 public class Attribute {
 
 	@Override
@@ -39,26 +40,27 @@ public class Attribute {
 	private int upper;
 	private boolean unique;
 
-	public Attribute(String name, String type, int lower, int upper, String unique) {
+	public Attribute(String name, String type ,int lower,int upper,String unique) {
 		this.name = name;
 		this.type = type;
-		this.lower = lower;
-		this.upper = upper;
-		this.unique = Boolean.valueOf(unique);
+		this.lower=lower;
+		this.upper=upper;
+		this.unique=Boolean.valueOf(unique);
 	}
-
-	public boolean getUnique() {
+	
+	public boolean getUnique(){
 		return this.unique;
 	}
-
-	public int getLower() {
+	
+	
+	public int getLower(){
 		return this.lower;
 	}
-
-	public int getUpper() {
+	
+	public int getUpper(){
 		return this.upper;
 	}
-
+	
 	public String getName() {
 		return this.name;
 	}

@@ -1,4 +1,5 @@
 package ccu.pllab.tcgen.libs;
+ 
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -68,15 +69,13 @@ public class DresdenOCLASTtoInternelAST extends ExpressionsSwitch<ASTNode> {
 		for (CollectionLiteralPart part : object.getPart()) {
 			partList.add(this.doSwitch(part));
 		}
-		return new ccu.pllab.tcgen.ast.CollectionLiteralExp(this.constraint,
-				TypeFactory.getInstance().getClassifier(object.getType().getName()), partList);
+		return new ccu.pllab.tcgen.ast.CollectionLiteralExp(this.constraint, TypeFactory.getInstance().getClassifier(object.getType().getName()), partList);
 	}
 
 	@Override
 	public ASTNode caseCollectionRange(CollectionRange object) {
-		return new ccu.pllab.tcgen.ast.CollectionRange(constraint,
-				TypeFactory.getInstance().getClassifier(object.getType().getName()), this.doSwitch(object.getFirst()),
-				this.doSwitch(object.getLast()));
+		return new ccu.pllab.tcgen.ast.CollectionRange(constraint, TypeFactory.getInstance().getClassifier(object.getType().getName()), this.doSwitch(object.getFirst()), this.doSwitch(object
+				.getLast()));
 	}
 
 	@Override
@@ -91,8 +90,7 @@ public class DresdenOCLASTtoInternelAST extends ExpressionsSwitch<ASTNode> {
 
 	@Override
 	public ASTNode caseBooleanLiteralExp(BooleanLiteralExp object) {
-		return new LiteralExp(this.constraint, TypeFactory.getInstance().getClassifier(object.getType().getName()),
-				Boolean.toString(object.isBooleanSymbol()));
+		return new LiteralExp(this.constraint, TypeFactory.getInstance().getClassifier(object.getType().getName()), Boolean.toString(object.isBooleanSymbol()));
 	}
 
 	@Override
@@ -102,16 +100,14 @@ public class DresdenOCLASTtoInternelAST extends ExpressionsSwitch<ASTNode> {
 
 	@Override
 	public ccu.pllab.tcgen.ast.IfExp caseIfExp(IfExp object) {
-		ccu.pllab.tcgen.ast.IfExp node = new ccu.pllab.tcgen.ast.IfExp(this.constraint,
-				this.doSwitch(object.getCondition()), this.doSwitch(object.getThenExpression()),
-				this.doSwitch(object.getElseExpression()));
+		ccu.pllab.tcgen.ast.IfExp node = new ccu.pllab.tcgen.ast.IfExp(this.constraint, this.doSwitch(object.getCondition()), this.doSwitch(object.getThenExpression()), this.doSwitch(object
+				.getElseExpression()));
 		return node;
 	}
 
 	@Override
 	public ASTNode caseIntegerLiteralExp(IntegerLiteralExp object) {
-		return new LiteralExp(this.constraint, TypeFactory.getInstance().getClassifier(object.getType().getName()),
-				Integer.toString(object.getIntegerSymbol()));
+		return new LiteralExp(this.constraint, TypeFactory.getInstance().getClassifier(object.getType().getName()), Integer.toString(object.getIntegerSymbol()));
 	}
 
 	@Override
@@ -122,8 +118,7 @@ public class DresdenOCLASTtoInternelAST extends ExpressionsSwitch<ASTNode> {
 		acc_param.setName(object.getResult().getName());
 
 		vars_stack.push(ASTUtil.createNewParameterListForIterate(this.constraint, acc_param, it_param));
-		ccu.pllab.tcgen.ast.IterateExp node = new ccu.pllab.tcgen.ast.IterateExp(this.constraint,
-				this.doSwitch(object.getSource()), "iterate", this.doSwitch(object.getResult().getInitExpression()),
+		ccu.pllab.tcgen.ast.IterateExp node = new ccu.pllab.tcgen.ast.IterateExp(this.constraint, this.doSwitch(object.getSource()), "iterate", this.doSwitch(object.getResult().getInitExpression()),
 				this.doSwitch(object.getBody()));
 		node.setAttribute("iterator_name", object.getIterator().get(0).getName());
 		node.setAttribute("iterator_type", object.getIterator().get(0).getType().getName());
@@ -141,25 +136,19 @@ public class DresdenOCLASTtoInternelAST extends ExpressionsSwitch<ASTNode> {
 		for (int i = 0; i < arguments.size(); i++) {
 			parameters.add(this.doSwitch(arguments.get(i)));
 		}
-		return new ccu.pllab.tcgen.ast.IteratorExp(this.constraint, source, object.getReferredOperation().getName(),
-				TypeFactory.getInstance().getClassifier(object.getType().getName()), parameters);
+		return new ccu.pllab.tcgen.ast.IteratorExp(this.constraint, source, object.getReferredOperation().getName(), TypeFactory.getInstance().getClassifier(object.getType().getName()), parameters);
 	}
 
 	@Override
 	public ASTNode caseLetExp(final LetExp object) {
-		final ccu.pllab.tcgen.ast.VariableExp newVariable = util.createNewVaraible(this.constraint,
-				object.getVariable());
-		newVariable.setVariableName(
-				String.format("#LetVar_%s_%s", newVariable.getVariableName(), newVariable.getCLPIndex()));
+		final ccu.pllab.tcgen.ast.VariableExp newVariable = util.createNewVaraible(this.constraint, object.getVariable());
+		newVariable.setVariableName(String.format("#LetVar_%s_%s", newVariable.getVariableName(), newVariable.getCLPIndex()));
 		final ASTNode init_exp = this.doSwitch(object.getVariable().getInitExpression());
-		final ASTNode var_assign = new ccu.pllab.tcgen.ast.OperationCallExp(this.constraint, newVariable, "=",
-				TypeFactory.getInstance().getClassifier("Boolean"), false, init_exp);
+		final ASTNode var_assign = new ccu.pllab.tcgen.ast.OperationCallExp(this.constraint, newVariable, "=", TypeFactory.getInstance().getClassifier("Boolean"), false, init_exp);
 		var_assign.setAttribute("dummy_assign", Boolean.toString(true));
 		final ASTNode in_statements = this.doSwitch(object.getIn());
-		final ASTNode root = new ccu.pllab.tcgen.ast.OperationCallExp(this.constraint, var_assign, "and",
-				TypeFactory.getInstance().getClassifier("Boolean"), false, in_statements);
-		GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER,
-				new StackFrontier<ASTNode>());
+		final ASTNode root = new ccu.pllab.tcgen.ast.OperationCallExp(this.constraint, var_assign, "and", TypeFactory.getInstance().getClassifier("Boolean"), false, in_statements);
+		GraphVisitor<ASTNode> dfs = new GraphVisitor<ASTNode>(GraphVisitor.TRAVERSAL_ORDER.POSTORDER, new StackFrontier<ASTNode>());
 		dfs.traverse(in_statements, new NodeVisitHandler<ASTNode>() {
 
 			@Override
@@ -170,8 +159,7 @@ public class DresdenOCLASTtoInternelAST extends ExpressionsSwitch<ASTNode> {
 				ccu.pllab.tcgen.ast.VariableExp variableExp = (ccu.pllab.tcgen.ast.VariableExp) current_node;
 				if (variableExp.getVariableName().equals(object.getVariable().getName())) {
 					if (variableExp.getPreviousNodes().get(0).getNextNodes().indexOf(variableExp) > -1) {
-						variableExp.setVariableName(String.format("#LetVar_%s_%s", variableExp.getVariableName(),
-								newVariable.getCLPIndex()));
+						variableExp.setVariableName(String.format("#LetVar_%s_%s", variableExp.getVariableName(), newVariable.getCLPIndex()));
 						variableExp.setCLPIndex(newVariable.getCLPIndex());
 					}
 				}
@@ -203,8 +191,7 @@ public class DresdenOCLASTtoInternelAST extends ExpressionsSwitch<ASTNode> {
 			return node;
 
 		}
-		if (object.getSource().getType() instanceof CollectionType
-				&& object.getReferredOperation().getName().matches("\\w+")) {
+		if (object.getSource().getType() instanceof CollectionType && object.getReferredOperation().getName().matches("\\w+")) {
 			return this.caseIteratorExp(object);
 		}
 
@@ -228,56 +215,44 @@ public class DresdenOCLASTtoInternelAST extends ExpressionsSwitch<ASTNode> {
 		for (int i = 0; i < arguments.size(); i++) {
 			parameters.add(this.doSwitch(arguments.get(i)));
 		}
-		return new ccu.pllab.tcgen.ast.OperationCallExp(this.constraint, source,
-				object.getReferredOperation().getName(), type, isMethod, parameters);
+		return new ccu.pllab.tcgen.ast.OperationCallExp(this.constraint, source, object.getReferredOperation().getName(), type, isMethod, parameters);
 	}
 
 	@Override
 	public ASTNode casePropertyCallExp(PropertyCallExp object) {
 		ASTNode node;
-		Association info = context.findAssociation(object.getSource().getType().getName(),
-				object.getReferredProperty().getName());
+		Association info = context.findAssociation(object.getSource().getType().getName(), object.getReferredProperty().getName());
 		if (info != null) {
 
-			AssociationEnd memberEnd = context.getAnotherMemberEnd(info, object.getSource().getType().getName(),
-					object.getReferredProperty().getName());
-			AssociationEndCallExp aecexp = new AssociationEndCallExp(this.constraint, doSwitch(object.getSource()),
-					object.getReferredProperty().getName(),
-					TypeFactory.getInstance().getClassifier(object.getType().getName()),
-					object.getReferredProperty().getName(), memberEnd.getName(), info.getName());
+			AssociationEnd memberEnd = context.getAnotherMemberEnd(info, object.getSource().getType().getName(), object.getReferredProperty().getName());
+			AssociationEndCallExp aecexp = new AssociationEndCallExp(this.constraint, doSwitch(object.getSource()), object.getReferredProperty().getName(), TypeFactory.getInstance().getClassifier(
+					object.getType().getName()), object.getReferredProperty().getName(), memberEnd.getName(), info.getName());
 			node = aecexp;
 		} else {
-			node = new AttributeCallExp(this.constraint, doSwitch(object.getSource()),
-					object.getReferredProperty().getName(),
-					TypeFactory.getInstance().getClassifier(object.getType().getName()));
+			node = new AttributeCallExp(this.constraint, doSwitch(object.getSource()), object.getReferredProperty().getName(), TypeFactory.getInstance().getClassifier(object.getType().getName()));
 		}
 		return node;
 	}
 
 	@Override
 	public ASTNode caseRealLiteralExp(RealLiteralExp object) {
-		return new LiteralExp(this.constraint, TypeFactory.getInstance().getClassifier(object.getType().getName()),
-				Double.toString(object.getRealSymbol()));
+		return new LiteralExp(this.constraint, TypeFactory.getInstance().getClassifier(object.getType().getName()), Double.toString(object.getRealSymbol()));
 	}
 
 	@Override
 	public ASTNode caseStringLiteralExp(StringLiteralExp object) {
-		return new LiteralExp(this.constraint, TypeFactory.getInstance().getClassifier(object.getType().getName()),
-				object.getStringSymbol());
+		return new LiteralExp(this.constraint, TypeFactory.getInstance().getClassifier(object.getType().getName()), object.getStringSymbol());
 	}
 
 	@Override
 	public ASTNode caseTypeLiteralExp(TypeLiteralExp object) {
-		return new ccu.pllab.tcgen.ast.TypeLiteralExp(this.constraint,
-				TypeFactory.getInstance().getClassifier(object.getReferredType().getName()));
+		return new ccu.pllab.tcgen.ast.TypeLiteralExp(this.constraint, TypeFactory.getInstance().getClassifier(object.getReferredType().getName()));
 	}
 
 	@Override
 	public ccu.pllab.tcgen.ast.VariableExp caseVariableExp(VariableExp object) {
-		ccu.pllab.tcgen.ast.VariableExp node = new ccu.pllab.tcgen.ast.VariableExp(this.constraint,
-				object.getReferredVariable().getName(),
-				TypeFactory.getInstance().getClassifier(object.getType().getName()),
-				getVariableStateFromConstraintKind());
+		ccu.pllab.tcgen.ast.VariableExp node = new ccu.pllab.tcgen.ast.VariableExp(this.constraint, object.getReferredVariable().getName(), TypeFactory.getInstance().getClassifier(
+				object.getType().getName()), getVariableStateFromConstraintKind());
 		node.setAttribute("label", object.getReferredVariable().getName());
 		if (object.getReferredVariable().getName().contains("implicit")) {
 			node.setAttribute("name", "self");
@@ -288,8 +263,7 @@ public class DresdenOCLASTtoInternelAST extends ExpressionsSwitch<ASTNode> {
 			if (ASTUtil.hasReturnValue(constraint)) {
 				node.setCLPIndex(Integer.toString(ASTUtil.getVarsLengthForCLP(constraint)));
 			} else {
-				throw new IllegalStateException(
-						"there is no return value for method:" + node.getConstraint().getConstrainedElement().get(0));
+				throw new IllegalStateException("there is no return value for method:" + node.getConstraint().getConstrainedElement().get(0));
 			}
 		} else {
 			for (int i = 0; i < vars_stack.peek().size(); i++) {
@@ -336,12 +310,10 @@ public class DresdenOCLASTtoInternelAST extends ExpressionsSwitch<ASTNode> {
 				if (vars_stack.peek().size() > 0 && vars_stack.peek().get(0).getName() == null) {
 					vars_stack.peek().get(0).setName("self");
 				}
-				node = new ccu.pllab.tcgen.ast.Constraint(this.context, constraint,
-						this.doSwitch(constraint.getSpecification()));
+				node = new ccu.pllab.tcgen.ast.Constraint(this.context, constraint, this.doSwitch(constraint.getSpecification()));
 			} else {
 				vars_stack.push(new ArrayList<Parameter>());
-				node = new ccu.pllab.tcgen.ast.Constraint(this.context, constraint,
-						this.doSwitch(constraint.getSpecification()));
+				node = new ccu.pllab.tcgen.ast.Constraint(this.context, constraint, this.doSwitch(constraint.getSpecification()));
 			}
 			tree_nodes.add(node);
 			vars_stack.pop();

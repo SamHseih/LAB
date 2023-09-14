@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.srcNodeVisitor;
 
+ 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -19,6 +20,8 @@ public class IfStatementVisitor extends JAVA2CLG implements SrcNodeVisit {
 
 	public boolean visit(IfStatement node) {
 
+		
+		
 		InfixExpressionVisitor visitor = new InfixExpressionVisitor();
 		node.getExpression().accept(visitor);
 
@@ -26,25 +29,28 @@ public class IfStatementVisitor extends JAVA2CLG implements SrcNodeVisit {
 		CLGGraph elseGraph = new CLGGraph(visitor.negationConstraint());
 		SrcVisitorUnit visitorThen = new SrcVisitorUnit();
 		node.getThenStatement().accept(visitorThen);
-
-		if (visitorThen.getGraph() != null) {
-			thenGraph.graphAnd(visitorThen.getGraph());
+		
+		
+		if(visitorThen.getGraph()!=null){
+		thenGraph.graphAnd(visitorThen.getGraph());
 		}
-
+	
 		SrcVisitorUnit visitorElse = new SrcVisitorUnit();
 		if (node.getElseStatement() != null) {
 			node.getElseStatement().accept(visitorElse);
-
+	
 			elseGraph.graphAnd(visitorElse.getGraph());
 
 		}
-
+		
 		thenGraph.graphOr(elseGraph);
 
-		clgGraph = thenGraph;
+		clgGraph=thenGraph;
 
 		return false;
 	}
+
+	
 
 	/***************************************************************/
 	@Override
@@ -60,7 +66,7 @@ public class IfStatementVisitor extends JAVA2CLG implements SrcNodeVisit {
 	}
 
 	public CLGGraph getCLGGraph() {
-
+		
 		return this.clgGraph;
 	}
 

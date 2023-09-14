@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.AbstractCLG;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,22 +26,24 @@ public class CLGGraph {
 		this.endNode.addPredecessor(this.startNode);
 	}
 
-	/*
-	 * public CLGGraph(int nums) { for (int i = 1; i < (nums + 3); i++) {
-	 * connectionNodes.add(new CLGConnectionNode(i)); } this.startNode = new
-	 * CLGStartNode(); this.endNode = new CLGEndNode();
-	 * this.startNode.addSuccessor(this.getConnectionNode(1));
-	 * //this.endNode.addPredecessor(this.getConnectionNode(2));
-	 * this.endNode.addPredecessor(this.getConnectionNode(nums+2)); for (int i = 1;
-	 * i < (nums + 2); i++) {
-	 * this.getConnectionNode(i).addSuccessor(this.getConnectionNode(i+1)); }
-	 * this.getConnectionNode(nums+2).addSuccessor(this.endNode);
-	 * 
-	 * }
-	 */
+	/*public CLGGraph(int nums) {
+		for (int i = 1; i < (nums + 3); i++) {
+			connectionNodes.add(new CLGConnectionNode(i));
+		}
+		this.startNode = new CLGStartNode();
+		this.endNode = new CLGEndNode();
+		this.startNode.addSuccessor(this.getConnectionNode(1));
+		//this.endNode.addPredecessor(this.getConnectionNode(2));
+		this.endNode.addPredecessor(this.getConnectionNode(nums+2));
+		for (int i = 1; i < (nums + 2); i++) {
+			this.getConnectionNode(i).addSuccessor(this.getConnectionNode(i+1));
+		}
+		this.getConnectionNode(nums+2).addSuccessor(this.endNode);
 
+	}*/
+	
 	public CLGGraph(int nums) {
-		for (int i = 1; i < (nums + 1); i++) {
+		for (int i = 1; i < (nums+1); i++) {
 			connectionNodes.add(new CLGConnectionNode(i));
 		}
 		this.startNode = new CLGStartNode();
@@ -49,11 +52,11 @@ public class CLGGraph {
 		this.endNode.addPredecessor(this.getConnectionNode(2));
 		// this.endNode.addPredecessor(this.getConnectionNode(nums));
 		/*
-		 * for (int i = 1; i < nums; i++) {
-		 * this.getConnectionNode(i).addSuccessor(this.getConnectionNode(i+1));
-		 * 
-		 * }
-		 */
+		for (int i = 1; i < nums; i++) {
+			this.getConnectionNode(i).addSuccessor(this.getConnectionNode(i+1));
+
+		}
+		*/
 		// this.getConnectionNode(nums).addSuccessor(this.endNode);
 
 	}
@@ -110,64 +113,61 @@ public class CLGGraph {
 		}
 		return (CLGConnectionNode) node;
 	}
-
-	public List<CLGNode> getConnectionNode() {
+	public List<CLGNode>getConnectionNode()
+	{
 		return this.connectionNodes;
 	}
-
-	public int getConstraintNodeCounter() {
-		return this.constraintNodes.size();
-	}
-
-	public void InsertCompoundStateCLG(int nodeId, CLGGraph clgGraph) {
-		// 做外層CLG和內層CLG做連接，如果有混合狀態，直接改變內層的初始狀態/外層的結束狀態的連接節點，就是插入圖
-		int externalId = ((CLGConnectionNode) (this.getEndPredecessor())).getConnectionId() + 1;
-		while (this.getConnectionNode(externalId) != null) {// to find external connection node max id
+	public void InsertCompoundStateCLG(int nodeId,CLGGraph clgGraph) {
+		//做外層CLG和內層CLG做連接，如果有混合狀態，直接改變內層的初始狀態/外層的結束狀態的連接節點，就是插入圖
+		int externalId=((CLGConnectionNode)(this.getEndPredecessor())).getConnectionId()+1;
+		while(this. getConnectionNode(externalId)!=null)
+		{//to find external connection node max id
 			externalId++;
 		}
-		int maxId = ((CLGConnectionNode) (clgGraph.getEndPredecessor())).getConnectionId();
-		for (int connId = ((CLGConnectionNode) (clgGraph.getStartSuccessor()))
-				.getConnectionId(); connId <= maxId; connId++) {
-			if (clgGraph.getConnectionNode(connId) != null)
-				clgGraph.getConnectionNode(connId).setConnectionId(externalId++);
+		int maxId=((CLGConnectionNode)(clgGraph.getEndPredecessor())).getConnectionId();
+		for(int connId=((CLGConnectionNode)(clgGraph.getStartSuccessor())).getConnectionId();connId<=maxId;connId++)
+		{
+			if(clgGraph.getConnectionNode(connId)!=null)
+			clgGraph.getConnectionNode(connId).setConnectionId(externalId++);
 		}
 		int size;
-		for (size = 0; size < this.connectionNodes.size(); size++) {// 找所有外層CLG的連接節點
-			if (((CLGConnectionNode) this.connectionNodes.get(size)).getConnectionId() == nodeId) {// 找到混合式的連接節點的ID
-				for (int i = 0; i < this.connectionNodes.get(size).getPredecessor().size(); i++) {// 處理外層CLG連接到此混合狀態的前面那些節點，使他們連接到內層CLG的初始狀態的連接節點
-					this.connectionNodes.get(size).getPredecessor().get(i)
-							.removeSuccessor(this.connectionNodes.get(size));// 所有連接到此混合狀態的節點都不要連接此混合狀態的連接節點
-					this.connectionNodes.get(size).getPredecessor().get(i)
-							.addSuccessor(clgGraph.getStartNode().getSuccessor().get(0));// 直接連到內層CLG的初始連接節點
-					clgGraph.getStartSuccessor().removePredecessor(clgGraph.getStartNode());// 內層CLG移除開始結點
-					clgGraph.getStartSuccessor().addPredecessor(this.connectionNodes.get(size).getPredecessor().get(i));// 初始連接節點連到外層CLG之前的狀態
+		for (size=0;size<this.connectionNodes.size();size++) {//找所有外層CLG的連接節點
+			if (((CLGConnectionNode)this.connectionNodes.get(size)).getConnectionId() == nodeId) {//找到混合式的連接節點的ID
+				for(int i=0;i<this.connectionNodes.get(size).getPredecessor().size();i++)
+				{//處理外層CLG連接到此混合狀態的前面那些節點，使他們連接到內層CLG的初始狀態的連接節點
+					this.connectionNodes.get(size).getPredecessor().get(i).removeSuccessor(this.connectionNodes.get(size));//所有連接到此混合狀態的節點都不要連接此混合狀態的連接節點
+					this.connectionNodes.get(size).getPredecessor().get(i).addSuccessor(clgGraph.getStartNode().getSuccessor().get(0));//直接連到內層CLG的初始連接節點
+					clgGraph.getStartSuccessor().removePredecessor(clgGraph.getStartNode());//內層CLG移除開始結點
+					clgGraph.getStartSuccessor().addPredecessor(this.connectionNodes.get(size).getPredecessor().get(i));//初始連接節點連到外層CLG之前的狀態
 				}
-				for (int i = 0; i < this.connectionNodes.get(size).getSuccessor().size(); i++) {// 與前者同理，只是處理內層結束連接節點
-					this.connectionNodes.get(size).getSuccessor().get(i)
-							.removePredecessor(this.connectionNodes.get(size));
-					this.connectionNodes.get(size).getSuccessor().get(i)
-							.addPredecessor(clgGraph.getEndNode().getPredecessor().get(0));
+				for(int i=0;i<this.connectionNodes.get(size).getSuccessor().size();i++)
+				{//與前者同理，只是處理內層結束連接節點
+					this.connectionNodes.get(size).getSuccessor().get(i).removePredecessor(this.connectionNodes.get(size));
+					this.connectionNodes.get(size).getSuccessor().get(i).addPredecessor(clgGraph.getEndNode().getPredecessor().get(0));
 					clgGraph.getEndPredecessor().addSuccessor(this.connectionNodes.get(size).getSuccessor().get(i));
-					clgGraph.getEndPredecessor().removeSuccessor(clgGraph.getEndNode());
-				}
+					clgGraph.getEndPredecessor().removeSuccessor(clgGraph.getEndNode());	
+				}	
 				break;
 			}
 		}
-		this.connectionNodes.remove(size);// 移除混合狀態
-		maxId = ((CLGConnectionNode) (clgGraph.getEndPredecessor())).getConnectionId();
-		for (int connId = ((CLGConnectionNode) (clgGraph.getStartSuccessor()))
-				.getConnectionId(); connId <= maxId; connId++) {
-			if (clgGraph.getConnectionNode(connId) != null)
+		this.connectionNodes.remove(size);//移除混合狀態
+		maxId=((CLGConnectionNode)(clgGraph.getEndPredecessor())).getConnectionId();
+		for(int connId=((CLGConnectionNode)(clgGraph.getStartSuccessor())).getConnectionId();connId<=maxId;connId++)
+		{
+			if(clgGraph.getConnectionNode(connId)!=null)
 				this.connectionNodes.add(clgGraph.getConnectionNode(connId));
 		}
-
-		this.constraintNodes.putAll(clgGraph.getConstraintCollection());// 合併
-
-		for (int num = 0; num < this.connectionNodes.size(); num++) {
-			// System.out.println(this.connectionNodes.get(num).toGenImg2());
+		
+		this.constraintNodes.putAll(clgGraph.getConstraintCollection());//合併
+		
+		
+		for(int num=0;num<this.connectionNodes.size();num++)
+		{
+		//	System.out.println(this.connectionNodes.get(num).toGenImg2());
 		}
 	}
-
+	
+	
 	public void graphAnd(CLGGraph clgGraph) {
 		this.getEndNode().getPredecessor().get(0).addSuccessor(clgGraph.getStartNode().getSuccessor().get(0));
 		clgGraph.getStartNode().getSuccessor().get(0).addPredecessor(this.getEndNode().getPredecessor().get(0));
@@ -180,8 +180,7 @@ public class CLGGraph {
 	}
 
 	public void graphOr(CLGGraph clgGraph) {
-		if (clgGraph.getStartNode().getSuccessor().get(0).getClass()
-				.equals("class ccu.pllab.tcgen.AbstractCLG.CLGConstraintNode")) {
+		if (clgGraph.getStartNode().getSuccessor().get(0).getClass().equals("class ccu.pllab.tcgen.AbstractCLG.CLGConstraintNode")) {
 			CLGNode inputStartNode = clgGraph.getStartNode().getSuccessor().get(0);
 			CLGNode inputEndNode = clgGraph.getEndNode().getPredecessor().get(0);
 			inputStartNode.clearPredecessors();
@@ -280,11 +279,6 @@ public class CLGGraph {
 	public void graphReset() {
 		ccu.pllab.tcgen.AbstractCLG.CLGConstraintNode.reset();
 		ccu.pllab.tcgen.AbstractCLG.CLGConnectionNode.reset();
-	}
-
-	public void printCLGGraph() {
-		for (CLGConstraintNode cons : this.getConstraintCollection().values())
-			System.out.println(cons.getOriginalConsName());
 	}
 
 }

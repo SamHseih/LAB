@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.srcNodeVisitor;
 
+ 
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 
@@ -16,20 +17,22 @@ public class ForStatementVisitor extends JAVA2CLG implements SrcNodeVisit {
 	/***************************************************/
 
 	public boolean visit(ForStatement node) {
-
+		
+		
+		
 		ForInitizersVisitor initVisitor = new ForInitizersVisitor();
 		InfixExpressionVisitor branchVisitor = new InfixExpressionVisitor();
 		SrcVisitorUnit bodyVisitor = new SrcVisitorUnit();
 		SrcVisitorUnit updaterVisitor = new SrcVisitorUnit();
-		int i = 0;
+		int i=0;
 		CLGGraph initGraph = null;
 		for (Object nd : node.initializers()) {
 			((Expression) nd).accept(initVisitor);
 			CLGGraph tempGraph = null;
-			if (initVisitor.getCLGGraph() != null) {
-				tempGraph = initVisitor.getCLGGraph();
-			} else {
-				tempGraph = new CLGGraph(initVisitor.getConstraint());
+			if(initVisitor.getCLGGraph()!=null){
+				tempGraph=initVisitor.getCLGGraph();
+			}else{
+				tempGraph= new CLGGraph(initVisitor.getConstraint());
 			}
 			if (initGraph == null) {
 				initGraph = tempGraph;
@@ -42,9 +45,9 @@ public class ForStatementVisitor extends JAVA2CLG implements SrcNodeVisit {
 		CLGGraph outbodyGraph = new CLGGraph(branchVisitor.negationConstraint());
 
 		node.getBody().accept(bodyVisitor);
-
+		
 		inbodyGraph.graphAnd(bodyVisitor.getGraph());
-
+		
 		CLGGraph updaterGraph = null;
 		for (Object nd : node.updaters()) {
 			((Expression) nd).accept(updaterVisitor);
@@ -56,18 +59,18 @@ public class ForStatementVisitor extends JAVA2CLG implements SrcNodeVisit {
 			}
 		}
 		inbodyGraph.graphAnd(updaterGraph);
-
+		
 		inbodyGraph.graphClosure();
-
+		
 		inbodyGraph.graphAnd(outbodyGraph);
-		if (initGraph != null) {
+		if(initGraph!=null){
 			initGraph.graphAnd(inbodyGraph);
-		} else {
-			initGraph = inbodyGraph;
+		}else{
+			initGraph=inbodyGraph;
 		}
-
+		
 		clgGraph = initGraph;
-
+		
 		return false;
 	}
 

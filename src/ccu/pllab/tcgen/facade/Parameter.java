@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.facade;
 
+ 
 public class Parameter {
 
 	private static Boolean enableDebug;

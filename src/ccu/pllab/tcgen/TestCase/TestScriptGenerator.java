@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,65 +19,62 @@ import com.parctechnologies.eclipse.EclipseException;
 import ccu.pllab.tcgen.PapyrusCDParser.ClassInfo;
 import ccu.pllab.tcgen.PapyrusCDParser.OperationInfo;
 import ccu.pllab.tcgen.PapyrusCDParser.VariableInfo;
-import ccu.pllab.tcgen.SymbolTable.SymbolTable;
-import ccu.pllab.tcgen.SymbolTable.VariableToken;
-import ccu.pllab.tcgen.AbstractType.ArrayType;
-import ccu.pllab.tcgen.AbstractType.IntType;
-import ccu.pllab.tcgen.AbstractType.StringType;
-import ccu.pllab.tcgen.AbstractType.TypeTable;
+
 import ccu.pllab.tcgen.AbstractType.UserDefinedType;
-import ccu.pllab.tcgen.AbstractType.VariableType;
-import ccu.pllab.tcgen.AbstractType.VoidType;
-import ccu.pllab.tcgen.CBTCGUtility.Utility;
 import ccu.pllab.tcgen.DataWriter.DataWriter;
-import ccu.pllab.tcgen.ecl2data.ECLiPSeCompoundTerm;
 import ccu.pllab.tcgen.ecl2data.Ecl2Data;
 import ccu.pllab.tcgen.ecl2data.Ecl2DataFactory;
 import ccu.pllab.tcgen.exe.main.Main;
 import ccu.pllab.tcgen.launcher.BlackBoxLauncher;
 import ccu.pllab.tcgen.pathCLP2data.CLP2Data;
 import ccu.pllab.tcgen.pathCLP2data.CLP2DataFactory;
-import ccu.pllab.tcgen.pathCLP2data.ECLiPSe_CompoundTerm;
 import ccu.pllab.tcgen.sd2clg.SDXML2SD;
 import ccu.pllab.tcgen.sd2clg.StateDigram;
 import ccu.pllab.tcgen.sd2clp.ExecuteCLP;
 import ccu.pllab.tcgen.sd2clp.SD2CLP;
 import ccu.pllab.tcgen.transform.Splitter;
 import ccu.pllab.tcgen.transform.UmlTransformer;
-import ccu.pllab.tcgen.typeTestData.MethodTestData;
-import ccu.pllab.tcgen.typeTestData.TypeTestData;
-import scala.reflect.Symbol;
 import tudresden.ocl20.pivot.model.ModelAccessException;
 import tudresden.ocl20.pivot.parser.ParseException;
 import tudresden.ocl20.pivot.tools.template.exception.TemplateException;
 
 public class TestScriptGenerator {
-	private List<MethodTestData> testDatas;
+	private List<TestData> testDatas;
 	static int scriptNo = 1;
 
 	public TestScriptGenerator() {
 		scriptNo = 1;
 	}
 
-	public void init(List<MethodTestData> tds) {
+	public void init(List<TestData> tds) {
 		this.testDatas = tds;
 	}
 
-	public String genTestScriptByPreamble() throws Exception {
+	public String genTestScriptByPreamble(File uml) throws Exception {
+//		String className = this.testDatas.get(0).getClassName();
+//		String methodName = this.testDatas.get(0).getMethodName();
+//		String testScript = "import junit.framework.TestCase;\n" + 
+//							"import java.util.ArrayList;\n" + 
+//							"import java.util.Arrays;\n\n" +
+//							"public class Test"+className+"_"+methodName+" extends TestCase {\n";
 		String testScript = "";
+		Splitter split = new Splitter(uml);
+		UmlTransformer trans = new UmlTransformer();
+		File umlPre = split.split2CDuml();
+		File cdUml = trans.transform(umlPre);
+		File sdUml = split.split2SDuml();
 		/* gen test method */
-		for (MethodTestData testData : this.testDatas) {
-			CLP2Data.testScriptVarCount.clear();
+		for (TestData testData : this.testDatas) {
 			/* STG set up */
 			URL stgFileURL;
 			InputStreamReader fr = null;
 			if (!testData.isInvalidated()) {
 				stgFileURL = TestScriptGenerator.class.getResource("testscript.stg");
 				fr = new InputStreamReader(TestScriptGenerator.class.getResourceAsStream("testscript.stg"));
-				System.out.println("valid " + stgFileURL.getPath());
+				System.out.println("invalid " + stgFileURL);
 			} else {
 				stgFileURL = TestScriptGenerator.class.getResource("testscriptfail.stg");
-				System.out.println("invalid " + stgFileURL.getPath());
+				System.out.println("valid " + stgFileURL);
 			}
 			File stgFileDir = null;
 			try {
@@ -87,162 +83,567 @@ public class TestScriptGenerator {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			STGroup stg = new STGroupFile(stgFileDir.getPath());
-
+			STGroup stg = new STGroupFile(stgFileDir.getAbsolutePath());
+			;
 			ST template = stg.getInstanceOf("testscript");
 
-			String sys_decl = "";
-			String target_obj = "";
+			/* sys_decl */
+			String sys_decl = testData.getClassName() + " obj" + testData.getClassName() + " = null;\n";
+//			if(testData.getObjPre().substring(1, testData.getObjPre().length() - 1).contains("["))
+//				sys_decl += testData.getClassName() + " obj" + testData.getClassName() + "Post = null;\n";
+//			else
+//				sys_decl += testData.getClassName() + " obj" + testData.getClassName() + "_Post = null;\n";
+			template.add("sys_decl", sys_decl);
 
 			/* preamble begins */
 			String sys_init = "";
-			HashMap<String, String> seq = new HashMap<>();
+			SDXML2SD parsd = new SDXML2SD();
+			StateDigram st = parsd.convert(sdUml, cdUml);
+			// StateDigram st = parsd.convert(new
+			// File("examples/"+testData.getClassName()+"/"+testData.getClassName()+"SD.uml"),new
+			// File("examples/"+testData.getClassName()+"/"+testData.getClassName()+"(old).uml"));
+			SD2CLP s = new SD2CLP();
+			s.convert(st);
+			ArrayList seq = new ArrayList();
 			CLP2Data clp = CLP2DataFactory.getEcl2DataInstance();
 
-			VariableType varType = Main.typeTable.get(testData.getClassName(), null);
-			SymbolTable sym = varType.getSymbolTable();
-			String preambleStr = "";
-			HashMap<String, String> preambleMap = new HashMap<>();
-			// obj start
-			if (!testData.isConstructor()) {
-				preambleMap.clear();
-				preambleStr = "";
-
-				preambleMap = clp.preambleQuery(testData.getObjPre().get(0), testData.getClassName(), varType);
-
-				preambleStr += preambleMap.get(CLP2Data.objAdditional);
-				if (!(preambleMap.get(CLP2Data.objConstructor).equals(""))) {
-					target_obj = preambleMap.get(CLP2Data.objName);
-					preambleStr += "\r\n" + target_obj + "=" + preambleMap.get(CLP2Data.objConstructor) + ";";
-				} else {
-					target_obj = CLP2Data.newObjName(testData.getClassName());
-					preambleStr += "\r\n" + target_obj + "=" + preambleMap.get(CLP2Data.objName) + ";";
-				}
-
-				if (!(preambleMap.get(CLP2Data.objPreamble).equals("")))
-					preambleStr += "\r\n" + preambleMap.get(CLP2Data.objPreamble) + ";";
-
-				sys_init += preambleStr;
+			if (testData.isConstructor()) {
+				seq = clp.preambleQuery(testData.getObjPost(), testData.getClassName());
 			} else {
-				target_obj = CLP2Data.newObjName(testData.getClassName());
-
+				seq = clp.preambleQuery(testData.getObjPre(), testData.getClassName());
 			}
-			/* sys_decl */
-			sys_decl = Utility.titleToUppercase(testData.getClassName()) + " " + target_obj + " = null;\n";
-			template.add("sys_decl", sys_decl);
-			/* targetObj */
-			template.add("target_obj", target_obj);
-
-			// obj end
-
-			// arg start
-			String varName = "";
-			preambleMap.clear();
-			preambleStr = "";
-			String methodName = testData.isConstructor() ? Utility.titleToUppercase(testData.getMethodName())
-					: testData.getMethodName();
-
-			for (TypeTestData arg : testData.getArgPre()) {
-				preambleMap = clp.preambleQuery(arg, arg.getType().getType(), arg.getType());
-				varName += preambleMap.get(CLP2Data.objName) + ", ";
-				preambleStr += preambleMap.get(CLP2Data.objAdditional);
-				if (!(preambleMap.get(CLP2Data.objConstructor).equals(""))) {
-					preambleStr += "\r\n" + arg.getType().getDclType() + " " + preambleMap.get(CLP2Data.objName) + "="
-							+ preambleMap.get(CLP2Data.objConstructor) + ";";
-				}
-				if (!(preambleMap.get(CLP2Data.objPreamble).equals("")))
-					preambleStr += "\r\n" + preambleMap.get(CLP2Data.objPreamble) + ";";
+			for (int i = 0; i < seq.size(); i++) {
+				if (i == 0)
+					sys_init = "obj" + testData.getClassName() + " = new "
+							+ seq.get(i).toString().substring(0, 1).toUpperCase() + seq.get(i).toString().substring(1)
+							+ ";\n";
+				else
+					sys_init += "obj" + testData.getClassName() + "." + seq.get(i) + ";\n";
 			}
-			// arg end
-
-			/* arg_list */
-			String arg_list = Utility.delEndRedundantSymbol(varName, ", ");
-			template.add("arg_list", arg_list);
-
-			// sys_init
-			sys_init += preambleStr;
-			if (testData.isConstructor())
-				sys_init += "\r\n" + target_obj + " = new " + testData.getClassName() + "(" + arg_list + ");";
-
+			template.add("sys_init", sys_init);
 			/* preamble ends */
 
 			/* sys_cleanup */
-			/*
-			 * String sys_cleanup = "obj" + testData.getClassName() + " = null;\n";
-			 * sys_cleanup += "obj" + testData.getClassName() + "_Post = null;\n";
-			 * template.add("sys_cleanup", sys_cleanup);
-			 */
+			String sys_cleanup = "obj" + testData.getClassName() + " = null;\n";
+			if (testData.getObjPre().substring(1, testData.getObjPre().length() - 1).contains("["))
+				sys_cleanup += "obj" + testData.getClassName() + "Post = null;\n";
+			else
+				sys_cleanup += "obj" + testData.getClassName() + "_Post = null;\n";
+			template.add("sys_cleanup", sys_cleanup);
+
+			/* targetObj */
+			String target_obj = "obj" + testData.getClassName();
+			template.add("target_obj", target_obj);
+
+			/* arg_list */
+			String arg_list = testData.getArgPre().substring(1, testData.getArgPre().length() - 1);
+			template.add("arg_list", arg_list);
 
 			/* isConstructor */
 			template.add("is_constructor", testData.isConstructor());
-			
-			if (testData.getResult().size() > 0) {
-				/* ret_type */
-				// 沒有用到
-				String ret_type = (testData.getResult().size() > 0) ? testData.getResult().get(0).getType().getType()
-						: "";
-				template.add("ret_type", ret_type);
-
-				/* assert */
-				String ret_val = "";
-				// 因為testData裡的ret_type是字串是錯的，但改成VariableType會造成preamble
-				// clp錯誤，故由symboltable判斷函式回傳型態
-				if (sym.getMethod().get(methodName).getReturnType() instanceof ArrayType) {
-					template.add("return_array", true);
-					HashMap<String, String> retVarlMap = new HashMap<>();
-					retVarlMap = clp.preambleQuery(testData.getResult().get(0), "",
-							testData.getResult().get(0).getType());
-					String retArrName = retVarlMap.get(CLP2Data.objName);
-					if (!(retVarlMap.get(CLP2Data.objConstructor).equals("")))
-						sys_init += "\r\n" + sym.getMethod().get(methodName).getReturnType().getDclType() + " "
-								+ retVarlMap.get(CLP2Data.objName) + "=" + retVarlMap.get(CLP2Data.objConstructor)
-								+ ";";
-					if (!(retVarlMap.get(CLP2Data.objPreamble).equals("")))
-						sys_init += "\r\n" + retVarlMap.get(CLP2Data.objPreamble) + ";";
-					sys_init += retVarlMap.get(CLP2Data.objAdditional);
-					ret_val = retArrName;
-				} else if (sym.getMethod().get(methodName).getReturnType() instanceof UserDefinedType) {
-					ret_val = "\"" + Utility.delHeadTailBrackets(testData.getResult().get(0).getValueString())
-							.replace("[](", "[").replace(")", "]") + "\"";
-					template.add("return_array", false);
-					template.add("return_baseType", false);
-				} else {
-					ret_val = Utility.delHeadTailBrackets(testData.getResult().get(0).getValueString())
-							.replace("[](", "[").replace(")", "]");
-					template.add("return_array", false);
-					template.add("return_baseType", true);
-				}
-
-				template.add("sys_init", sys_init);
-
-				String assertStr = "";
-				assertStr = "assertTrue(" + "result.equals(" + ret_val + "))";
-
-				template.add("ret_val", ret_val);
-			}else {
-				template.add("sys_init", sys_init);
+			if (testData.getRetType().equals("OclVoid"))
 				template.add("return_void", true);
+
+			/* ret_type */
+			String ret_type = "String";
+			template.add("ret_type", ret_type);
+			/* assert */
+			String ret_val = testData.getRetVal().substring(1, testData.getRetVal().length() - 1);
+
+//			2020/3/4 處理tkeclipse 回傳值(testdata)有字串的情況，下面的寫法為date, time範例做
+			if (ret_val.contains("com.parctechnologies.eclipse.CompoundTermImpl with [functor=, arity=2 ")) {
+				ret_val = ret_val.replaceAll("com.parctechnologies.eclipse.CompoundTermImpl with \\[functor=, arity=2 ",
+						"");
+				ret_val = ret_val.replaceAll("arg\\(1\\)=", "");
+				ret_val = ret_val.replaceAll("arg\\(2\\)=", ",");
+				ret_val = ret_val.replaceAll(" ,", ", ");
+				ret_val = ret_val.replaceAll("\\]", "");
 			}
+
+			String assertStr = "";
+			assertStr = "assertTrue(" + "result.equals(" + ret_val + "))";
+			if (ret_val.contains("true"))
+				ret_val = "true";
+			else if (ret_val.contains("false"))
+				ret_val = "false";
+			if (Main.twoD) {
+				String ret_list = ret_val;
+				ret_val = "\"" + ret_val.substring(0, ret_val.lastIndexOf("]") + 1) + "\"";
+			} else if (ret_val.contains("[")) {
+				if (ret_val.contains("]"))
+					ret_val = ret_val.substring(0, ret_val.indexOf("]"));
+				ret_val = ret_val.replaceAll("\\[", "");
+				ret_val = "\"[" + ret_val + "]\"";
+			}
+			template.add("ret_val", ret_val);
+			if (!testData.isConstructor())
+				template.add("assert", assertStr);
 
 			template.add("exception", "Exception");
 			template.add("testCasePackage", testData.getClassName());
 			template.add("classPackage", testData.getClassName());
 			template.add("class_name", testData.getClassName());
 			template.add("method_name", testData.getMethodName());
-			template.add("new_method_name", Utility.titleToUppercase(testData.getMethodName()) + "_");
-			String dataObjPost = "";
-			for (TypeTestData attri : testData.getObj()) {
-				dataObjPost += attri.getValueString() + ", ";
-			}
-			dataObjPost = Utility.delEndRedundantSymbol(dataObjPost, ", ");
-			dataObjPost = dataObjPost.replace("[](", "[").replace(")", "]");
-			template.add("obj_list", "\"" + dataObjPost + "\"");
+			template.add("new_method_name",
+					testData.getMethodName().substring(0, 1).toUpperCase() + testData.getMethodName().substring(1));
+			template.add("obj_list", "\"" + testData.getObjPost() + "\"");
 			template.add("case_no", scriptNo);
 
 			testScript += template.render();
 			scriptNo++;
 		}
+//		testScript += "}";
+//		DataWriter.writeInfo(testScript, "Test" + className +"_"+methodName, "java", DataWriter.output_folder_path, "TestSuites");
+		cdUml.delete();
+		sdUml.delete();
+		umlPre.delete();
 
+		return testScript;
+	}
+
+//	public String genTestScript() throws ParserConfigurationException, SAXException, IOException, TemplateException, ModelAccessException, ParseException, EclipseException {
+//		for (TestData testData : this.testDatas) {
+//			this.genTestCase(testData);
+//		}
+//
+//		return null;
+//	}
+	public String genTestScript(String output_path) {
+		for (TestData testData : this.testDatas) {
+			this.genTestCase(testData, output_path);
+		}
+		return null;
+	}
+
+//	2020/2/25調整，原版看建隆
+	public String genTestCase() throws ParserConfigurationException, SAXException, IOException, TemplateException,
+			ModelAccessException, ParseException, EclipseException {
+		String testScript = "";
+		for (TestData testData : this.testDatas) {
+//			String testCaseName = String.format("Test%s%s", testData.getTestDataName(), scriptNo);
+//			System.out.println(testCaseName);
+			//System.out.println(testData.getClassName()+"ODOD");
+			URL stgFileURL;
+			InputStreamReader fr = null;
+			if (!testData.isInvalidated()) {
+				stgFileURL = TestScriptGenerator.class.getResource("testscript.stg");
+				fr = new InputStreamReader(TestScriptGenerator.class.getResourceAsStream("testcase.stg"));
+				System.out.println("invalid " + stgFileURL);
+
+			} else {
+				stgFileURL = TestScriptGenerator.class.getResource("testscriptfail.stg");
+				System.out.println("valid " + stgFileURL);
+			}
+
+			File stgFileDir = null;
+			try {
+//				stgFileDir = new File(stgFileURL.toURI());
+				stgFileDir = new File(stgFileURL.getPath());
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			STGroup stg;
+			ST template;
+			if (!testData.isInvalidated()) {
+//				stg = new STGroupFile(stgFileDir);
+				stg = new STGroupFile(stgFileDir.getAbsolutePath());
+				template = stg.getInstanceOf("testscript");
+			} else {
+				stg = new STGroupFile(stgFileDir.getAbsolutePath());
+				template = stg.getInstanceOf("testscript");
+			}
+			/* sys_decl */
+			String sys_decl = testData.getClassName() + " obj" + testData.getClassName() + " = null;\n";
+			if (testData.getObjPre().substring(1, testData.getObjPre().length() - 1).contains("["))
+				sys_decl += testData.getClassName() + " obj" + testData.getClassName() + "Post = null;\n";
+			
+			//20200828
+			else;
+				//sys_decl += testData.getClassName() + " obj" + testData.getClassName() + "_Post = null;\n";
+
+			template.add("sys_decl", sys_decl);
+
+			String exception = "Exception";
+
+			/* sys_init */
+			String obj_pre = testData.getObjPre().substring(1, testData.getObjPre().length() - 1);
+			String obj_post = testData.getObjPost().substring(1, testData.getObjPost().length() - 1);
+			obj_pre = obj_pre.replace(", ", ",");
+			obj_post = obj_post.replace(", ", ",");
+			String sys_init = "";
+			String arg_list = testData.getArgPre().substring(1, testData.getArgPre().length() - 1);
+			
+String ret_val = testData.getRetVal().substring(1, testData.getRetVal().length() - 1);
+			
+			boolean isReturnClass = false;
+//			2020/3/4 處理tkeclipse 回傳值(testdata)有字串的情況，下面的寫法為date, time範例做
+			if (ret_val.contains("com.parctechnologies.eclipse.CompoundTermImpl with [functor=, arity=2 ")) {
+				ret_val = ret_val.replaceAll("com.parctechnologies.eclipse.CompoundTermImpl with \\[functor=, arity=2 ",
+						"");
+				ret_val = ret_val.replaceAll("arg\\(1\\)=", "");
+				ret_val = ret_val.replaceAll("arg\\(2\\)=", ",");
+				ret_val = ret_val.replaceAll(" ,", ", ");
+				ret_val = ret_val.replaceAll("\\]", "");
+				isReturnClass = true;
+			}
+			if (ret_val.contains("true"))
+				ret_val = "true";
+			else if (ret_val.contains("false"))
+				ret_val = "false";
+			if (Main.twoD) {
+				String ret_list = ret_val;
+
+				ret_val = "\"" + ret_val.substring(0, ret_val.lastIndexOf("]") + 1) + "\"";
+			} else if (ret_val.contains("[")) {
+				if (ret_val.contains("]"))
+					ret_val = ret_val.substring(0, ret_val.indexOf("]"));
+				ret_val = ret_val.replaceAll("\\[", "");
+				ret_val = "\"[" + ret_val + "]\"";
+			}
+			
+			
+			if (obj_pre.contains("[") || obj_post.contains("[")) {
+				exception = "ArraySizeException";
+				if (testData.isConstructor()) {
+					if (Main.twoD) {
+						sys_init += "int[][] objArray=";
+						String temparg = arg_list;
+						int row = 0;
+						int col = 1;
+						for (String temp = temparg; temp.indexOf("],") > 0; temp = temp
+								.substring(temp.indexOf("],") + 2))
+							row++;
+						for (String temp = temparg; temp.indexOf(",") > 0
+								&& temp.indexOf(",") < temp.indexOf("]"); temp = temp.substring(temp.indexOf(",") + 1))
+							col++;
+
+						if (temparg.contains("[]")) {
+							row = 0;
+							col = 0;
+						}
+						temparg = temparg.replaceAll("\\[", "{").replaceAll("]", "}");
+						sys_init += temparg.substring(0, temparg.lastIndexOf("}") + 1) + ";\n";
+
+						if (Main.symbolTable.getAttributeMap().containsKey("row"))
+							sys_init += "obj" + testData.getClassName() + "=new " + testData.getClassName()
+									+ "(objArray, " + row + ", " + col + ");\n";// ,"+row_pre+","+col_pre+");\n";
+						else
+							sys_init += "obj" + testData.getClassName() + "=new " + testData.getClassName()
+									+ "(objArray);\n";// ,"+row_pre+","+col_pre+");\n";
+
+						String obj_list = "\"" + obj_post.substring(0, obj_post.lastIndexOf("]") + 1) + "\"";
+						template.add("obj_list", obj_list);
+					} else if (testData.getClassName().contains("Stack") || testData.getClassName().contains("Queue")) {
+						String bound = "";
+						if (obj_post.contains("],")) {
+							bound = obj_post.substring(obj_post.indexOf("],") + 2);
+							if (bound.contains(","))
+								bound = bound.substring(0, bound.indexOf(","));
+							else
+								bound = "";
+						}
+						if (!testData.getObjPost().equals("[]"))
+							obj_post = testData.getObjPost().substring(2, testData.getObjPost().length() - 2);
+						else
+							obj_post = "";
+						template.add("is_array", true);
+
+						if (testData.getClassName().contains("Stack")) {
+							if (testData.getArgPre().contains("-32768"))
+								sys_init += "objStack_Post=new Stack(-32768);\n";
+							else {
+								sys_init += "objStack_Post=new Stack(" + bound + ");\n";
+								if (obj_post.contains(",")) {
+									String[] pushPost = obj_post.split(",");
+									for (String token : pushPost) {
+										if (token.contains("]")) {
+											if (token.substring(0, token.length() - 1).length() > 0)
+												sys_init += "objStack_Post.push("
+														+ token.substring(0, token.length() - 1) + ");\n";
+											break;
+										}
+										sys_init += "objStack_Post.push(" + token + ");\n";
+									}
+								} else if (obj_post.length() > 0) {
+									sys_init += "objStack_Post.push(" + obj_post + ");\n";
+								}
+
+								// template.add("is_bound",true);
+								// arg_list="\""+data.getObjPost().substring(1,
+								// data.getObjPost().indexOf("]")+1)+"\"";
+								template.add("obj_list", "\"[" + obj_post.substring(0, obj_post.indexOf("]")) + "]\"");
+							}
+
+							// template.add("assert","assertEquals(objStack.toString(),\"[]\");\n");
+						} else if (testData.getClassName().contains("Queue")) {
+							if (testData.getArgPre().contains("-32768"))
+								sys_init += "objQueue_Post=new Queue(-32768);\n";
+							else {
+								sys_init += "objQueue_Post = new Queue(" + bound + ");\n";
+								if (obj_post.contains(",")) {
+									String[] pushPost = obj_post.split(",");
+									for (String token : pushPost) {
+										if (token.contains("]")) {
+											if (token.substring(0, token.length() - 1).length() > 0)
+												sys_init += "objQueue_Post.enqueue("
+														+ token.substring(0, token.length() - 1) + ");\n";
+											break;
+										}
+										sys_init += "objQueue_Post.enqueue(" + token + ");\n";
+									}
+								} else if (obj_post.length() > 0) {
+									sys_init += "objQueue_Post.enqueue(" + obj_post + ");\n";
+								}
+
+								// template.add("is_bound",true);
+								// arg_list="\""+data.getObjPost().substring(1,
+								// data.getObjPost().indexOf("]")+1)+"\"";
+								template.add("obj_list", "\"[" + obj_post.substring(0, obj_post.indexOf("]")) + "]\"");
+
+							}
+							// template.add("assert","assertEquals(objStack.toString(),\"[]\");\n");
+						}
+					} 
+
+					//20200828  UserDefinedType
+					//else if(BlackBoxLauncher.typeTable.containsType(testData.getClassName(),testData.getClassName())) {
+					else if(Main.typeTable.containsType(testData.getClassName(),testData.getClassName())) {
+						//ClassInfo c = ((UserDefinedType)(BlackBoxLauncher.typeTable.get(testData.getClassName(), testData.getClassName()))).getClassInfo();
+						ClassInfo c = ((UserDefinedType)(Main.typeTable.get(testData.getClassName(), testData.getClassName()))).getClassInfo();
+						ArrayList<String> ans_arr =new ArrayList<String>();
+						sys_init +=  "obj"+ testData.getClassName() + " = new " + testData.getClassName() + "(";
+						String obj_list_str = "\"" ;
+						for(int i= 0 ; i < c.getProperties().size();i++) {
+							String temp = obj_post.substring(obj_post.indexOf("["),obj_post.indexOf("]")+1);  // [....]
+							if(i!=c.getProperties().size()-1)obj_post = obj_post.substring(obj_post.indexOf("]")+2);
+							if(i==0) {
+								sys_init += temp.substring(1, temp.length()-1);
+								obj_list_str += temp;
+							}
+							else {
+								sys_init += ","+temp.substring(1, temp.length()-1);
+								obj_list_str += ","+temp;
+							}
+							ans_arr.add(temp);
+						}
+						
+						sys_init += ");\n";
+						template.add("obj_list", obj_list_str + "\"");
+					} // else if UserDefinedType
+
+					else {
+						if (obj_post.contains("]"))
+							obj_post = obj_post.substring(0, obj_post.indexOf("]"));
+						String size = testData.getObjPost().substring(testData.getObjPost().indexOf("]") + 1,
+								testData.getObjPost().length() - 1);
+						sys_init += "int[] objArrayPost= {" + obj_post.substring(1) + "};\n" + "obj"
+								+ testData.getClassName() + " = new " + testData.getClassName() + "(objArrayPost" + size
+								+ ");\n";
+						template.add("obj_list", "\"[" + obj_post.substring(1) + "]\"");
+					}
+				} else {
+					if (Main.twoD) {
+						sys_init += "int[][] objArray={";
+						String tempObjpre = obj_pre.substring(1, obj_pre.lastIndexOf("]"));
+						int row = 0;
+						int col = 0;
+						for (String temp = tempObjpre; temp.indexOf("],") > 0; temp = temp
+								.substring(temp.indexOf("],") + 2))
+							row++;
+						for (String temp = tempObjpre; temp.indexOf(",") > 0
+								&& temp.indexOf(",") < temp.indexOf("]"); temp = temp.substring(temp.indexOf(",") + 1))
+							col++;
+
+						if (tempObjpre.length() > 0) {
+							row++;
+							col++;
+						}
+						tempObjpre = tempObjpre.replaceAll("\\[", "{").replaceAll("]", "}");
+						sys_init += tempObjpre.substring(0, tempObjpre.lastIndexOf("}") + 1) + "};\n";
+
+						if (Main.symbolTable.getAttributeMap().containsKey("row"))
+							sys_init += "obj" + testData.getClassName() + "=new " + testData.getClassName()
+									+ "(objArray, " + row + ", " + col + ");\n";// ,"+row_pre+","+col_pre+");\n";
+						else
+							sys_init += "obj" + testData.getClassName() + "=new " + testData.getClassName()
+									+ "(objArray);\n";// ,"+row_pre+","+col_pre+");\n";
+						String obj_list = "";
+
+						template.add("obj_list", obj_list);
+						// sys_init+="obj"+data.getClassName()+"Post =new
+						// "+data.getClassName()+"(objArrayPost);\n";//,"+row_post+","+col_post+");\n";
+						template.add("is_array", true);
+					} else {
+						String bound = "";
+						if ((testData.getClassName().contains("Stack") || testData.getClassName().contains("Queue"))
+								&& obj_pre.contains("],")) {
+							bound = obj_pre.substring(obj_pre.indexOf("],") + 2);
+							if (bound.contains(","))
+								bound = bound.substring(0, bound.indexOf(","));
+							else
+								bound = "";
+						}
+						if (!obj_pre.equals("[]")) {
+							obj_pre = testData.getObjPre().substring(2, testData.getObjPre().indexOf("]"));
+							if (!testData.getObjPost().equals("[]"))
+								obj_post = testData.getObjPost().substring(2, testData.getObjPost().length() - 2);
+						} else {
+							obj_pre = "";
+							if (!testData.getObjPost().equals("[]"))
+								obj_post = testData.getObjPost().substring(2, testData.getObjPost().length() - 2);
+							else
+								obj_post = "";
+						}
+						template.add("is_array", true);
+						if (testData.getClassName().contains("Stack")) {
+							sys_init += "objStack = new Stack(" + bound;// );\n";
+
+							sys_init += ");\n";
+							if (obj_pre.contains(",")) {
+								String[] push = obj_pre.split(",");
+								for (String token : push) {
+									if (token.contains("]")) {
+										sys_init += "objStack.push(" + token.substring(0, token.indexOf("]")) + ");\n";
+										break;
+									}
+									sys_init += "objStack.push(" + token + ");\n";
+								}
+							} else if (obj_pre.length() > 0) {
+								sys_init += "objStack.push(" + obj_pre + ");\n";
+							}
+							template.add("obj_list", "\"[" + obj_post.substring(0, obj_post.indexOf("]")) + "]\"");
+						} else if (testData.getClassName().contains("Queue")) {
+							sys_init = "objQueue = new Queue(" + bound + ");\n";
+							if (obj_pre.contains(",")) {
+								String[] queue = obj_pre.split(",");
+								for (String token : queue) {
+									if (token.contains("]")) {
+										sys_init += "objQueue.enqueue(" + token.substring(0, token.indexOf("]"))
+												+ ");\n";
+										break;
+									}
+									sys_init += "objQueue.enqueue(" + token + ");\n";
+								}
+							} else if (obj_pre.length() > 0) {
+								sys_init += "objQueue.enqueue(" + obj_pre + ");\n";
+							}
+							template.add("obj_list", "\"[" + obj_post.substring(0, obj_post.indexOf("]")) + "]\"");
+						}
+						//20200828
+						else if(testData.getClassName().contains("Clock") ) {
+							String size = testData.getObjPre().substring(testData.getObjPre().indexOf("]") + 1,
+									testData.getObjPre().length() - 1);
+							sys_init = "obj" + testData.getClassName()
+									+ " = new " + testData.getClassName() + "(" +obj_pre + ");\n";
+							if (obj_post.contains("]"))
+								obj_post = obj_post.substring(0, obj_post.indexOf("]"));
+							size = testData.getObjPost().substring(testData.getObjPost().indexOf("]") + 1,
+									testData.getObjPost().length() - 1);
+							template.add("obj_list", "\"[" + obj_post + "]\"");
+							// sys_init += "int[] objArrayPost= {"+obj_post+"};\n"+"obj" +
+							// data.getClassName() + "Post = new " + data.getClassName() +
+							// "(objArrayPost"+size+");\n";
+						}
+
+						else {
+							String size = testData.getObjPre().substring(testData.getObjPre().indexOf("]") + 1,
+									testData.getObjPre().length() - 1);
+							sys_init = "int[] objArray= {" + obj_pre + "};\n" + "obj" + testData.getClassName()
+									+ " = new " + testData.getClassName() + "(objArray" + size + ");\n";
+							if (obj_post.contains("]"))
+								obj_post = obj_post.substring(0, obj_post.indexOf("]"));
+							size = testData.getObjPost().substring(testData.getObjPost().indexOf("]") + 1,
+									testData.getObjPost().length() - 1);
+							template.add("obj_list", "\"[" + obj_post + "]\"");
+							// sys_init += "int[] objArrayPost= {"+obj_post+"};\n"+"obj" +
+							// data.getClassName() + "Post = new " + data.getClassName() +
+							// "(objArrayPost"+size+");\n";
+						}
+					}
+				}
+			} else {
+				if (!Main.twoD && !testData.getClassName().equals("Stack")
+						&& !testData.getClassName().equals("Queue")) {
+					sys_init = "obj" + testData.getClassName() + " = new " + testData.getClassName() + "(" + obj_post
+							+ ");\n";
+//					sys_init += "obj" + testData.getClassName() + "_Post = new " + testData.getClassName() + "("
+//							+ obj_post + ");\n";
+					if (testData.isInvalidated() && testData.isConstructor()) {
+						sys_init = "";
+					}else if(isReturnClass) {
+						sys_init += "obj" + testData.getClassName() + "_Post = new " + testData.getClassName() + "("
+								+ ret_val + ");\n";
+					}
+					template.add("obj_list", "\"" + testData.getObjPost() + "\"");
+				}
+			}
+			
+			if(isReturnClass) {
+				template.add("ret_val","obj" + testData.getClassName() + "_Post");
+			}else {
+				template.add("ret_val", ret_val);
+			}
+			template.add("is_ReturnClass", isReturnClass);
+			
+			template.add("sys_init", sys_init);
+
+			/* sys_cleanup */
+			String sys_cleanup = "obj" + testData.getClassName() + " = null;\n";
+			if (testData.getObjPre().substring(1, testData.getObjPre().length() - 1).contains("["))
+				sys_cleanup += "obj" + testData.getClassName() + "Post = null;\n";
+			else
+				sys_cleanup += "obj" + testData.getClassName() + "_Post = null;\n";
+
+			template.add("sys_cleanup", sys_cleanup);
+
+			/* targetObj */
+			String target_obj = "obj" + testData.getClassName();
+			template.add("target_obj", target_obj);
+
+			/* arg_list */
+
+			template.add("arg_list", arg_list);
+
+			/* isConstructor */
+			template.add("is_constructor", testData.isConstructor());
+			if (testData.getRetType().equals("OclVoid"))
+				template.add("return_void", true);
+			/* ret_type */
+			String ret_type = "String";
+			template.add("ret_type", ret_type);
+
+			/* assert */
+			
+
+			String assertStr = "";
+			// if(data.getRetVal().length()-1==0)
+			assertStr = "assertTrue(" + "result.equals(" + ret_val + "))";
+			
+			// else
+			// assertStr = "assertTrue(" + "obj" + data.getClassName() +".equals(" + "obj" +
+			// data.getClassName() + "_Post" + "))";
+			if (!testData.isConstructor())
+				template.add("assert", assertStr);
+			template.add("exception", exception);
+			template.add("testCasePackage", testData.getClassName());
+			template.add("classPackage", testData.getClassName());
+			template.add("class_name", testData.getClassName());
+			template.add("method_name", testData.getMethodName());
+			template.add("new_method_name", testData.getMethodName());
+			// template.add("case_no", data.getTestDataID());
+			template.add("case_no", scriptNo);
+			// System.out.println(template.render());
+			String testCasePreName;
+			if (testData.isInvalidated()) {
+				testCasePreName = "errTest";
+			} else {
+				testCasePreName = "Test";
+			}
+			if (!obj_pre.equals("[]"))
+				testScript += template.render();
+			scriptNo++;
+		}
 		return testScript;
 	}
 

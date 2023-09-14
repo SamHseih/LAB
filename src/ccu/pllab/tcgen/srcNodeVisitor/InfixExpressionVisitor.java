@@ -1,5 +1,7 @@
 package ccu.pllab.tcgen.srcNodeVisitor;
 
+
+ 
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import ccu.pllab.tcgen.AbstractCLG.CLGGraph;
@@ -10,59 +12,95 @@ public class InfixExpressionVisitor extends JAVA2CLG implements SrcNodeVisit {
 	private CLGNode clgNode;
 	private CLGConstraint constraint;
 	private CLGGraph clgGraph;
-
 	/****************************************************************/
 	@Override
 	public boolean visit(InfixExpression node) {
-		if (!node.hasExtendedOperands()) {
-			CLGConstraint leftOperandCons;
-			CLGConstraint operationCons = new CLGOperatorNode(node.getOperator().toString());
-			CLGConstraint rightOperandCons;
-			/*
-			 * LeftOp start to visit
-			 */
-			leftOperandCons = BasicExpVisitor.VisitorAssign(node.getLeftOperand());
-			((CLGOperatorNode) operationCons).setLeftOperand(leftOperandCons);
-			// LeftOp finish
+		String leftOperand = node.getLeftOperand().getClass().toString();
+		String rightOperand = node.getRightOperand().getClass().toString();
+		CLGConstraint leftOperandCons = new CLGVariableNode();
+		CLGConstraint operationCons = new CLGOperatorNode(node.getOperator().toString());
+		CLGConstraint rightOperandCons = new CLGVariableNode();
+		
+		
+		/********
+		 * 
+		 * 括號要修正
+		 */
+		
+//		System.out.println("LCons: "+node.getLeftOperand().getClass().toString());
+//		System.out.println("RCons: "+node.getRightOperand().getClass().toString());
+//		System.out.println("node.getOperator() "+node.getOperator().toString());
+//		System.out.println("node.getLeftOperand() "+node.getLeftOperand().toString());
+//		System.out.println("node.getRightOperand() "+node.getRightOperand().toString());
+//		System.out.println("node.extendedOperands() "+node.extendedOperands().toString());
+//		System.out.println("node.extendedOperands().size() "+node.extendedOperands().size());
+//		if(node.extendedOperands().size()>0)
+//		System.out.println("node.extendedOperands().class() "+node.extendedOperands().get(0).getClass());
+//		InfixExpressionVisitor Nvisitor = new InfixExpressionVisitor();
+//		if(node.extendedOperands().size()>0)
+//		((Expression)node.extendedOperands().get(0)).accept(Nvisitor);
+		/*
+		 * 
+		 * 
+		 * LeftOp start to visit
+		 */
+		if (leftOperand.equals("class org.eclipse.jdt.core.dom.InfixExpression")) {
+			InfixExpressionVisitor visitor = new InfixExpressionVisitor();
+			node.getLeftOperand().accept(visitor);
+			leftOperandCons = visitor.getConstraint();
+			
 
-			/*
-			 * RightOp start to visit
-			 */
-			rightOperandCons = BasicExpVisitor.VisitorAssign(node.getRightOperand());
-			((CLGOperatorNode) operationCons).setRightOperand(rightOperandCons);
-			// RightOp finish
-
-			constraint = operationCons;
-		} else {// 如果有extendedOperands(詳情可看官方文件InfixExpression底下extendedOperands的欄位說明)
-			// 一開始先照一般infix做
-			String commonOp = node.getOperator().toString();// 共用的OP
-			CLGConstraint leftOperandCons;
-			CLGConstraint operationCons = new CLGOperatorNode(commonOp);
-			CLGConstraint rightOperandCons;
-
-			leftOperandCons = BasicExpVisitor.VisitorAssign(node.getLeftOperand());
-			((CLGOperatorNode) operationCons).setLeftOperand(leftOperandCons);
-			// LeftOp finish
-
-			/*
-			 * RightOp start to visit
-			 */
-			rightOperandCons = BasicExpVisitor.VisitorAssign(node.getRightOperand());
-			((CLGOperatorNode) operationCons).setRightOperand(rightOperandCons);
-			// RightOp finish
-
-			// 處理extendedOp部份
-			for (int i = 0; i < node.extendedOperands().size(); i++) {
-				leftOperandCons = operationCons;// 將處理好的CLGNode丟到leftOp
-				operationCons = new CLGOperatorNode(commonOp);// 重建一個新的CLGNode
-				((CLGOperatorNode) operationCons).setLeftOperand(leftOperandCons);// 剛處理的丟到左邊
-				rightOperandCons = BasicExpVisitor.VisitorAssign((Expression) node.extendedOperands().get(i));
-				((CLGOperatorNode) operationCons).setRightOperand(rightOperandCons);// extendOp丟到右邊
-			}
-
-			constraint = operationCons;
+		} else if (leftOperand.equals("class org.eclipse.jdt.core.dom.NumberLiteral")) {
+			NumberLiteralVisitor visitor = new NumberLiteralVisitor();
+			node.getLeftOperand().accept(visitor);
+			leftOperandCons = visitor.getConstraint();
+		} else if (leftOperand.equals("class org.eclipse.jdt.core.dom.StringLiteral")) {
+			StringLiteralVisitor visitor = new StringLiteralVisitor();
+			node.getLeftOperand().accept(visitor);
+			leftOperandCons = visitor.getConstraint();
+		} else if (leftOperand.equals("class org.eclipse.jdt.core.dom.SimpleName")) {
+			SimpleNameVisitor visitor = new SimpleNameVisitor();
+			node.getLeftOperand().accept(visitor);
+			leftOperandCons = visitor.getConstraint();
+		}else if((leftOperand.equals("class org.eclipse.jdt.core.dom.ArrayAccess"))){
+			ArrayAccessVisitor visitor =new ArrayAccessVisitor();
+			node.getLeftOperand().accept(visitor);
+			leftOperandCons = visitor.getConstraint();
 		}
-
+		((CLGOperatorNode) operationCons).setLeftOperand(leftOperandCons);
+		
+		//LeftOp finish
+		
+		/*
+		 * 
+		 * 
+		 * RightOp start to visit
+		 */
+		if (rightOperand.equals("class org.eclipse.jdt.core.dom.InfixExpression")) {
+			InfixExpressionVisitor visitor = new InfixExpressionVisitor();
+			node.getRightOperand().accept(visitor);
+			rightOperandCons = visitor.getConstraint();		
+		} else if (rightOperand.equals("class org.eclipse.jdt.core.dom.NumberLiteral")) {
+			NumberLiteralVisitor visitor = new NumberLiteralVisitor();
+			node.getRightOperand().accept(visitor);
+			rightOperandCons = visitor.getConstraint();
+		} else if (rightOperand.equals("class org.eclipse.jdt.core.dom.StringLiteral")) {
+			StringLiteralVisitor visitor = new StringLiteralVisitor();
+			node.getRightOperand().accept(visitor);
+			rightOperandCons = visitor.getConstraint();
+		} else if (rightOperand.equals("class org.eclipse.jdt.core.dom.SimpleName")) {
+			SimpleNameVisitor visitor = new SimpleNameVisitor();
+			node.getRightOperand().accept(visitor);
+			rightOperandCons = visitor.getConstraint();
+		}else if((leftOperand.equals("class org.eclipse.jdt.core.dom.ArrayAccess"))){
+			ArrayAccessVisitor visitor =new ArrayAccessVisitor();
+			node.getRightOperand().accept(visitor);
+			rightOperandCons = visitor.getConstraint();
+		}
+		((CLGOperatorNode) operationCons).setRightOperand(rightOperandCons);
+		//RightOp finish
+		
+		constraint = operationCons;
 		return false;
 	}
 

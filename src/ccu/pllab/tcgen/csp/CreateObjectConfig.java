@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.csp;
 
+ 
 import org.apache.commons.lang3.Range;
 
 import ccu.pllab.tcgen.libs.pivotmodel.Association;

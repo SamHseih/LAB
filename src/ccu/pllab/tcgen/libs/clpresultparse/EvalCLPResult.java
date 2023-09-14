@@ -1,5 +1,6 @@
 package ccu.pllab.tcgen.libs.clpresultparse;
 
+ 
 import ccu.pllab.tcgen.libs.CLPResult;
 import ccu.pllab.tcgen.libs.CLPState;
 import ccu.pllab.tcgen.libs.clpresultparse.ResultParser.ArgArgContext;
@@ -18,7 +19,7 @@ public class EvalCLPResult extends ResultBaseVisitor<String> {
 	public static enum ResultType {
 		ARG, POST_STATE, PRE_STATE
 	}
-
+ 
 	// keep the intermedia parsing results
 	CLPResult mResult = null;
 
