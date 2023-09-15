@@ -182,7 +182,7 @@ public class CLG2Path {
 //		String ts = testScriptGenerator.genTestScriptByPreamble(uml);
 //		this.testScript += ts;
 		
-		if(this.className.contains("Array") || this.className.contains("Date") || this.className.contains("Time")) {
+		if(this.className.contains("Array") || this.className.contains("Date") || this.className.contains("Time") || this.className.contains("Clock")) {
 			TestScriptGenerator testScriptGenerator = new TestScriptGenerator();
 			testScriptGenerator.init(this.testData);
 			String ts = testScriptGenerator.genTestCase();

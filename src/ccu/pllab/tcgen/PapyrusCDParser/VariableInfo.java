@@ -1,8 +1,10 @@
 package ccu.pllab.tcgen.PapyrusCDParser;
 
+import ccu.pllab.tcgen.AbstractType.*;
 
 public class VariableInfo {
-	private String type ;
+	// private String type ;
+	private VariableType varType;
 	private String name ;
 	private String id ;
 	private String visibility ;
@@ -14,7 +16,8 @@ public class VariableInfo {
 	// private String value ;
 	
 	public VariableInfo() {
-		type = "" ;
+		// type = "" ;
+		varType = null;
 		name = "" ;
 		id = "";
 		visibility = "";
@@ -23,8 +26,9 @@ public class VariableInfo {
 		className = "" ;
 	}
 	
-	public VariableInfo(String t, String n, String i, String v, String c) {
-		type = t ;
+	public VariableInfo(/*String t,*/VariableType var, String n, String i, String v, String c) {
+		// type = t;
+		varType = var;
 		name = n ;
 		id = i ;
 		visibility = v ;
@@ -33,9 +37,13 @@ public class VariableInfo {
 		className = c ;
 	}
 	
+	/*
+	public void setType(String t ) {
+		this.type = t;
+	}*/
 	
-	public void setType( String type ) {
-		this.type = type ;
+	public void setType(VariableType t ) {
+		this.varType = t;
 	}
 	
 	public void setName( String name ) {
@@ -71,8 +79,13 @@ public class VariableInfo {
 	*/
 	
 	
+	/*
 	public String getType() {
 		return type ;
+	}*/
+	
+	public VariableType getType() {
+		return varType ;
 	}
 	
 	public String getName() {

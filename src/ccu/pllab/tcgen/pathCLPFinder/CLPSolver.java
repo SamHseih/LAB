@@ -74,12 +74,41 @@ public class CLPSolver {
 		}
 		
 		this.EclDirectPath = DataWriter.testCons_output_path;
+		System.out.println(this.EclDirectPath);
 		File eclFile = new File(EclDirectPath + className + methodName + TestTypeSign + pathNum + ".ecl");
 		int testCaseID = 1;
 		try {
 //			
 			this.connectCLPSolver();
+			File tempF1= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Date_BlackBox_DCC\\DateDate.ecl");
+			File tempF2= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Date_BlackBox_DCC\\DateGetYear.ecl");
+			File tempF3= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Date_BlackBox_DCC\\DateGetMonth.ecl");
+			File tempF4= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Date_BlackBox_DCC\\DateGetDay.ecl");
+			File tempF5= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Date_BlackBox_DCC\\DateNext.ecl");
+			
+			this.clp2data.compile(tempF1);
+			this.clp2data.compile(tempF2);
+			this.clp2data.compile(tempF3);
+			this.clp2data.compile(tempF4);
+			this.clp2data.compile(tempF5);
+
+			
+			File tempF6= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Time_BlackBox_DCC\\TimeTime.ecl");
+			File tempF7= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Time_BlackBox_DCC\\TimeGetHour.ecl");
+			File tempF8= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Time_BlackBox_DCC\\TimeGetMinute.ecl");
+			File tempF9= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Time_BlackBox_DCC\\TimeGetSecond.ecl");
+			File tempF10= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Time_BlackBox_DCC\\TimeNext.ecl");
+			
+			this.clp2data.compile(tempF6);
+			this.clp2data.compile(tempF7);
+			this.clp2data.compile(tempF8);
+			this.clp2data.compile(tempF9);
+			this.clp2data.compile(tempF10);
+			File tempF11= new File("C:\\runtime-EclipseApplication\\Clock\\test constraints\\Clock_BlackBox_DCC\\ClockClock.ecl");
+			this.clp2data.compile(tempF11);
+			
 			this.clp2data.compile(eclFile);
+			
 			this.sol = this.clp2data.solvingCSP_term("test" + className + methodName, objPre, argPre, objPost, argPost, retVal, 5);
 			this.testData = new TestData(className, methodName, pathNum, testCaseID, isConstructor, retType, this.sol);
 			System.out.println("TD: " + testData.toString());
@@ -113,7 +142,8 @@ public class CLPSolver {
 		try {
 //			
 			this.connectCLPSolver();
-			this.clp2data.compile(eclFile);
+
+			
 			this.sol = this.clp2data.solvingCSP_term("test" + className + methodName, objPre, argPre, objPost, argPost, retVal, 4);
 			this.testData = new TestData(className, methodName, pathNum, testCaseID, isConstructor, retType, this.sol);
 			System.out.println("TD: " + testData.toString());

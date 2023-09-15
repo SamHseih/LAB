@@ -8,12 +8,14 @@ import org.apache.commons.io.output.ThresholdingOutputStream;
 import ccu.pllab.tcgen.ASTGraph.ASTGraphNode;
 import ccu.pllab.tcgen.AbstractCLG.CLGGraph;
 import ccu.pllab.tcgen.AbstractConstraint.*;
+import ccu.pllab.tcgen.AbstractType.*;
 import ccu.pllab.tcgen.exe.main.Main;
 import ccu.pllab.tcgen.oclRunner.OclParser.ReturnTypeContext;
 import scala.reflect.generic.Trees.This;
 public class PropertyCallExp extends AbstractSyntaxTreeNode{
 //result.hour or self.hour
 	private String type="";
+	private VariableType var_type;
 	private String variable;//pathname
 	private boolean timeExpression=false;
 	private ArrayList<AbstractSyntaxTreeNode> qualifier;
@@ -123,7 +125,7 @@ public class PropertyCallExp extends AbstractSyntaxTreeNode{
 					for(VariableToken variable:attribute)
 						if(variable.getVariableName().equals(this.variable))
 						{
-							this.type=variable.getType();
+							this.type=variable.getType().toString();
 						}
 				}
 				else
@@ -133,7 +135,7 @@ public class PropertyCallExp extends AbstractSyntaxTreeNode{
 						for(VariableToken variable:token.getArgument())
 						{
 							if(variable.getVariableName().equals(this.variable))
-								this.type=variable.getType();
+								this.type=variable.getType().toString();
 						}
 					}
 				}
@@ -191,8 +193,13 @@ public class PropertyCallExp extends AbstractSyntaxTreeNode{
 			ArrayList<String> argument=new ArrayList<String>();
 			for(int parameter=0;parameter<this.parameters.size();parameter++)
 				argument.add(this.parameters.get(parameter).NodeToString());
-			
-			constraint=new CLGMethodInvocationNode(Main.className,name,argument);
+			if( name.contains("::") ) {
+				int one=name.indexOf(':');
+				String classObjName= name.substring(0,one);
+				String methodname=name.substring(one+2);
+				constraint=new CLGMethodInvocationNode(classObjName, methodname,argument);
+			}
+			else constraint=new CLGMethodInvocationNode(Main.className,name,argument);
 		}
 		else
 		{

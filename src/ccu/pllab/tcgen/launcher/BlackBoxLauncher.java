@@ -2,6 +2,8 @@ package ccu.pllab.tcgen.launcher;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
@@ -28,12 +30,16 @@ import org.xml.sax.SAXException;
 import com.parctechnologies.eclipse.EclipseException;
 
 import ccu.pllab.tcgen.AbstractCLG.CLGGraph;
+import ccu.pllab.tcgen.AbstractCLG.CLGStartNode;
 import ccu.pllab.tcgen.AbstractSyntaxTree.AbstractSyntaxTreeNode;
 import ccu.pllab.tcgen.AbstractSyntaxTree.SymbolTable;
+import ccu.pllab.tcgen.AbstractType.TypeTable;
+import ccu.pllab.tcgen.AbstractType.UserDefinedType;
 import ccu.pllab.tcgen.DataWriter.DataWriter;
 import ccu.pllab.tcgen.transform.AST2CLG;
 import ccu.pllab.tcgen.transform.CLG2Path;
 import ccu.pllab.tcgen.transform.OCL2AST;
+import ccu.pllab.tcgen.transform.Splitter;
 import tudresden.ocl20.pivot.model.ModelAccessException;
 import tudresden.ocl20.pivot.parser.ParseException;
 import tudresden.ocl20.pivot.tools.template.exception.TemplateException;
@@ -50,11 +56,13 @@ public class BlackBoxLauncher {
 	private ArrayList<CLGGraph> clgGraph;
 	private CLGGraph invCLG;
 	private IProgressMonitor pmonitor;
+	public static TypeTable typeTable;
 	
 	public BlackBoxLauncher(File ocl, File classUml, IProgressMonitor monitor) {
 		this.ocl = ocl;
 		this.classUml = classUml;
 		this.pmonitor = monitor;
+		this.typeTable = new TypeTable();
 	}
 	
 	public AbstractSyntaxTreeNode getAST() {
@@ -89,6 +97,8 @@ public class BlackBoxLauncher {
 			this.clgGraph = clgParser.getCLGGraph();
 			this.invCLG = clgParser.getInvCLG();
 			pmonitor.worked(10);
+
+			
 //			CLG -> JUnit
 //			this.pathParser = new CLG2Path();
 //			this.symbolTable = oclParser.getSymbolTable();
@@ -140,6 +150,7 @@ public class BlackBoxLauncher {
 			oclParser = null;
 			clgParser = null;
 			pathParser = null;
+			typeTable = null;
 			
 //			JOptionPane.showMessageDialog(null, "Execution Succeed", "Result", JOptionPane.INFORMATION_MESSAGE );
 		} catch (Exception e1) {

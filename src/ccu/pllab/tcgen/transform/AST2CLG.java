@@ -322,6 +322,7 @@ public class AST2CLG {
 					
 //					this.genCLGGraph(clg, clg_number);
 					String methodname = ((OperationContext) astNode.get(clg_number)).getMethodName();
+					String classname = ((OperationContext) astNode.get(clg_number)).getClassName();
 					this.genCLGGraph(clg, methodname);
 					clg_list.remove(clg_list.size() - 1);
 					clg_list.add(clg);
@@ -336,6 +337,10 @@ public class AST2CLG {
 					
 					/*start  ocl2clp*/
 					String methodCLP = ((CLGStartNode) clg.getStartNode()).OCL2CLP();
+					DataWriter.writeInfo(methodCLP,
+							classname + methodname , "ecl",
+							DataWriter.testCons_output_path);
+					//AAAAAAAAAAA // 完整CLP
 					//System.out.println(methodCLP);
 					/*end ocl2clp*/
 				}
@@ -464,7 +469,11 @@ public class AST2CLG {
 					clg_list.add(clg);// 加入pre+post clg
 					
 					/*start  ocl2clp*/
-//					String methodCLP = ((CLGStartNode) clg.getStartNode()).OCL2CLP();
+					String methodCLP = ((CLGStartNode) clg.getStartNode()).OCL2CLP();
+					methodname = methodname.substring(0,1).toUpperCase()+methodname.substring(1);
+					DataWriter.writeInfo(methodCLP,
+							classname + methodname , "ecl",
+							DataWriter.testCons_output_path);
 					//System.out.println(methodCLP);
 					/*end ocl2clp*/
 					
@@ -521,6 +530,7 @@ public class AST2CLG {
 					
 //					this.genCLGGraph(clg, clg_number);
 					String methodname = ((OperationContext) astNode.get(clg_number)).getMethodName();
+					String classname = ((OperationContext) astNode.get(clg_number)).getClassName();
 					this.genCLGGraph(clg, methodname);
 					clg_list.remove(clg_list.size() - 1);
 					clg_list.add(clg);
@@ -535,6 +545,11 @@ public class AST2CLG {
 					
 					/*start  ocl2clp*/
 					String methodCLP = ((CLGStartNode) clg.getStartNode()).OCL2CLP();
+					methodname = methodname.substring(0,1).toUpperCase()+methodname.substring(1);
+					System.out.print(methodname);
+					DataWriter.writeInfo(methodCLP,
+							classname + methodname , "ecl",
+							DataWriter.testCons_output_path);
 					//System.out.println(methodCLP);
 					/*end ocl2clp*/
 				}

@@ -2,6 +2,7 @@ package ccu.pllab.tcgen.AbstractSyntaxTree;
 
 
 import ccu.pllab.tcgen.AbstractCLG.*;
+import ccu.pllab.tcgen.AbstractType.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,9 +12,12 @@ public class SymbolTable {
 	private String className;
 	private ArrayList<VariableToken> attribute;
 	private ArrayList<MethodToken> method;
+	private HashMap<String,VariableType> attributeMap=new HashMap<String,VariableType>();//Name,type
+	private HashMap<String,VariableType> argumentMap=new HashMap<String,VariableType>();
+	
 	private ArrayList<VariableToken> argument;
-	private HashMap<String,String> attributeMap=new HashMap<String,String>();//Name,type
-	private HashMap<String,String> argumentMap=new HashMap<String,String>();
+	//private HashMap<String,String> attributeMap=new HashMap<String,String>();//Name,type
+	//private HashMap<String,String> argumentMap=new HashMap<String,String>();  ÂÂªº*/
 	
 	
 	public SymbolTable(String calssName)
@@ -33,6 +37,7 @@ public class SymbolTable {
 	{
 		this.method.add(method);
 	}
+	
 	public void addArgument(ArrayList<VariableToken> argument)
 	{
 		this.argument.addAll(argument);
@@ -48,12 +53,12 @@ public class SymbolTable {
 		this.argumentMap.put(argument.getVariableName(),argument.getType());
 	}
 	
-	public HashMap<String,String> getAttributeMap()
+	public HashMap<String,VariableType> getAttributeMap()
 	{
 		return this.attributeMap;
 	}
 	
-	public HashMap<String,String> getArgumentMap()
+	public HashMap<String,VariableType> getArgumentMap()
 	{
 		return this.argumentMap;
 	}
@@ -70,10 +75,12 @@ public class SymbolTable {
 	{
 		return this.method;
 	}
+	
 	public ArrayList<VariableToken> getArgument()
 	{
 		return this.argument;
 	}
+	
 	/*public void setAttribute(String attribute,String type)
 	{
 		this.attribute.put(attribute, type);
