@@ -31,7 +31,8 @@ import tudresden.ocl20.pivot.model.ModelAccessException;
 import tudresden.ocl20.pivot.parser.ParseException;
 import tudresden.ocl20.pivot.tools.template.exception.TemplateException;
 import ccu.pllab.tcgen.transform.*;
-import ccu.pllab.tcgen.AbstractSyntaxTree.SymbolTable;;
+import ccu.pllab.tcgen.AbstractSyntaxTree.SymbolTable;
+import ccu.pllab.tcgen.AbstractType.TypeTable;;
 
 
 public class Main {
@@ -135,6 +136,7 @@ public class Main {
 	public static boolean doArray=false;
 	public static boolean boundaryhavesolution=false;
 	public static String TestType; //用來判斷測試類別
+	public static TypeTable typeTable = new TypeTable();
 	
 	public static void main(String[] args) throws IOException, TemplateException, ModelAccessException, ParseException,Exception {
 		msort=false;

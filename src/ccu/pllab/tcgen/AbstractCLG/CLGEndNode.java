@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 public class CLGEndNode extends CLGNode{
 	private static ArrayList visted = new ArrayList();
+	private static ArrayList vistedForClass = new ArrayList(); //20200917 dai
 
 	public CLGEndNode() {
 		super();
@@ -28,6 +29,27 @@ public class CLGEndNode extends CLGNode{
 			a.add("999_999");
 			a.add(className + methodName + "_endNode(ObjPre, ArgPre, ObjPost, ArgPost, Result, Exception):- \n");
 			a.add("	Exception=[].\n");
+			clp.add(a);
+		}		
+		localParameters.clear();
+		return clp;
+	}
+	
+	public ArrayList genMethodCLPForClass(String className, String methodName, ArrayList classAttributes, ArrayList methodParameters, ArrayList localParameters, String result) {
+		ArrayList<ArrayList<String>> clp = new ArrayList();
+		
+		if (vistedForClass.contains(this.getId()) != true) {
+			vistedForClass.add(this.getId());
+			ArrayList a = new ArrayList();
+			a.add("999_999");
+			//a.add(className + methodName + "_endNode(ObjPre, ArgPre, ObjPost, ArgPost, Result, Exception):- \n");
+			//a.add("	Exception=[].\n");
+			
+			a.add(className + methodName + "_endNode(ObjPre, ArgPre, ObjPost, ArgPost, Result, Exception).\n");
+			a.add("typeCheck([T],R):-\n");
+			a.add("    integer(T) -> R = T ; (string(T) -> R = T ; R = []).\n");
+
+			
 			clp.add(a);
 		}		
 		localParameters.clear();

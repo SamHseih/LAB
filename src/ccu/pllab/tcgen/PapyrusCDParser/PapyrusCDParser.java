@@ -14,7 +14,7 @@ public class PapyrusCDParser {
 	private ArrayList<ClassInfo> refClassList = null ;
 	
 	// constructor ==============================================================================
-	// 單一圖
+	// �銝����
 	public PapyrusCDParser(File cd) {
 		if(cd.exists()) {
 			testCD = cd;
@@ -22,7 +22,7 @@ public class PapyrusCDParser {
 		else System.err.println("No such file!");
 	} 
 	
-	// 其中有自訂型别需參考其他類別圖
+	// �銝剜�閮������隞����
 	public PapyrusCDParser(File cd, ArrayList<File> ref) {
 		if(cd.exists()) {
 			testCD = cd ;
@@ -42,10 +42,10 @@ public class PapyrusCDParser {
 	
 	
 	
-	// 外部拿取資料 method =======================================================================
+	// 憭������ method =======================================================================
 	// Get package name
 	public String getPkgName() {
-		return parser.getPkgName();   // XML根節點
+		return parser.getPkgName();   // XML�蝭�暺�
 	}
 	
 	// Get Class List
@@ -54,7 +54,7 @@ public class PapyrusCDParser {
 	}
 	
 	
-	// 輸入Class的名字, 只回傳名字符合的Class的資訊
+	// 頛詨Class�����, ������泵���lass�����
 	public ClassInfo findClass( String name ) {
 		if( testClassList == null ) {
 			return null ;
@@ -72,7 +72,7 @@ public class PapyrusCDParser {
 	
 
 	
-	// 外部拿取資料 method =======================================================================
+	// 憭������ method =======================================================================
 	
 	
 	public ClassDiagram Parse() {
@@ -113,7 +113,7 @@ public class PapyrusCDParser {
             	VariableInfo p = testClassList.get(k).getProperties().get(j);
             	p.setType(searchRef(p.getType()));
             	
-            	// if(p.getSize() != null) p.setType(p.getType()+"[]"); // size非空即為陣列
+            	// if(p.getSize() != null) p.setType(p.getType()+"[]"); // size��征������
 		    } // for
             
 
@@ -126,13 +126,13 @@ public class PapyrusCDParser {
             			para_i < o.getParameter().size();para_i++) {
             		VariableInfo parameter = o.getParameter().get(para_i);
             		parameter.setType(searchRef(parameter.getType()));
-            		// if(parameter.getSize() != null) parameter.setType(parameter.getType()+"[]"); // size非空即為陣列
+            		// if(parameter.getSize() != null) parameter.setType(parameter.getType()+"[]"); // size��征������
                 } // for
             	
             	// return type
             	VariableInfo rt = o.getReturnType() ;
             	rt.setType(searchRef(rt.getType()));
-            	// *** if(o.getReturnType().getSize() != null) o.setType(p.getType()+"[]"); // size非空即為陣列
+            	// *** if(o.getReturnType().getSize() != null) o.setType(p.getType()+"[]"); // size��征������
             }//for operation
 			
 		} // for
@@ -165,7 +165,7 @@ public class PapyrusCDParser {
             	p.setType(searchRef(p.getType()));
             	
             	if(!p.getLowerValue().equals("1") && !p.getUpperValue().equals("1") )
-            		p.setType(p.getType()+"[]"); // size非空即為陣列
+            		p.setType(p.getType()+"[]"); // size��征������
 		    } // for
             
 
@@ -179,13 +179,13 @@ public class PapyrusCDParser {
             		VariableInfo parameter = o.getParameter().get(para_i);
             		parameter.setType(searchRef(parameter.getType()));
                 	if(!parameter.getLowerValue().equals("1") && !parameter.getUpperValue().equals("1") )
-                		parameter.setType(parameter.getType()+"[]"); // size非空即為陣列
+                		parameter.setType(parameter.getType()+"[]"); // size��征������
                 } // for
             	
             	// return type
             	VariableInfo rt = o.getReturnType() ;
             	if(!rt.getLowerValue().equals("1") && !rt.getUpperValue().equals("1") )
-            		rt.setType(rt.getType()+"[]"); // size非空即為陣列
+            		rt.setType(rt.getType()+"[]"); // size��征������
 
             }//for operation
 			

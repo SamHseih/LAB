@@ -11,7 +11,9 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 
 import ccu.pllab.tcgen.AbstractCLG.*;
+import ccu.pllab.tcgen.DataWriter.DataWriter;
 import ccu.pllab.tcgen.clg2path.CriterionFactory.Criterion;
+import tcgenplugin_2.handlers.ClassLevelHandler;
 //import ccu.pllab.tcgen.home_sd2clg.CLGRF2;
 import tudresden.ocl20.pivot.model.ModelAccessException;
 import tudresden.ocl20.pivot.tools.template.exception.TemplateException;
@@ -35,8 +37,10 @@ public class SD2CLG {
 			Transition tr =statedigram.getTransitions().get(i);
 			//System.out.println("source: "+tr.getSource().getName()+"id= "+tr.getSource().getId());
 			//System.out.println("target: "+tr.getTarget().getName()+"id= "+tr.getTarget().getId());
-			if(tr.getGuard()!=null){
-				Guard = new CLGGraph(tr.getGuard());
+			//if(tr.getGuard()!=null){
+			if(tr.getGuardCLG()!=null){
+				//Guard = new CLGGraph(tr.getGuard());
+				Guard = tr.getGuardCLG();
 				if(tr.getMethod()==null)
 					SG=new CLGGraph();
 				else
@@ -98,16 +102,29 @@ public class SD2CLG {
 //		//System.out.println("HI ~ "+clgstr);
 //		
 //		
-		File dir = new File("${eclipse_home}../../Examples/"+statedigram.getSDName()+"CLG"); 
-		if(dir.isDirectory())  { System.out.println("有資料夾"); }
-		else { dir.mkdir(); System.out.println("no dir"); }   
-		FileWriter dataFile = new FileWriter("${eclipse_home}../../Examples/"+statedigram.getSDName()+"CLG/"+statedigram.getSDName()+"CLG.dot");
+//		File dir = new File("${eclipse_home}../../Examples/"+statedigram.getSDName()+"CLG"); 
+//		if(dir.isDirectory())  { System.out.println("有資料夾"); }
+//		else { dir.mkdir(); System.out.println("no dir"); }   
+//		FileWriter dataFile = new FileWriter("${eclipse_home}../../Examples/"+statedigram.getSDName()+"CLG/"+statedigram.getSDName()+"CLG.dot");
+//		BufferedWriter input = new BufferedWriter(dataFile);
+//		input.write(clgstr);
+//		input.close();
+		
+		FileWriter dataFile;	
+		File clgFolder= new File(DataWriter.Clg_output_path);
+		if(!clgFolder.exists()) {
+			clgFolder.mkdirs();
+		}
+		File clgdot = new File(clgFolder.getPath()+"/"+ ClassLevelHandler.CurrentEditorName+".dot");
+		dataFile = new FileWriter(clgdot.getPath());
 		BufferedWriter input = new BufferedWriter(dataFile);
 		input.write(clgstr);
 		input.close();
-		new ProcessBuilder("dot", "-Tpng", "${eclipse_home}../../Examples/"+statedigram.getSDName()+"CLG/"+statedigram.getSDName()+"CLG.dot",
-				"-o", "${eclipse_home}../../Examples/"+statedigram.getSDName()+"CLG/"+statedigram.getSDName()+"CLG.png").start();
 		
+//		new ProcessBuilder("dot", "-Tpng", "${eclipse_home}../../Examples/"+statedigram.getSDName()+"CLG/"+statedigram.getSDName()+"CLG.dot",
+//				"-o", "${eclipse_home}../../Examples/"+statedigram.getSDName()+"CLG/"+statedigram.getSDName()+"CLG.png").start();
+		new ProcessBuilder("dot", "-Tpng", DataWriter.Clg_output_path + ClassLevelHandler.CurrentEditorName+".dot",
+				"-o", DataWriter.Clg_output_path +ClassLevelHandler.CurrentEditorName+".png").start();
 		
 		//--
 		/*

@@ -82,6 +82,12 @@ public class UserDefinedType extends VariableType {
 	@Override
 	public String genDomainCLP(String obj) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/*@Override
+	public String genDomainCLP(String obj) {
+		// TODO Auto-generated method stub
 		String s="" ;
 		String name=obj+"=[";
 		for(int i = 0; i <content.getProperties().size();i++) {
@@ -96,6 +102,6 @@ public class UserDefinedType extends VariableType {
 			s=s+content.getProperties().get(i).getType().genDomainCLP(temp)+",";
 		}
 		return  name+s.substring(0,s.length()-1);
-	}
+	}*/
 
 }

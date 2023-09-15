@@ -89,7 +89,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 		this.coverageCheckingTable = new CoverageCheckingTable();
 		// ---
 		this.coverageDUPCheckingTable = new CoverageCheckingTable();
-		this.criteria = "";
+		//this.criteria = "";
 		this.infeasiblePath = new ArrayList<CLGPath>();
 		SIPNodesList.clear();
 		conflictConstraints.clear();
@@ -182,7 +182,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 	}
 
 	/* State diagram analysis */
-	public void init(CLGGraph graph, Criterion criterionState, List<ccu.pllab.tcgen.ast.Constraint> OCLCons) {
+	/*public void init(CLGGraph graph, Criterion criterionState, List<ccu.pllab.tcgen.ast.Constraint> OCLCons) {
 		this.targetCLG = graph;
 		this.selectCLGGraphCriteria(graph, Main.criterion);
 		this.criterionState = criterionState;
@@ -222,7 +222,50 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 			clgRDA = new CLGReachingDefinitionAnalyzer();
 		}
 		// ---
-	}
+	}*/
+	
+	//使用建隆學長 ocl parser
+		public void init(CLGGraph graph, ArrayList<CLGGraph> ocl_clg, String criterion) {
+			this.targetCLG = graph;
+			this.attribute = attribute;
+			this.criterion = criterion;
+			// this.selectCLGGraphCriteria(graph, Main.criterion);//61和62同
+			this.clgPathEnumerator.init(targetCLG);
+			this.testDatas = new ArrayList<TestData>();
+			this.testClassDatas = new ArrayList<TestDataClassLevel>();
+																
+			for (CLGEdge edge : graph.getAllBranches()) {
+				this.coverageCheckingTable.put(edge, 0);
+			}
+				
+			oriDUP = new ArrayList<DUP>();
+			if (criterion.equals("dcdup") || criterion.equals("dccdup") || criterion.equals("mccdup")) {
+				System.out.println("part 1 ");
+				CLGReachingDefinitionAnalyzer clg2dup = new CLGReachingDefinitionAnalyzer();
+//				String classname = "";
+//				classname = ((CLGStartNode) graph.getStartNode()).getClassName();
+//				clg2dup.dupGenerate(ocl_clg, classname, ((CLGStartNode) graph.getStartNode()).getMethodName());
+				
+				String classname = "";
+				classname = ((CLGStartNode) ocl_clg.get(0).getStartNode()).getClassName();
+				for (int i = 0; i < ocl_clg.size(); i++) {
+					clg2dup.dupGenerate(ocl_clg.get(i), classname,((CLGStartNode) ocl_clg.get(i).getStartNode()).getMethodName());
+				} // end for i
+				
+				ArrayList<DUP> clgDUP = clg2dup.dupGenerate(this.targetCLG, classname, "");
+				for (int i = 0; i < clgDUP.size(); i++)
+					this.coverageDUPCheckingTable.put(clgDUP.get(i), 0);
+				oriDUP = clgDUP;
+				for (int i1 = 0; i1 < oriDUP.size(); i1++) {
+					System.out.println("([" + oriDUP.get(i1).getDefineNode().getXLabelId() + "]," + "["
+							+ oriDUP.get(i1).getUseNode().getXLabelId() + "]" + "," + oriDUP.get(i1).getVariable() + ")");
+				}
+				feasibledup = new ArrayList<DUP>();
+				infeasibledup = new ArrayList<DUP>();
+				clgRDA = new CLGReachingDefinitionAnalyzer();
+			}
+
+		}
 
 //	黑箱使用 ~line 1622
 	@SuppressWarnings("rawtypes")
@@ -275,6 +318,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 				pathObj.initPathID();
 				hasInitPathCount = true;
 			}
+			
 			pathObjInfo += "\n" + pathObj.toGetPathInfo() + "\n";
 			//在pathinfo文件中印出每條路徑在CLG中的限制式
 			String tempConStr = "";
@@ -1499,7 +1543,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 		 * e) { // TODO Auto-generated catch block e.printStackTrace(); }
 		 */
 		saveTDPathDUP += "\n\nfeasiblepathsize = " + feasible_path.size() + "\n"; //
-		System.out.println("feasiblepathsize = " + feasible_path.size());
+		//System.out.println("feasiblepathsize = " + feasible_path.size());
 		for (CLGPath p : feasible_path) {
 			System.out.println(p.toGetPathInfo());
 			List<CLGNode> new_path1 = clgPathEnumerator.filterConstraintNode(p.getPathNodes());
@@ -2286,7 +2330,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 				System.out.println("part 2 ");
 				List<CLGNode> new_path1 = clgPathEnumerator.filterConstraintNode(pathObj.getPathNodes());
 				ArrayList<DUP> regDUP = new ArrayList<DUP>();
-				CLGPath clgp = new CLGPath(new_path1);
+				CLGPath clgp = new CLGPath(new_path1,pathObj.toGetPathId());
 				regDUP = clgRDA.parsePathDUP(clgp, oriDUP);
 				System.out.println(" regdup " + regDUP.size());
 				for (int i = 0; i < regDUP.size(); i++) {
@@ -2308,9 +2352,26 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 				}
 			}
 
-			if (nowDUP.size() > 0) {
-				// 824
+			if (nowDUP.size() > 0 || (!Main.criterion.equals(Criterion.dcdup) && !Main.criterion.equals(Criterion.dccdup) && !Main.criterion.equals(Criterion.mccdup) && intersectionalEdge.size() >0)) {
+				//20200916 dai
 				// --
+				
+				pathObjInfo += "\n" + pathObj.toGetPathInfo() + "\n";
+				
+				//20200916 dai 從黑箱移植過來的
+				//在pathinfo文件中印出每條路徑在CLG中的限制式
+				String tempConStr = "";
+				for (int i = 0; i < pathObj.getPathNodes().size(); i++) {
+					if (pathObj.getPathNodes().get(i) instanceof CLGConstraintNode) {
+						// CLGConstraintNode cons = (CLGConstraintNode)pathObj.getPathNodes().get(i);
+						CLGConstraintNode cons = (CLGConstraintNode) pathObj.getPathNodes().get(i);
+						tempConStr += cons.toCLPInfo().replace("#", "") + ",";
+					}
+				}
+				//tempConStr.substring(0, (tempConStr.length() - 2));
+				pathObjInfo += "CLG Constraints: " + tempConStr + "\n"; // pathObjInfo 印出到檔案的字串
+				tempConStr = ""; 
+				
 				boolean flag = false;
 				ArrayList<String> methodarr = new ArrayList<String>();
 				for (int pathi = 0; pathi < pathObj.getPathNodes().size(); pathi++) {
@@ -2326,7 +2387,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 				}
 				String clpContent = "";
 				if (flag) { // method
-					clpContent = clpTranslator.genMethodPathCLP(pathObj, pathnum);
+					clpContent = clpTranslator.genMethodPathCLP_try(pathObj, pathnum);//20200922 dai
 					// DataWriter.writeFile(clpContent, graphClassName, "ECL",
 					// pathnum);
 					// 715
@@ -2396,6 +2457,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 						}
 						this.infeasiblePath.add(pathObj);
 						this.removeCoveredBranches(intersectionalEdge);
+						pathObjInfo += "infeasible\n";
 					} else {// sol
 						for (int dupi = 0; dupi < nowDUP.size(); dupi++) {
 							this.feasible_path.add(pathObj);
@@ -2404,17 +2466,19 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 							this.removeCoveredBranches(intersectionalEdge);
 						}
 						List<CLGNode> new_path1 = clgPathEnumerator.filterConstraintNode(pathObj.getPathNodes());
-						CLGPath clgp = new CLGPath(new_path1);
+						CLGPath clgp = new CLGPath(new_path1,pathObj.toGetPathId());
 						saveTDPathDUP += "Path = " + clgp.toGetPathInfo();
 						for (DUP p : nowDUP) {
 							saveTDPathDUP += "\n" + p.DUP2Str();
 						}
 						saveTDPathDUP += "\n" + clpSolver.getTestData() + "\n\n";
+						pathObjInfo += "feasible\n";
 					}
 				} else {// control
 					if (clpSolver.getTestDataclass() == null) {
 
 						this.infeasiblePath.add(pathObj);
+						this.feasible_path.add(pathObj);
 						// this.removeCoveredBranches(intersectionalEdge);
 					} else {// sol
 						for (int dupi = 0; dupi < intersectionalEdge.size(); dupi++) {
@@ -2426,6 +2490,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 					}
 					// this.removeCoveredBranches(intersectionalEdge);
 					// this.feasible_path.add(pathObj);
+					pathObjInfo += "feasible\n";
 				}
 				// --
 
@@ -2463,7 +2528,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 		for (CLGPath p : feasible_path) {
 			System.out.println(p.toGetPathInfo());
 			List<CLGNode> new_path1 = clgPathEnumerator.filterConstraintNode(p.getPathNodes());
-			CLGPath clgp = new CLGPath(new_path1);
+			CLGPath clgp = new CLGPath(new_path1,p.toGetPathId());
 			saveTDPathDUP += clgp.toGetPathInfo() + "\n";
 		}
 
@@ -2502,7 +2567,7 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 		for (int i = 0; i < infeasiblePath.size(); i++) {
 			System.out.println(infeasiblePath.get(i).toGetPathInfo());
 			List<CLGNode> new_path1 = clgPathEnumerator.filterConstraintNode(infeasiblePath.get(i).getPathNodes());
-			CLGPath clgp = new CLGPath(new_path1);
+			CLGPath clgp = new CLGPath(new_path1,infeasiblePath.get(i).toGetPathId());
 			saveTDPathDUP += clgp.toGetPathInfo() + "\n";
 		}
 		for (TestDataClassLevel td : testClassDatas) {
@@ -2511,15 +2576,15 @@ public class CoverageCriterionManager implements CLGCoverageCriterion {
 		}
 		DataWriter.writeInfo(content, graphClassName + graphMethodName, "txt", DataWriter.testData_output_path);
 
-//		new ProcessBuilder("dot", "-Tpng", DataWriter.output_folder_path+"/clg/"+SampleHandler.CurrentEditorName+"CLG"+"1"+".dot",
-//				"-o", DataWriter.output_folder_path+"/clg/"+SampleHandler.CurrentEditorName+"CLG"+graphMethodName+".png").start();
-
-//		new ProcessBuilder("dot", "-Tpng", DataWriter.output_folder_path+"/clg/"+SampleHandler.CurrentEditorName+"CLG"+"2"+".dot",
-//				"-o", DataWriter.output_folder_path+"/clg/"+SampleHandler.CurrentEditorName+"CLG"+graphMethodName+".png").start();
-
-//		DataWriter.writeInfo(saveTDPathDUP, graphClassName + graphMethodName, "java", DataWriter.output_folder_path, "TDPathDUP");
-		// DataWriter.writeFile(content, graphClassName, "TestDatas", ".txt");
+		DataWriter.writeInfo(saveTDPathDUP, graphClassName + graphMethodName + "TryTypeTable", "java", DataWriter.output_folder_path, "TDPathDUP");
 		// saveTDPathDUP
+		
+		pathObjInfo = pathObjInfo.replaceAll("[\\(\\)]", "");
+		pathObjInfo = pathObjInfo.replaceAll("CLGStartNode", "[0]");
+		pathObjInfo = pathObjInfo.replaceAll("CLGEndNode", "[-1]");
+		DataWriter.writeInfo(pathObjInfo, graphClassName + graphMethodName + "_pathInfo", "txt",
+				DataWriter.testPath_output_path);
+		
 		return this.testClassDatas;
 	}
 

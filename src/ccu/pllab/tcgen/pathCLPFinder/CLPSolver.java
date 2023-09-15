@@ -74,39 +74,46 @@ public class CLPSolver {
 		}
 		
 		this.EclDirectPath = DataWriter.testCons_output_path;
+		String Time_EclDirectPath = DataWriter.testCons_output_path.replace(className+"_BlackBox", "Time_BlackBox");
+		String Date_EclDirectPath = DataWriter.testCons_output_path.replace(className+"_BlackBox", "Date_BlackBox");
 		System.out.println(this.EclDirectPath);
+		//System.out.println(Time_EclDirectPath );
+		//System.out.println(Date_EclDirectPath );
+
 		File eclFile = new File(EclDirectPath + className + methodName + TestTypeSign + pathNum + ".ecl");
 		int testCaseID = 1;
 		try {
-//			
-			this.connectCLPSolver();
-			File tempF1= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Date_BlackBox_DCC\\DateDate.ecl");
-			File tempF2= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Date_BlackBox_DCC\\DateGetYear.ecl");
-			File tempF3= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Date_BlackBox_DCC\\DateGetMonth.ecl");
-			File tempF4= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Date_BlackBox_DCC\\DateGetDay.ecl");
-			File tempF5= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Date_BlackBox_DCC\\DateNext.ecl");
 			
-			this.clp2data.compile(tempF1);
-			this.clp2data.compile(tempF2);
-			this.clp2data.compile(tempF3);
-			this.clp2data.compile(tempF4);
-			this.clp2data.compile(tempF5);
+			this.connectCLPSolver();
+
+			/*
+			File tempF1= new File(Date_EclDirectPath+"DateDate.ecl");
+			File tempF2= new File(Date_EclDirectPath+"DateGetYear.ecl");
+			File tempF3= new File(Date_EclDirectPath+"DateGetMonth.ecl");
+			File tempF4= new File(Date_EclDirectPath+"DateGetDay.ecl");
+			File tempF5= new File(Date_EclDirectPath+"DateNext.ecl");
+			
+			if( tempF1.exists() ) this.clp2data.compile(tempF1);
+			if( tempF2.exists() ) this.clp2data.compile(tempF2);
+			if( tempF3.exists() ) this.clp2data.compile(tempF3);
+			if( tempF4.exists() ) this.clp2data.compile(tempF4);
+			if( tempF5.exists() ) this.clp2data.compile(tempF5);
 
 			
-			File tempF6= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Time_BlackBox_DCC\\TimeTime.ecl");
-			File tempF7= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Time_BlackBox_DCC\\TimeGetHour.ecl");
-			File tempF8= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Time_BlackBox_DCC\\TimeGetMinute.ecl");
-			File tempF9= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Time_BlackBox_DCC\\TimeGetSecond.ecl");
-			File tempF10= new File("C:\\runtime-EclipseApplication\\DateTime\\test constraints\\Time_BlackBox_DCC\\TimeNext.ecl");
+			File tempF6= new File(Time_EclDirectPath+"TimeTime.ecl");
+			File tempF7= new File(Time_EclDirectPath+"TimeGetHour.ecl");
+			File tempF8= new File(Time_EclDirectPath+"TimeGetMinute.ecl");
+			File tempF9= new File(Time_EclDirectPath+"TimeGetSecond.ecl");
+			File tempF10= new File(Time_EclDirectPath+"TimeNext.ecl");
 			
-			this.clp2data.compile(tempF6);
-			this.clp2data.compile(tempF7);
-			this.clp2data.compile(tempF8);
-			this.clp2data.compile(tempF9);
-			this.clp2data.compile(tempF10);
-			File tempF11= new File("C:\\runtime-EclipseApplication\\Clock\\test constraints\\Clock_BlackBox_DCC\\ClockClock.ecl");
-			this.clp2data.compile(tempF11);
-			
+			if( tempF6.exists() ) this.clp2data.compile(tempF6);
+			if( tempF7.exists() ) this.clp2data.compile(tempF7);
+			if( tempF8.exists() ) this.clp2data.compile(tempF8);
+			if( tempF9.exists() ) this.clp2data.compile(tempF9);
+			if( tempF10.exists() ) this.clp2data.compile(tempF10);
+			//File tempF11= new File("C:\\runtime-EclipseApplication\\Clock\\test constraints\\Clock_BlackBox_DCC\\ClockClock.ecl");
+			//this.clp2data.compile(tempF11);
+			*/
 			this.clp2data.compile(eclFile);
 			
 			this.sol = this.clp2data.solvingCSP_term("test" + className + methodName, objPre, argPre, objPost, argPost, retVal, 5);
@@ -165,15 +172,26 @@ public class CLPSolver {
 			eclFile = new File(pathecl + classN+"_"+pathNum + ".ecl");
 			this.connectCLPSolver();	
 			
-			this.clp2data.compile(new File("E:\\pllab20150831\\eclipse\\workspace\\tcgen\\examples\\testmethodpath\\CLPCoffeeMachine.ecl"));
-			this.clp2data.compile(new File("E:\\pllab20150831\\eclipse\\workspace\\tcgen\\examples\\testmethodpath\\CLPInsert.ecl"));
-			this.clp2data.compile(new File("E:\\pllab20150831\\eclipse\\workspace\\tcgen\\examples\\testmethodpath\\CLPWithdraw.ecl"));
-			this.clp2data.compile(new File("E:\\pllab20150831\\eclipse\\workspace\\tcgen\\examples\\testmethodpath\\CLPCook.ecl"));
-			this.clp2data.compile(new File("E:\\pllab20150831\\eclipse\\workspace\\tcgen\\examples\\testmethodpath\\CLPDone.ecl"));
+			//20200921 dai
+//			this.clp2data.compile(new File("examples\\testmethodpath\\CLPCoffeeMachine.ecl"));
+//			this.clp2data.compile(new File("examples\\testmethodpath\\CLPInsert.ecl"));
+//			this.clp2data.compile(new File ("examples\\testmethodpath\\CLPWithdraw.ecl"));
+//			this.clp2data.compile(new File("examples\\testmethodpath\\CLPCook.ecl"));
+//			this.clp2data.compile(new File("examples\\testmethodpath\\CLPDone.ecl"));
+			
+			this.clp2data.compile(new File("examples\\CoffeeMachineCLPForClassLevel\\CoffeeMachineCoffeeMachine.ecl"));
+			this.clp2data.compile(new File("examples\\CoffeeMachineCLPForClassLevel\\CoffeeMachineInsert.ecl"));
+			this.clp2data.compile(new File ("examples\\CoffeeMachineCLPForClassLevel\\CoffeeMachineWithdraw.ecl"));
+			this.clp2data.compile(new File("examples\\CoffeeMachineCLPForClassLevel\\CoffeeMachineCook.ecl"));
+			this.clp2data.compile(new File("examples\\CoffeeMachineCLPForClassLevel\\CoffeeMachineDone.ecl"));
+			//
 			
 			this.clp2data.compile(eclFile);
 			
-			String comstr = "testpath"+pathNum+"(Obj_pre, Arg_pre, Obj_post, Arg_post, Ret_val).";
+			//20200921 dai
+			//String comstr = "testpath"+pathNum+"(Obj_pre, Arg_pre, Obj_post, Arg_post, Ret_val).";
+			String comstr = "testpath"+pathNum+"(SDObjPre, SDArgPre, SDObjPost, SDArgPost, SDResult, SDException).";
+			//
 			this.sol= this.clp2data.solvingCSP_new(comstr, 5);
 			
 			if(!this.sol.contains(null)){

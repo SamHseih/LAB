@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 public class CLGConnectionNode extends CLGNode {
 	private static ArrayList visted = new ArrayList();
+	private static ArrayList vistedForClass = new ArrayList(); //20200917 dai
 	private static int connection_count=1;
 	private int connectionId;
 	private String connectionName = "";
@@ -109,6 +110,79 @@ public class CLGConnectionNode extends CLGNode {
 					a.add(className + methodName + "_node_" + this.getConnectionId()+"("+ attributes_pre +","+ arg_pre +","+ classAttributes +","+ methodParameters +", "+result+", Exception, "+local_pre+"):- \n");
 					clp.add(a);
 					clp.addAll(nextNode.genMethodCLP(className, methodName, classAttributes, methodParameters, localParameters, result));
+					/*移除空陣列*/
+					for(int j=0; j < clp.size(); j++) {
+						if(clp.get(j).isEmpty())
+							clp.remove(j);
+					}
+					/*設定相同clp名稱*/
+					for(int k=0; k < clp.size(); k++) {
+						if(clp.get(k).get(0).equals("0")) {
+							clp.get(k).set(0, this.connectionId + "_" + i);
+						}
+					}
+				}
+			}
+		}
+		else {
+			localParameters.clear();
+		}
+		return clp;
+	}
+	
+	@Override
+	public ArrayList genMethodCLPForClass(String className, String methodName, ArrayList classAttributes, ArrayList methodParameters, ArrayList localParameters, String result) {
+		CLGNode nextNode ;
+		ArrayList attributes_pre = new ArrayList();
+		ArrayList arg_pre = new ArrayList();
+		ArrayList local_pre = new ArrayList();
+		ArrayList<ArrayList<String>> clp = new ArrayList();
+
+		/*add pre*/
+		for(int i = 0; i < classAttributes.size(); i++) {		
+			attributes_pre.add(classAttributes.get(i)+"_pre");
+		}
+		for(int j = 0; j < methodParameters.size(); j++) {		
+			arg_pre.add(methodParameters.get(j)+"_pre");
+		}
+		for(int k = 0; k < localParameters.size(); k++) {
+			if(localParameters.get(k).equals("It_1")) {
+				localParameters.set(k, "It");
+			}
+			local_pre.add(localParameters.get(k));
+		}
+		
+		if (vistedForClass.contains(this.getId()) != true) {
+			vistedForClass.add(this.getId());
+			for(int i=0; i < this.getSuccessor().size(); i++) {
+				nextNode = this.getSuccessor().get(i);
+				/*下一個如果是連結點*/
+				if(nextNode.getClass().equals(this.getClass())) {
+					ArrayList connect = new ArrayList();
+					connect.add(this.connectionId + "_" + i);
+					connect.add(className + methodName + "_node_" + this.getConnectionId()+"("+ attributes_pre +","+ arg_pre +","+ classAttributes +","+ methodParameters +", [Result], [Exception], "+local_pre+"):- \n");
+					connect.add("	" + className  + methodName + "_node_" + ((CLGConnectionNode )nextNode).getConnectionId()+"("+ attributes_pre +","+ arg_pre +","+ classAttributes +","+ methodParameters +", ["+ result +"], [Exception], "+ localParameters +"). \n");
+					clp.add(connect);
+					//clp.addAll(nextNode.genMethodCLP(className, methodName, classAttributes, methodParameters, localParameters, result));
+					clp.addAll(nextNode.genMethodCLPForClass(className, methodName, classAttributes, methodParameters, localParameters, result));
+				}
+				/*下一個如果是結束點*/
+				else if(nextNode.getClass().equals(CLGEndNode.class)) {
+					ArrayList end = new ArrayList();
+					end.add(this.connectionId + "_" + i);
+					end.add(className + methodName + "_node_" + this.getConnectionId()+"("+ attributes_pre +","+ arg_pre +","+ classAttributes +","+ methodParameters +", [Result], [Exception], "+local_pre+"):- \n");
+					end.add("	"+className + methodName + "_endNode(ObjPre, ArgPre, ObjPost, ArgPost, [Result], [Exception]). \n");
+					clp.add(end);
+					//clp.addAll(nextNode.genMethodCLP(className, methodName, classAttributes, methodParameters, localParameters, result));
+					clp.addAll(nextNode.genMethodCLPForClass(className, methodName, classAttributes, methodParameters, localParameters, result));
+				}
+				else {
+					ArrayList a = new ArrayList();
+					a.add(this.connectionId + "_" + i);
+					a.add(className + methodName + "_node_" + this.getConnectionId()+"("+ attributes_pre +","+ arg_pre +","+ classAttributes +","+ methodParameters +", ["+result+"], [Exception], "+local_pre+"):- \n");
+					clp.add(a);
+					//clp.addAll(nextNode.genMethodCLP(className, methodName, classAttributes, methodParameters, localParameters, result));
+					clp.addAll(nextNode.genMethodCLPForClass(className, methodName, classAttributes, methodParameters, localParameters, result));
 					/*移除空陣列*/
 					for(int j=0; j < clp.size(); j++) {
 						if(clp.get(j).isEmpty())

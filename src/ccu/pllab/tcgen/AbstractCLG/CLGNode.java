@@ -135,6 +135,11 @@ public abstract class CLGNode implements Cloneable{
 	public abstract String toCLPInfo();
 	
 	public abstract ArrayList genMethodCLP(String className, String methodName, ArrayList classAttributes, ArrayList methodParameters, ArrayList localParameters, String result);
+	public abstract ArrayList genMethodCLPForClass(String className, String methodName, ArrayList classAttributes, ArrayList methodParameters, ArrayList localParameters, String result);
+	//20200916 dai
+		public static void reset() {
+			node_count = 0;
+		}
 	
 //	public  CLGNode clone(){
 //		return this;

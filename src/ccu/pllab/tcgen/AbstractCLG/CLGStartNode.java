@@ -142,12 +142,24 @@ public class CLGStartNode extends CLGNode {
 	
 	public String OCL2CLP() {
 		String CLP="";
+		String clp2StringForClassLevel =""; //20200917 dai
 		ArrayList<ArrayList<String>> clp = new ArrayList();
 		ArrayList<ArrayList<String>> localParameters = new ArrayList();
+		ArrayList<ArrayList<String>> clpForClassLevel = new ArrayList(); //20200917 dai
 		clp = this.genMethodCLP("", "", classAttributes, methodParameters, localParameters,"");
+		clpForClassLevel = this.genMethodCLPForClass("", "", classAttributes, methodParameters, localParameters,""); //20200917 dai
 		
 		//Sort
 		Collections.sort(clp, new Comparator<ArrayList<String>>(){
+            public int compare(ArrayList a1, ArrayList a2) {
+            	String num1 = (String) a1.get(0);
+            	String num2 = (String) a2.get(0);
+                return num1.compareTo(num2);
+            }
+        });
+		
+		//20200917 dai
+		Collections.sort(clpForClassLevel, new Comparator<ArrayList<String>>(){
             public int compare(ArrayList a1, ArrayList a2) {
             	String num1 = (String) a1.get(0);
             	String num2 = (String) a2.get(0);
@@ -161,14 +173,32 @@ public class CLGStartNode extends CLGNode {
 				CLP = CLP + clp.get(i).get(j); 
 			}
 		}
+		
+		//20200917 dai
+		for(int i = 0; i < clpForClassLevel.size(); i++) {
+			for(int j = 1; j < clpForClassLevel.get(i).size(); j++) {
+				clp2StringForClassLevel = clp2StringForClassLevel + clpForClassLevel.get(i).get(j); 
+			}
+		}
+		
 		//File
 		try {
 			File dir = new File("examples/"+this.getClassName()+"CLP"); 
-			dir.mkdir();
+			dir.mkdir(); 
+			
 			FileWriter dataFile = new FileWriter("examples/"+this.getClassName()+"CLP/"+this.getClassName()+this.getMethodName().substring(0, 1).toUpperCase() + this.getMethodName().substring(1)+".ecl");
 			BufferedWriter input = new BufferedWriter(dataFile);
 			input.write(CLP);
 			input.close();
+			
+			//20200917 dai 
+			File dirForClassLevel = new File("examples/"+this.getClassName()+"CLPForClassLevel"); 
+			dirForClassLevel.mkdir(); 
+			
+			FileWriter dataFileForClassLevel = new FileWriter("examples/"+this.getClassName()+"CLPForClassLevel/"+this.getClassName()+this.getMethodName().substring(0, 1).toUpperCase() + this.getMethodName().substring(1)+".ecl");
+			BufferedWriter inputForClassLevel = new BufferedWriter(dataFileForClassLevel);
+			inputForClassLevel.write(clp2StringForClassLevel);
+			inputForClassLevel.close();
 		}
 		catch (Exception e) {
 		}	
@@ -246,6 +276,73 @@ public class CLGStartNode extends CLGNode {
 		return clp;
 	}
 	
+	@Override
+	public ArrayList genMethodCLPForClass(String className, String methodName, ArrayList classAttributes, ArrayList methodParameters, ArrayList localParameters, String result) {
+		ArrayList attributes_pre = new ArrayList();
+		ArrayList attributes_post = new ArrayList();
+		ArrayList arg_pre = new ArrayList();
+		ArrayList arg_post = new ArrayList();
+		String return_value="Result";
+		ArrayList<ArrayList<String>> clp = new ArrayList();
+		
+		
+//		System.out.println("---------------"+this.className);
+//		System.out.println("---------------"+this.methodName);
+		if(this.className!= null)
+			className = this.className.substring(0, 1).toLowerCase() + this.className.substring(1);
+		if(this.methodName != null)	
+			methodName = this.methodName.substring(0, 1).toUpperCase() + this.methodName.substring(1);
+		
+		
+		for(int i = 0; i < this.classAttributes.size(); i++) {
+			attributes_pre.add(this.classAttributes.get(i).substring(0, 1).toUpperCase() + this.classAttributes.get(i).substring(1)+"_pre");
+			attributes_post.add(this.classAttributes.get(i).substring(0, 1).toUpperCase() + this.classAttributes.get(i).substring(1)) ;
+		}
+		for(int j = 0; j < this.methodParameters.size(); j++) {
+			arg_pre.add(this.methodParameters.get(j).substring(0, 1).toUpperCase() + this.methodParameters.get(j).substring(1)+"_pre");
+			arg_post.add(this.methodParameters.get(j).substring(0, 1).toUpperCase() + this.methodParameters.get(j).substring(1)) ;
+		}
+		
+		/*modify non primitive type return value*/
+		if(this.getReturnType() == null || this.getReturnType().equals("") || this.getReturnType().equals("String") || this.getReturnType().equals("Boolean") || this.getReturnType().equals("Integer")) {
+			return_value="Result";
+		}
+		else if(this.getReturnType().equals(this.className)){
+			ArrayList returnValue = new ArrayList();
+			for(int k = 0; k < this.classAttributes.size(); k++) {
+				returnValue.add("Result_"+this.classAttributes.get(k).substring(0, 1).toUpperCase() + this.classAttributes.get(k).substring(1)) ;
+			}
+			return_value = returnValue.toString();
+		}
+		
+		
+		
+		clp.add(new ArrayList());
+		clp.get(0).add("0");
+		clp.get(0).add(":- lib(ic).\r\n:- lib(timeout).\r\n\n");
+		//constructor ¨S¦³ attribute pre
+		if (className.toLowerCase().equals(methodName.toLowerCase())) {
+			clp.get(0).add(className + methodName +"(ArgPre, ObjPost, ArgPost, Result, Exception):- \n");
+			clp.get(0).add("	"+className + methodName +"_startNode(ArgPre, ObjPost, ArgPost, ResultT, ExceptionT), \n");
+			clp.get(0).add("	typeCheck(ResultT,Result), \n");
+			clp.get(0).add("	typeCheck(ExceptionT,Exception). \n");
+			clp.get(0).add(className + methodName +"_startNode("+ arg_pre +","+ attributes_post +","+ arg_post +", ["+ return_value +"], [Exception]):- \n");
+		}
+		else {
+			clp.get(0).add(className + methodName +"(ObjPre, ArgPre, ObjPost, ArgPost, Result, Exception):- \n");
+			clp.get(0).add("	"+className + methodName +"_startNode(ObjPre, ArgPre, ObjPost, ArgPost, ResultT, ExceptionT), \n");
+			clp.get(0).add("	typeCheck(ResultT,Result), \n");
+			clp.get(0).add("	typeCheck(ExceptionT,Exception). \n");
+			clp.get(0).add(className + methodName +"_startNode("+ attributes_pre +","+ arg_pre +","+ attributes_post +","+ arg_post +", ["+ return_value +"], [Exception]):- \n");
+		}
+		clp.get(0).add(fix());
+		if(this.getSuccessor().get(0).getClass().equals(CLGConnectionNode.class)) {
+			clp.get(0).add("	"+ className + methodName + "_node_" +((CLGConnectionNode)this.getSuccessor().get(0)).getConnectionId()+"("+attributes_pre +","+ arg_pre +","+ attributes_post +","+ arg_post+", "+ return_value+", Exception, "+ localParameters +"). \n");
+		}
+		clp.addAll(this.getSuccessor().get(0).genMethodCLPForClass(className, methodName, attributes_post, arg_post, localParameters, return_value));
+		return clp;
+	}
+	
 	public String fix() {
 		String fix="";
 		switch (this.methodName) {
@@ -271,6 +368,8 @@ public class CLGStartNode extends CLGNode {
 		return fix;
 	}
 }
+
+
 
 	
 //	@Override

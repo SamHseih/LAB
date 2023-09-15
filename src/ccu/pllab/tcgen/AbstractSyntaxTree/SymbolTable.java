@@ -20,7 +20,7 @@ public class SymbolTable {
 	//private HashMap<String,String> argumentMap=new HashMap<String,String>();  ÂÂªº*/
 	
 	
-	public SymbolTable(String calssName)
+	public SymbolTable(String className)
 	{
 		this.className=className;
 		attribute=new ArrayList<VariableToken>();

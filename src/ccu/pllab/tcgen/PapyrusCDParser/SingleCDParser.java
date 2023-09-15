@@ -23,6 +23,7 @@ import org.xml.sax.SAXException;
 
 import ccu.pllab.tcgen.AbstractType.*;
 import ccu.pllab.tcgen.DataWriter.DataWriter;
+import ccu.pllab.tcgen.exe.main.Main;
 import ccu.pllab.tcgen.launcher.BlackBoxLauncher;
 import ccu.pllab.tcgen.transform.Splitter;
 import ccu.pllab.tcgen.transform.UmlTransformer;
@@ -68,7 +69,7 @@ public class SingleCDParser {
 	/*
 	 * 以下為Parse主要及所需method
 	 * 
-	 * 1. 將類別圖轉成dom樹狀結構 : init(), initRef()
+	 * 1. 將類別圖轉成dom樹狀結構 : init(), initRef() 
 	 * 2. 分析並取得類別圖裡的資訊 : Parse()
 	 */ 
 	
@@ -106,7 +107,7 @@ public class SingleCDParser {
 			
 			// 定義XML DOM parser解析器
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			// 建立DOM document
+			// 建立DOM document DocumentBuilder
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			
 			for(int i = 0 ; i < rList.size() ; i++ ) {
@@ -138,21 +139,22 @@ public class SingleCDParser {
 			ClassInfo c = new ClassInfo();
 			UserDefinedType this_class_type = null;
 			
-            Node node = nList.item(i);                // 第i個class
+            Node node = nList.item(i);                // // 第i個class
             if (node.getNodeType() == Node.ELEMENT_NODE) {  
                 Element e = (Element) node;
                 c.setName(e.getAttribute("name"));    // class name
                 c.setID(e.getAttribute("xmi:id"));    // class id
     			this_class_type = new UserDefinedType(c.getName(), c.getID());
-    			BlackBoxLauncher.typeTable.add(this_class_type);
+    			//BlackBoxLauncher.typeTable.add(this_class_type);
+    			Main.typeTable.add(this_class_type);
     			
-    		    System.out.println(BlackBoxLauncher.typeTable.printTypeTableInfo());
+    		    //System.out.println(BlackBoxLauncher.typeTable.printTypeTableInfo());
                 
                 // ---------- Property ----------
-                NodeList pList = e.getElementsByTagName("ownedAttribute");   // 取得此class的所有property
+                NodeList pList = e.getElementsByTagName("ownedAttribute");   // ���迨class�����roperty
                 if( pList.getLength() != 0 ) property_List = new ArrayList<VariableInfo>() ;
                 
-                // 取得此class裡的各個property的type & name
+                // ���迨class鋆∠���roperty��ype & name
                 for( int j = 0 ; j < pList.getLength() ; j++ ) {
                 	Element child = (Element) pList.item(j);
                 	VariableInfo p = new VariableInfo( getVarType(child, c.getID(), c.getName()), child.getAttribute("name"), 
@@ -174,7 +176,7 @@ public class SingleCDParser {
                 		p.setType(new ArrayType(p.getType(), p.getUpperValue()));
                 	}
                 	
-                	property_List.add( p ) ;    // 把property加進list
+                	property_List.add( p ) ;    // ��roperty���烽ist
                 } // for
                 // ---------- Property ----------
                 
@@ -183,7 +185,7 @@ public class SingleCDParser {
                 NodeList oList = e.getElementsByTagName("ownedOperation");   // 取得此class的所有operation
                 if( oList.getLength() != 0 ) operation_List = new ArrayList<OperationInfo>() ;
                 
-                // 取得此class裡的各個operation的name, parameter, return type 
+                // 取得此class裡的各個operation的name, parameter, return type
                 for( int k = 0 ; k < oList.getLength() ; k++ ) {
                 	OperationInfo method = new OperationInfo();
                 	Element child = (Element) oList.item(k);
@@ -228,9 +230,9 @@ public class SingleCDParser {
                       		p.setType(new ArrayType(p.getType(), p.getUpperValue()));
                       	}
                         	
-                      	  // 參數
+                      	  // 參數
                       	  if ( ! eParameter.getAttribute("direction").equals("return"))
-                      		  parameter_List.add( p ) ;    // 把parameter加進list
+                      		  parameter_List.add( p ) ;    //把parameter加進list
                     	  
                     	  // return variable
                     	  else method.setReturnType( p );
@@ -266,7 +268,7 @@ public class SingleCDParser {
 	
 	
 	
-	// 於Parse()中所用到的method =================================================================
+	// �於Parse()中所用到的method =================================================================
 	
 	// 取得property的type: 自建立的型別, 基本型別, 陣列
 	private String getVarType_Str(Element e) {
@@ -284,12 +286,14 @@ public class SingleCDParser {
 	// 取得property的type: 自建立的型別, 基本型別, 陣列
 	private VariableType getVarType(Element e, String classID, String className ) throws ParserConfigurationException, SAXException, IOException, TransformerException {
 		/*
-		// 2020/05 可能都只用下面的程式碼了
+		// 2020/05 可能都只用下面的程式碼了 if(e.hasAttribute("type")) return
     	if(e.hasAttribute("type")) return e.getAttribute("type");
     	*/
-		if(e.hasAttribute("type") ) {//同類別圖的   待修
-			if(BlackBoxLauncher.typeTable.containsType(e.getAttribute("type"), e.getAttribute("type")))
-				return BlackBoxLauncher.typeTable.get(e.getAttribute("type"), e.getAttribute("type"));
+		if(e.hasAttribute("type") ) {// 同類別圖的 待修
+			if(Main.typeTable.containsType(e.getAttribute("type"), e.getAttribute("type")))
+			//if(BlackBoxLauncher.typeTable.containsType(e.getAttribute("type"), e.getAttribute("type")))
+				return Main.typeTable.get(e.getAttribute("type"), e.getAttribute("type"));
+				//return BlackBoxLauncher.typeTable.get(e.getAttribute("type"), e.getAttribute("type"));
 			//else return new UnDefinedType(e.getAttribute("type"));// 還未讀取便先用到的 待修改
 		}
 		
@@ -303,7 +307,7 @@ public class SingleCDParser {
         	String s = et.getAttribute("href");
         	s = s.substring(s.indexOf("#")+1, s.length());
         	
-        	/*判斷是否是array*/        	
+        	/* 判斷是否是array */        	
         	String low = "1", up = "1";
         	
         	if (e.getElementsByTagName("lowerValue").item(0) != null) {
@@ -318,13 +322,16 @@ public class SingleCDParser {
         	
         	// ArrayType
         	if(!low.equals("1") && !up.equals("1")) {
-        		ArrayType new_arrType = new ArrayType(BlackBoxLauncher.typeTable.get(s, s), up);
-        		BlackBoxLauncher.typeTable.add(new_arrType);
+        		//ArrayType new_arrType = new ArrayType(BlackBoxLauncher.typeTable.get(s, s), up);
+        		//BlackBoxLauncher.typeTable.add(new_arrType);
+        		ArrayType new_arrType = new ArrayType(Main.typeTable.get(s, s), up);
+        		Main.typeTable.add(new_arrType);
         		return new_arrType;
         	}
-        	/*判斷是否是array*/
+        	/* 判斷是否是array */
         	
-        	else return BlackBoxLauncher.typeTable.get(s, s);
+        	//else return BlackBoxLauncher.typeTable.get(s, s);
+        	else return Main.typeTable.get(s, s);
     	} // if
     	
     	// 自定義型別 (ArrayList, String, UserDefinedType)
@@ -339,17 +346,19 @@ public class SingleCDParser {
         		System.out.println("CD Parser Test Type [ArrayList]: "+ comment_type);
         		// comment_type = comment_type.substring( comment_type.indexOf("<")+1,  comment_type.length()) ;
         		tempType = createArrayListType(comment_type);
-        		BlackBoxLauncher.typeTable.add(tempType);
+        		Main.typeTable.add(tempType);
+        		//BlackBoxLauncher.typeTable.add(tempType);
         	} // if
         	
-        	else if ( s.equals("String") )tempType = BlackBoxLauncher.typeTable.get("string", "string") ;
+        	//else if ( s.equals("String") )tempType = BlackBoxLauncher.typeTable.get("string", "string") ;
+        	else if ( s.equals("String") )tempType = Main.typeTable.get("string", "string") ;
         	
         	else {
         		tempType = createUserDefinedType( s ); 
         	} // else
 
         	
-        	/*判斷是否是array*/        	
+        	/* 判斷是否是array */        	
         	String low="1", up = "1";
         	
         	if (e.getElementsByTagName("lowerValue").item(0) != null) {
@@ -365,10 +374,11 @@ public class SingleCDParser {
         	// ArrayType
         	if(!low.equals("1") && !up.equals("1")) {
         		ArrayType new_arrType = new ArrayType(tempType, up);
-        		BlackBoxLauncher.typeTable.add(new_arrType);
+        		Main.typeTable.add(new_arrType);
+        		//BlackBoxLauncher.typeTable.add(new_arrType);
         		return new_arrType;
         	}
-        	/*判斷是否是array*/
+        	/*�����array*/
         	
         	else return tempType;
 
@@ -388,8 +398,10 @@ public class SingleCDParser {
 			type_str = s.substring(0, s.indexOf("<") );
 		
 		System.out.println(s+"::"+type_str+"::"+element);
-		if( BlackBoxLauncher.typeTable.containsType(element, element)) {
-			return new ArrayListType( BlackBoxLauncher.typeTable.get(element, element) );
+		//if( BlackBoxLauncher.typeTable.containsType(element, element)) {
+		//	return new ArrayListType( BlackBoxLauncher.typeTable.get(element, element) );
+		if( Main.typeTable.containsType(element, element)) {
+			return new ArrayListType( Main.typeTable.get(element, element) );
 		}
 		else if( type_str != null && type_str.equals("ArrayList") )  // 多維 muti-D
 			return new ArrayListType( createArrayListType(element) );
@@ -400,9 +412,9 @@ public class SingleCDParser {
 	
 	// 創建使用者自定義的UserDefinedType結構
 	private UserDefinedType createUserDefinedType( String s ) throws ParserConfigurationException, SAXException, IOException, TransformerException {
-		//去spec資料夾找同名的類別圖，並傳入PapyrusCDParser分析
-		//從ClassInfo拿資料
-		//創建結構並回傳
+		// 去spec資料夾找同名的類別圖，並傳入PapyrusCDParser分析
+		// 從ClassInfo拿資料
+		// 創建結構並回傳
 		Path CDumlPath = Paths.get(DataWriter.output_folder_path+"/spec/"+s+".uml");
 		File uml = CDumlPath.toFile();
 		Splitter split = new Splitter(uml);
@@ -417,11 +429,13 @@ public class SingleCDParser {
         	String type_name = e.getAttribute("name");    // class name
         	String type_id = e.getAttribute("xmi:id");    // class id
         	
-        	if( ! BlackBoxLauncher.typeTable.containsType( type_name, type_id) ) {
+        	//if( ! BlackBoxLauncher.typeTable.containsType( type_name, type_id) ) {
+        	if( ! Main.typeTable.containsType( type_name, type_id) ) {
             	parser.Parse(ref_doc);
         	} // if
         	
-        	return ((UserDefinedType)BlackBoxLauncher.typeTable.get( type_name, type_id ));
+        	//return ((UserDefinedType)BlackBoxLauncher.typeTable.get( type_name, type_id ));
+        	return ((UserDefinedType)Main.typeTable.get( type_name, type_id ));
 
         } // if
         
@@ -494,10 +508,10 @@ public class SingleCDParser {
 			    }
 	}*/
 	/*
-	// 2020/05 以下函式可能不會用到 -----------------------------------------------------------------------------------------------------------------------------------------
+	// 2020/05 以下函式可能不會用到 -----------------------------------------------------------------------------------------------------------------------------------------
 	
-	// 將變數的型別與自己建立的class的id做對應, 把id改成class的name
-	// 如果型別是陣列要把在name後面加上[]                                   ****待改
+	//  將變數的型別與自己建立的class的id做對應, 把id改成class的name
+	// 如果型別是陣列要把在name後面加上[] ****待改
 	public void changeTypeStr() {
 		
 		for (int  i= 0 ; i < this.classList.size();i++){
@@ -507,7 +521,7 @@ public class SingleCDParser {
             	VariableInfo p = this.classList.get(i).getProperties().get(j);
             	p.setType(typeIDtoName(p.getType()));
             	
-            	// if(p.getSize() != null) p.setType(p.getType()+"[]"); // size非空即為陣列
+            	// if(p.getSize() != null) p.setType(p.getType()+"[]"); // size非空即為陣列 }
 		    } // for
             
 
@@ -521,7 +535,7 @@ public class SingleCDParser {
             		VariableInfo parameter = o.getParameter().get(para_i);
             		parameter.setType(typeIDtoName(parameter.getType()));
             		
-            		// if(parameter.getSize() != null) parameter.setType(parameter.getType()+"[]"); // size非空即為陣列
+            		// if(parameter.getSize() != null) parameter.setType(parameter.getType()+"[]"); // size非空即為陣列 }
                 } // for
             	
             	// return type
@@ -529,7 +543,7 @@ public class SingleCDParser {
             	if(o.getReturnType()!=null)
             	rt.setType(typeIDtoName(rt.getType()));
             	
-            	// *** if(o.getReturnType().getSize() != null) o.setType(p.getType()+"[]"); // size非空即為陣列
+            	// *** if(o.getReturnType().getSize() != null) o.setType(p.getType()+"[]"); // size非空即為陣列 }
             }//for operation
 		}
 	} // changeTypeStr()
@@ -556,7 +570,7 @@ public class SingleCDParser {
 	
 	public void parseRef() {
 		NodeList list = doc.getElementsByTagName("packageImport");
-		Node node = list.item(4);                // 第i個class
+		Node node = list.item(4);                // 蝚枰�lass
          if (node.getNodeType() == Node.ELEMENT_NODE) {  
              Element e = (Element) node;
              NodeList child = e.getElementsByTagName("importedPackage");

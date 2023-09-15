@@ -10,6 +10,7 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import ccu.pllab.tcgen.DataWriter.DataWriter;
+import tcgenplugin_2.handlers.ClassLevelHandler;
 
 public class TestScriptGeneratorClassLevel {
 	private List<TestData> testDatas;
@@ -23,10 +24,17 @@ public class TestScriptGeneratorClassLevel {
 	//----
 	public String genTestCase(List<TestDataClassLevel> data, String packagePosition, String packageName, ArrayList<String> att){
 		String str="";
-		str += "package ccu.pllab.tcgen.TCGenExample715.TestSuites715;\n";
+		/*str += "package ccu.pllab.tcgen.TCGenExample715.TestSuites715;\n";
 		str += "import "+packagePosition+";\n"+
 			"import junit.framework.TestCase;\n\n";
-		str += "public class test"+packageName+" extends TestCase {\n";
+		str += "public class test"+packageName+" extends TestCase {\n";*/
+		
+		str += "package team.ccu.pllab."+ ClassLevelHandler.coverageCriteria+  ";\n"+ 
+		"import junit.framework.TestCase;\n" + 
+		"import java.util.ArrayList;\n" + 
+		"import java.util.Arrays;\n\n" +
+		"public class "+ packageName +"Test extends TestCase {\n"+
+		"\t@Test\n";
 		
 		for(int i=0;i<data.size();i++){ 
 			ArrayList<Object> methodname=data.get(i).getMethodName();
@@ -34,7 +42,8 @@ public class TestScriptGeneratorClassLevel {
 			int count=0;
 			for(int i1=0;i1<methodname.size();i1++){
 				if(i1==0){ //constructor
-					str += "\t\t"+methodname.get(i1)+" coffee = new "+methodname.get(i1)+"(";
+					//str += "\t\t"+methodname.get(i1)+" coffee = new "+methodname.get(i1)+"(";
+					str += "\t\t"+methodname.get(i1)+" obj" + packageName + " = new "+methodname.get(i1)+"(";
 					ArrayList<Object> prearg = data.get(i).getArgPre();
 					ArrayList<Object> inprearg = (ArrayList<Object>)prearg.get(i1);
 					if(!inprearg.isEmpty()){
@@ -59,12 +68,14 @@ public class TestScriptGeneratorClassLevel {
 							//str += "\t\tassertTrue("+"o"+count+".equals(coffee.getmoney()));\n";
 							str += "\t\tassertTrue("+"o"+count+".equals(coffee.get"+att.get(statep)+"()));\n";
 							*/count++;
-							str += "\t\tassertEquals("+posts1.get(statep)+",coffee.get"+att.get(statep)+"());\n";
+							//str += "\t\tassertEquals("+posts1.get(statep)+",coffee.get"+att.get(statep)+"());\n";
+							str += "\t\tassertEquals("+posts1.get(statep)+"," +"obj" + packageName + ".get" +att.get(statep)+"());\n";
 						}
 						else if(posts1.get(statep) instanceof String){
 							//str += "\t\tassertTrue(\""+posts1.get(statep)+"\".equals(coffee.getmoney()));\n";
 							//str += "\t\tassertTrue(\""+posts1.get(statep)+"\".equals(coffee.get"+att.get(statep)+"()));\n";
-							str += "\t\tassertEquals(\""+posts1.get(statep)+"\",coffee.get"+att.get(statep)+"());\n";
+							//str += "\t\tassertEquals(\""+posts1.get(statep)+"\",coffee.get"+att.get(statep)+"());\n";
+							str += "\t\tassertEquals(\""+posts1.get(statep)+"," +"obj" + packageName + ".get" +att.get(statep)+"());\n";
 						}
 					}
 				}//end if i1=0
@@ -80,18 +91,21 @@ public class TestScriptGeneratorClassLevel {
 							for(int argp=0;argp<inprearg.size();argp++){
 								if(inprearg.get(argp) instanceof Integer){
 									//str += "\t\tcoffee."+methodname.get(i1)+"("+inprearg.get(0)+");\n";
-									str += "\t\tcoffee."+methodname.get(i1)+"("+inprearg.get(argp);
+									//str += "\t\tcoffee."+methodname.get(i1)+"("+inprearg.get(argp);
+									str += "\t\tobj"+ packageName  +"."+methodname.get(i1)+"("+inprearg.get(argp);
 								}
 								else if(inprearg.get(argp) instanceof String){
 									//str += "\t\tcoffee."+methodname.get(i1)+"(\""+inprearg.get(0)+"\");\n";
-									str += "\t\tcoffee."+methodname.get(i1)+"(\""+inprearg.get(argp)+"\"";
+									//str += "\t\tcoffee."+methodname.get(i1)+"(\""+inprearg.get(argp)+"\"";
+									str += "\t\tobj"+ packageName + "."+methodname.get(i1)+"(\""+inprearg.get(argp)+"\"";
 								}
 								if(inprearg.size()!=1 && argp!=(inprearg.size()-1)) str+=",";
 							}
 							str += ");\n";
 						}
 						else{
-							str += "\t\tcoffee."+methodname.get(i1)+"();\n";
+							//str += "\t\tcoffee."+methodname.get(i1)+"();\n";
+							str += "\t\tobj" + packageName + "."+methodname.get(i1)+"();\n";
 						}
 					}
 					else{//has return val
@@ -116,18 +130,21 @@ public class TestScriptGeneratorClassLevel {
 								for(int argp=0;argp<inprearg.size();argp++){
 									if(inprearg.get(argp) instanceof Integer){
 										//str += "\t\tcoffee."+methodname.get(i1)+"("+inprearg.get(0)+");\n";
-										str += "coffee."+methodname.get(i1)+"("+inprearg.get(argp);
+										//str += "coffee."+methodname.get(i1)+"("+inprearg.get(argp);
+										str += "obj" + packageName + "."+methodname.get(i1)+"("+inprearg.get(argp);
 									}
 									else if(inprearg.get(argp) instanceof String){
 										//str += "\t\tcoffee."+methodname.get(i1)+"(\""+inprearg.get(0)+"\");\n";
-										str += "coffee."+methodname.get(i1)+"(\""+inprearg.get(argp)+"\"";
+										//str += "coffee."+methodname.get(i1)+"(\""+inprearg.get(argp)+"\"";
+										str += "obj"+ packageName + "."+methodname.get(i1)+"(\""+inprearg.get(argp)+"\"";
 									}
 									if(inprearg.size()!=1 && argp!=(inprearg.size()-1)) str+=",";
 								}
 								str += ");\n";
 							}
 							else{
-								str += "coffee."+methodname.get(i1)+"());\n";
+								//str += "coffee."+methodname.get(i1)+"());\n";
+								str += "obj"+packageName +"."+methodname.get(i1)+"());\n";
 							}
 						}//end for inc
 					}
@@ -138,14 +155,16 @@ public class TestScriptGeneratorClassLevel {
 						if(inposts.get(statep) instanceof String){
 							//str += "\t\tassertTrue(\""+posts1.get(statep)+"\".equals(coffee.getmoney()));\n";
 							//str += "\t\tassertTrue(\""+inposts.get(statep)+"\".equals(coffee.get"+att.get(statep)+"()));\n";
-							str += "\t\tassertEquals(\""+inposts.get(statep)+"\",coffee.get"+att.get(statep)+"());\n";
+							//str += "\t\tassertEquals(\""+inposts.get(statep)+"\",coffee.get"+att.get(statep)+"());\n";
+							str += "\t\tassertEquals(\""+inposts.get(statep)+"\",obj"+ packageName +".get"+att.get(statep)+"());\n";
 						}
 						else if(inposts.get(statep) instanceof Integer){
 							//str += "\t\tObject o"+count+" = "+inposts.get(statep)+";\n"; 
 							//str += "\t\tassertTrue("+"o"+count+".equals(coffee.getmoney()));\n";
 							//str += "\t\tassertTrue("+"o"+count+".equals(coffee.get"+att.get(statep)+"()));\n";
 							count++;
-							str += "\t\tassertEquals("+inposts.get(statep)+",coffee.get"+att.get(statep)+"());\n";
+							//str += "\t\tassertEquals("+inposts.get(statep)+",coffee.get"+att.get(statep)+"());\n";
+							str += "\t\tassertEquals("+inposts.get(statep)+",obj"+ packageName +".get"+att.get(statep)+"());\n";
 						}
 					}
 				}
@@ -153,7 +172,11 @@ public class TestScriptGeneratorClassLevel {
 			str += "\t}\n";
 		}//end data
 		str += "}";
-		DataWriter.writeInfo(str, "test"+packageName, "java", DataWriter.output_folder_path, "TestSuites715");
+		
+		//20200708
+		String testOutputPath = DataWriter.output_folder_path+ "/test script/team/ccu/pllab/" + ClassLevelHandler.coverageCriteria +"/";
+		DataWriter.writeInfo(str, packageName+"Test", "java", testOutputPath);
+		//DataWriter.writeInfo(str, "test"+packageName, "java", DataWriter.output_folder_path, "TestSuites715");
 		//DataWriter.writeFile(str, packageName, "TestSuites", ".java");
 		return str;
 	}

@@ -810,7 +810,7 @@ public class CLPTranslator {
 				}
 			}
 			if (object_pre_content != "") {
-				domainPredicate += "[" + object_pre_content.substring(1) + "]:: -32768..32767,\n";
+				domainPredicate += "[" + object_pre_content.substring(1) + "]:: 0..32767,\n";
 			}
 		}
 		if (this.arg_pre.size() > 0) {
@@ -821,12 +821,13 @@ public class CLPTranslator {
 					if (variableToken.getVariableName().equals(temp)) {
 						if (!(variableToken.getType() instanceof ArrayType) && !(variableToken.getType() instanceof ArrayListType))
 							arg_pre_content += "," + object;
+							
 					}
 				}
 				
 			}
 			if (arg_pre_content != "") {
-				domainPredicate += "[" + arg_pre_content.substring(1) + "]:: -32768..32767,\n";
+				domainPredicate += "[" + arg_pre_content.substring(1) + "]:: 0..32767,\n";
 			}
 
 		}
@@ -851,7 +852,7 @@ public class CLPTranslator {
 				
 			}
 			if (object_post_content != "")
-				domainPredicate += "[" + object_post_content.substring(1) + "]:: -32768..32767,\n";
+				domainPredicate += "[" + object_post_content.substring(1) + "]:: 0..32767,\n";
 		}
 		if (this.arg_post.size() > 0) {
 			for (String object : this.arg_post) {
@@ -865,7 +866,7 @@ public class CLPTranslator {
 				
 			}
 			if (arg_post_content != "")
-				domainPredicate += "[" + arg_post_content.substring(1) + "]:: -32768..32767,\n";
+				domainPredicate += "[" + arg_post_content.substring(1) + "]:: 0..32767,\n";
 		}
 		/*for (String object : this.result) {
 			if (object.contains("Result_"))
@@ -1416,7 +1417,8 @@ public class CLPTranslator {
 						String[] para_list = temp.substring(temp.indexOf("(")+1, temp.indexOf(")")).split(",");
 						
 						// "D#=Date(Dy,Dm,Dd)" >> "dateDate([Dy_pre,Dm_pre,Dd_pre],D,[Dy,Dm,Dd],[],[])"						
-						if(BlackBoxLauncher.typeTable.containsType(class_constructor_name, class_constructor_name)){
+						//if(BlackBoxLauncher.typeTable.containsType(class_constructor_name, class_constructor_name)){
+						if(Main.typeTable.containsType(class_constructor_name, class_constructor_name)){	
 							temp = class_constructor_name.substring(0, 1).toLowerCase()+
 								   class_constructor_name.substring(1) + class_constructor_name + "([";
 							
@@ -1965,6 +1967,141 @@ public class CLPTranslator {
 				}
 			}
 		}
+		this.body_count++;
+		return clpstr1;
+	}
+	
+	public String genMethodPathCLP_try(CLGPath path, int pathN) {
+		int clpcount = 1;
+		String clpstr1 = "", classn = "";
+		List<CLGNode> nodeli = path.getPathNodes();
+		clpstr1 += importLibraryCLP();
+		clpstr1 += "testpath" + (pathN) + "(SDObjPre, SDArgPre, SDObjPost, SDArgPost, SDResult,SDException):-\n\n";
+
+		CLGPathEnumerator clgPathEnumerator = new CLGPathEnumerator();
+		nodeli = clgPathEnumerator.filterConstraintNode(nodeli);
+
+		for (int i = 0; i < nodeli.size(); i++) {
+			if (nodeli.get(i) instanceof CLGConstraintNode) {
+				CLGConstraintNode c = (CLGConstraintNode) nodeli.get(i);
+
+				if (c.getConstraint() instanceof CLGOperatorNode) {
+					CLGOperatorNode clgop = (CLGOperatorNode) c.getConstraint();
+					if (clgop.getOperator().equals("=")) {
+						this.renameUseVar(clgop.getRightOperand());
+						this.renameDefVar(clgop.getLeftOperand());
+						clpstr1 += "ObjPost" + clpcount+ " = [P" + clpcount+ "],\n";
+						clpstr1 += "P" + clpcount+ " #=" + clgop.getRightOperand().getImgInfo() + ",\n";
+					} else {
+						this.renameUseVar(clgop.getLeftOperand());
+						this.renameUseVar(clgop.getRightOperand());
+						if (clgop.getOperator().equals("==")) {
+							clpstr1 += "ObjPost" + clpcount+ " = [P" + clpcount + "],\n";
+							clpstr1 += "P" + clpcount + " #= " + clgop.getRightOperand().getImgInfo() + ",\n\n";
+						} else {
+							clpstr1 += "ObjPost" + clpcount + " = [P" + clpcount + "],\n";
+							clpstr1 += "P" + clpcount + " #" + clgop.getOperator() + clgop.getRightOperand().getImgInfo() + ",\n";
+						}
+					}
+				} else if (c.getConstraint() instanceof CLGMethodInvocationNode) {
+					
+					CLGMethodInvocationNode clgme = (CLGMethodInvocationNode) c.getConstraint();
+					
+					if(!clgme.getMethodArgument().contains(" ")) {
+						
+						String argstring = "ArgPre" + clpcount + " = [";
+						for (int argCount = 0 ; argCount < clgme.getMethodArgument().size(); argCount++) {
+							String thisarg = clgme.getMethodArgument().get(argCount).toString();
+							thisarg = thisarg.substring(0, 1).toUpperCase() + thisarg.substring(1) + clpcount;
+							clpstr1 += thisarg;
+							clpstr1 += " :: 1 .. 32767,\n";
+							
+							if(argCount != clgme.getMethodArgument().size() -1)
+								argstring += thisarg +", ";
+							else
+								argstring += thisarg;
+						}
+						argstring += "],\n";
+						clpstr1 += argstring;
+					}
+					
+					clpstr1 += "ArgPre"+ clpcount + " = ArgPost" + clpcount + ",\n";
+					
+					if (clpcount == 1) {
+						classn = clgme.getMethodName();
+						if (nodeli.size() == 3) {
+							clpstr1 += classn.substring(0, 1).toLowerCase() +classn.substring(1) + clgme.getMethodName().substring(0, 1).toUpperCase() + clgme.getMethodName().substring(1, clgme.getMethodName().length()) 
+									+ "(ArgPre" + clpcount + ", ObjPost" + clpcount + ", ArgPre" + clpcount + ", Result" + clpcount+ ", Exception"+ clpcount +"),\n";
+							clpstr1 += "SDObjPre = [[]],\n";
+							clpstr1 += "SDArgPre = [ArgPre" + clpcount + "],\n";
+							clpstr1 += "SDObjPost = [ObjPost" + clpcount + "],\n";
+							clpstr1 += "SDArgPost = [ArgPost" + clpcount + "],\n";
+							clpstr1 += "SDResult = [[]],\n";
+							clpstr1 += "SDException = [Exception"+clpcount +"],\n\n";
+						} else {
+							clpstr1 += classn.substring(0, 1).toLowerCase() +classn.substring(1) + clgme.getMethodName().substring(0, 1).toUpperCase() + clgme.getMethodName().substring(1, clgme.getMethodName().length()) 
+									+ "(ArgPre" + clpcount + ", ObjPost" + clpcount + ", ArgPre" + clpcount + ", Result" + clpcount+ ", Exception"+ clpcount +"),\n";
+							clpstr1 += "SDObjPre = [[]|SDObjPre" + (clpcount + 1) + "],\n";
+							clpstr1 += "SDArgPre = [ArgPre" + clpcount + "|SDArgPre" + (clpcount + 1) + "],\n";
+							clpstr1 += "SDObjPost = [ObjPost" + clpcount + "|SDObjPost" + (clpcount + 1) + "],\n";
+							clpstr1 += "SDArgPost = [ArgPost" + clpcount + "|SDArgPost" + (clpcount + 1) + "],\n";
+							clpstr1 += "SDResult = [[] |SDResult" + (clpcount + 1) + "],\n";
+							clpstr1 += "SDException = [Exception"+ clpcount+ "|SDException" + (clpcount + 1) +"],\n\n";
+							
+							
+							clpstr1 += "ObjPre"+ (clpcount + 1 ) + " = ObjPost" + clpcount + ",\n";
+							//clpstr1 += "ArgPre"+ clpcount + " = ArgPost" + clpcount + ",\n";
+						}
+						clpcount++;
+					} else {
+						// check last op
+						if (i != nodeli.size() - 2) {
+							clpstr1 += classn.substring(0, 1).toLowerCase() +classn.substring(1) + clgme.getMethodName().substring(0, 1).toUpperCase() + clgme.getMethodName().substring(1, clgme.getMethodName().length()) 
+									+ "(ObjPre"+ clpcount+ ", ArgPre" + clpcount + ", ObjPost" + clpcount + ", ArgPre" + clpcount + ", Result" + clpcount + ", Exception" + clpcount +"),\n";
+							clpstr1 += "SDObjPre" +	clpcount + " = [ObjPre" + clpcount + "|SDObjPre" + (clpcount + 1) + "],\n";
+							clpstr1 += "SDArgPre" + clpcount+ " = [ArgPre" + clpcount + "|SDArgPre" + (clpcount + 1) + "],\n";
+							clpstr1 += "SDObjPost" + clpcount+ " = [ObjPost" + clpcount + "|SDObjPost" + (clpcount + 1) + "],\n";
+							clpstr1 += "SDArgPost" + clpcount+ " = [ArgPost" + clpcount + "|SDArgPost" + (clpcount + 1) + "],\n";
+							clpstr1 += "SDResult" + clpcount + " = " + "[Result" + clpcount + "|SDResult" + (clpcount + 1) + "],\n";
+							clpstr1 += "SDException" + clpcount + " = " + "[Exception" + clpcount + "|SDException" + (clpcount + 1) + "],\n\n";
+							
+							clpstr1 += "ObjPre"+ (clpcount + 1 ) + " = ObjPost" + clpcount + ",\n";
+							//clpstr1 += "ArgPre"+ clpcount + " = ArgPost" + clpcount + ",\n";
+							clpcount++;
+						} else {
+							clpstr1 += classn.substring(0, 1).toLowerCase() +classn.substring(1) + clgme.getMethodName().substring(0, 1).toUpperCase() + clgme.getMethodName().substring(1, clgme.getMethodName().length()) 
+									+ "(ObjPre"+ clpcount + ", ArgPre" + clpcount + ", ObjPost" + clpcount + ", ArgPre" + clpcount + ", Result" + clpcount + ", Exception" + clpcount +"),\n";
+							clpstr1 += "SDObjPre"+ clpcount + " = [ObjPre" + clpcount+ "],\n";
+							clpstr1 += "SDArgPre" + clpcount + " = [ArgPre" + clpcount + "],\n";
+							clpstr1 += "SDObjPost" + clpcount + " = [ObjPost" + clpcount + "],\n";
+							clpstr1 += "SDArgPost" + clpcount + " = [ArgPost" + clpcount + "],\n";
+							clpstr1 += "SDResult" + clpcount + " = " + "[Result" + clpcount + "],\n";
+							clpstr1 += "SDException" + clpcount + " = " + "[Exception" + clpcount + "],\n\n";
+							clpcount++;
+						}
+					} // end else
+				}
+			}
+		}
+		
+		for(int i = 1; i < clpcount; i++) {
+			
+			if(i != 1)
+				clpstr1 += "labeling(ObjPre" + i + "),\n";
+			
+			clpstr1 += "labeling(ArgPre" + i + "),\n";
+			clpstr1 += "labeling(ObjPost" + i + "),\n";
+			//clpstr1 += "labeling(ArgPost" + i + "),\n";
+			
+			if(i != clpcount - 1)
+				clpstr1 += "labeling(ArgPost" + i + "),\n\n";
+			else
+				clpstr1 += "labeling(ArgPost" + i + ").\n\n";
+			
+			//之後要將Result 和 exception 
+		}
+		
+		
 		this.body_count++;
 		return clpstr1;
 	}

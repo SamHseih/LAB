@@ -72,7 +72,8 @@ public class OCL2AST {
 		    
 		    //測試類別資訊是否正確
 		    System.out.println(classParser.printParseClassInfo(c));
-		    System.out.println(BlackBoxLauncher.typeTable.printTypeTableInfo());
+		    //System.out.println(BlackBoxLauncher.typeTable.printTypeTableInfo());
+		    System.out.println(Main.typeTable.printTypeTableInfo());
 		    
 		   
 		    for(int j= 0; c.getProperties()!= null && j < c.getProperties().size();j++ ) {

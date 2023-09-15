@@ -46,7 +46,7 @@ public class CLG2Path {
 		
 	}
 	
-	public CLG2Path(ArrayList<CLGGraph> clg, CLGGraph invCLG,SymbolTable symbolTable,File uml) throws IOException, ParserConfigurationException, SAXException, TemplateException, ModelAccessException, ParseException, EclipseException, TransformerException, CloneNotSupportedException
+	public CLG2Path(ArrayList<CLGGraph> clg, CLGGraph invCLG,SymbolTable symbolTable,File uml) throws Exception
 	{	//基本上，黑箱白箱都要用，單純是和張振鴻學長一樣的code
 		this.setAttribute(invCLG,symbolTable);
 		Main.attribute=this.attribute;
@@ -158,25 +158,31 @@ public class CLG2Path {
 			packagePath = "package team.ccu.pllab.dcc;";
 						
 	}
+		
+		
 		this.testScript = packagePath + "\n" + 
 				"import junit.framework.TestCase;\n" + 
 				"import java.util.ArrayList;\n" + 
 				"import java.util.Arrays;\n" +
 				"import org.junit.Test;\n\n" +
 				"public class "+this.className+"Test extends TestCase {\n";
+		
 	}
 	
 	public List<TestData> genTestData(ArrayList<CLGGraph> clg, int number) throws IOException, CloneNotSupportedException{
 		CoverageCriterionManager manager=new CoverageCriterionManager();	
 		CLGGraph subclg=clg.get(number);
+		System.out.println("before set attri");
 		((CLGStartNode)subclg.getStartNode()).setClassAttributes(this.attribute);
+		
 		manager.init(subclg);
+		System.out.println("before gen suite");
 		this.testData = manager.genTestSuite();
 		
 		return this.testData;
 	}
 	
-	public void genTestScript(File uml) throws ParserConfigurationException, SAXException, IOException, TemplateException, ModelAccessException, ParseException, EclipseException, TransformerException {
+	public void genTestScript(File uml) throws Exception {
 //		TestScriptGenerator testScriptGenerator = new TestScriptGenerator();
 //		testScriptGenerator.init(this.testData);
 //		String ts = testScriptGenerator.genTestScriptByPreamble(uml);
@@ -207,7 +213,7 @@ public class CLG2Path {
 		return this.testScript;
 	}
 	
-	public void genTestScripts(ArrayList<CLGGraph> clg, File uml) throws IOException, ParserConfigurationException, SAXException, TemplateException, ModelAccessException, ParseException, EclipseException, TransformerException, CloneNotSupportedException {
+	public void genTestScripts(ArrayList<CLGGraph> clg, File uml) throws Exception {
 		Main.attribute=this.attribute; //有使用到
 		if(this.invCLP!=null)
 			Main.invCLP=this.invCLP.substring(0, this.invCLP.length()-2);

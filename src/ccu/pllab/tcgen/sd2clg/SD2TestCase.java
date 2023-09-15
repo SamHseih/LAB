@@ -25,6 +25,9 @@ import ccu.pllab.tcgen.libs.pivotmodel.ClassDiagInfo;
 import ccu.pllab.tcgen.libs.pivotmodel.ClassDiagToJson;
 import ccu.pllab.tcgen.libs.pivotmodel.Model;
 import ccu.pllab.tcgen.libs.pivotmodel.type.TypeFactory;
+import ccu.pllab.tcgen.transform.AST2CLG;
+import ccu.pllab.tcgen.transform.OCL2AST;
+import tcgenplugin_2.handlers.ClassLevelHandler;
 import tudresden.ocl20.pivot.model.IModel;
 import tudresden.ocl20.pivot.model.ModelAccessException;
 import tudresden.ocl20.pivot.parser.ParseException;
@@ -36,14 +39,16 @@ public class SD2TestCase {
 
 	public SD2TestCase(){
 	}
-	public SD2TestCase(File SD, File CD, File OCL) throws IOException{
+	public SD2TestCase(File SD, File CD, File OCL) throws Exception{
 		SDXML2SD parsd = new SDXML2SD();
 		SD2CLG cpsd = new SD2CLG();
 		
 		// QueueUnbounded , Queuebounded, Stackbounded, StackUnbounded,CoffeeMachine
 		StateDigram st = new StateDigram();
 		CLGGraph gtclggraph=new CLGGraph();
-		List<ccu.pllab.tcgen.ast.Constraint>OCLCons = new ArrayList<ccu.pllab.tcgen.ast.Constraint>();
+		AST2CLG ocl_clg=null;
+		OCL2AST oclParser = new OCL2AST();
+		//List<ccu.pllab.tcgen.ast.Constraint>OCLCons = new ArrayList<ccu.pllab.tcgen.ast.Constraint>();
 		
 		try {
 			st = parsd.convert(SD,CD);
@@ -56,25 +61,28 @@ public class SD2TestCase {
 				e.printStackTrace();
 			} //CLG-structure coffeemachine
 			
-			OCLCons=parseOCL(OCL, CD);
+			
+			
+			
+			oclParser.makeAST(OCL);
+			oclParser.makeSymbolTable(CD);
+			Main.symbolTable = oclParser.getSymbolTable();
+		    oclParser.typeToAst();
+		    oclParser.getAbstractSyntaxTree().toGraphViz();
+			Main.ast=oclParser.getAbstractSyntaxTree();
+			//ocl_clg=new AST2CLG(Main.ast);
+			ocl_clg=new AST2CLG();
+			ocl_clg.genCLG(Main.ast, "");
+			
+			//OCLCons=parseOCL(OCL, CD);
 		} catch (ParserConfigurationException | SAXException | IOException | TemplateException | ModelAccessException | ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		
-//		((CLGStartNode)gtclggraph.getStartNode()).setClassName("CoffeeMachine");
-//		((CLGStartNode)gtclggraph.getStartNode()).setMethodName("CoffeeMachine");
-//		ArrayList <String> att = new ArrayList <String>(); att.add("money");
-//		((CLGStartNode)gtclggraph.getStartNode()).setClassAttributes(att);
-		
 		CoverageCriterionManager coverman = new CoverageCriterionManager();
-		coverman.init(gtclggraph,Main.criterion,OCLCons);
-		
-		DataWriter.writeInfo(gtclggraph.graphDraw(), 
-				"CLG", "dot", DataWriter.output_folder_path,"CLG");
-		new ProcessBuilder("dot", "-Tpng", DataWriter.output_folder_path+"\\CLG\\"+"CLG.dot",
-				"-o", DataWriter.output_folder_path+"\\CLG\\"+"CLG.png").start();
+		coverman.init(gtclggraph,ocl_clg.getCLGGraph(),Main.criterion.toString());
 		
 		List<TestDataClassLevel> resulttd = new ArrayList<TestDataClassLevel>();
 		resulttd = coverman.genClassLevelTestSuite();

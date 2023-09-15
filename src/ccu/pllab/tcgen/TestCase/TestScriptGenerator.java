@@ -50,8 +50,7 @@ public class TestScriptGenerator {
 		this.testDatas = tds;
 	}
 
-	public String genTestScriptByPreamble(File uml) throws ParserConfigurationException, SAXException, IOException,
-			TemplateException, ModelAccessException, ParseException, EclipseException, TransformerException {
+	public String genTestScriptByPreamble(File uml) throws Exception {
 //		String className = this.testDatas.get(0).getClassName();
 //		String methodName = this.testDatas.get(0).getMethodName();
 //		String testScript = "import junit.framework.TestCase;\n" + 
@@ -408,8 +407,10 @@ String ret_val = testData.getRetVal().substring(1, testData.getRetVal().length()
 					} 
 
 					//20200828  UserDefinedType
-					else if(BlackBoxLauncher.typeTable.containsType(testData.getClassName(),testData.getClassName())) {
-						ClassInfo c = ((UserDefinedType)(BlackBoxLauncher.typeTable.get(testData.getClassName(), testData.getClassName()))).getClassInfo();
+					//else if(BlackBoxLauncher.typeTable.containsType(testData.getClassName(),testData.getClassName())) {
+					else if(Main.typeTable.containsType(testData.getClassName(),testData.getClassName())) {
+						//ClassInfo c = ((UserDefinedType)(BlackBoxLauncher.typeTable.get(testData.getClassName(), testData.getClassName()))).getClassInfo();
+						ClassInfo c = ((UserDefinedType)(Main.typeTable.get(testData.getClassName(), testData.getClassName()))).getClassInfo();
 						ArrayList<String> ans_arr =new ArrayList<String>();
 						sys_init +=  "obj"+ testData.getClassName() + " = new " + testData.getClassName() + "(";
 						String obj_list_str = "\"" ;
