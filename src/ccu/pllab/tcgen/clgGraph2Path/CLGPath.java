@@ -35,14 +35,6 @@ public class CLGPath implements Cloneable{
 		pathId = path_count++;
 	}
 	
-	public CLGPath(List<CLGNode> list,int ori_path_count) {
-		this.nodes = new ArrayList<CLGNode>();
-		this.edges = new HashSet<CLGEdge>();
-		nodes.addAll(list);
-		this.analyzeEdges();
-		pathId = ori_path_count;
-	}
-	
 	@Override
 	public CLGPath clone() throws CloneNotSupportedException {
 		CLGPath p = (CLGPath) super.clone();
@@ -232,10 +224,6 @@ public class CLGPath implements Cloneable{
 		
 		new ProcessBuilder("dot", "-Tpng", clgPath.getPath(),
 		"-o", clgPathFolder+"/"+BlackBoxHandler.CurrentEditorName+graphMethodName+pathId+".png").start();
-	}
-	
-	public static void reset() {
-		path_count = 1;
 	}
 	
 }

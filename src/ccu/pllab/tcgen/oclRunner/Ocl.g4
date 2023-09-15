@@ -221,12 +221,12 @@ formalParameterLists returns[ArrayList<PropertyCallExp> list]://這個list只容許va
 
 typeSpecifier returns[String value]: //這裡的value是指什麼type
 		sts=simpleTypeSpecifier		{$value=$sts.name;}
-		| col=arrayKind{$value=$col.type;};
+		| col=collectionKind{$value=$col.type;};
  
  
  
  
-collectionType : arrayKind '(' simpleTypeSpecifier ')';//未處理
+collectionType : collectionKind '(' simpleTypeSpecifier ')';//未處理
 
 
 
@@ -435,7 +435,6 @@ unaryOperator returns[String type,OperatorExp operator]:
 postfixExpression 	returns [AbstractSyntaxTreeNode node]: 
 	priEx=primaryExpression //if或運算或變數自然數或做let或呼叫attribute
 	pes=primaryExpressions[$priEx.node] ( cal=calculator[$pes.node]{$node=$cal.node;}|{$node=$pes.node;});
-	
 primaryExpressions [AbstractSyntaxTreeNode priEx]	returns [AbstractSyntaxTreeNode node]:	 
 ('.' {$node=new OperatorExp(".");}| '->'{$node=new OperatorExp("->");})prop=propertyCall 
  pes=primaryExpressions[$prop.property]{((OperatorExp)$node).setOperand($priEx,$pes.node);}
@@ -471,7 +470,7 @@ primaryExpression returns[AbstractSyntaxTreeNode node]:
 
 literal returns[LiteralExp liter]: 
 	STRING					{$liter=new LiteralExp("String",$STRING.text);}
-	|{boolean minus=false;}('-'{minus=true;})?INTEGER				{if(minus) $liter=new LiteralExp("int","-"+$INTEGER.text);else $liter=new LiteralExp("int",$INTEGER.text);}
+	|{boolean minus=false;}('-'{minus=true;})?INTEGER				{if(minus) $liter=new LiteralExp("Integer","-"+$INTEGER.text);else $liter=new LiteralExp("Integer",$INTEGER.text);}
 	|INTEGER {String real=$INTEGER.text;}'.' INTEGER{real+="."+$INTEGER.text;$liter=new LiteralExp("Real",real);}
 	|enumLiteral
 	|boolExp=booleanExp		{$liter=new LiteralExp("Boolean",$boolExp.value);}
@@ -525,9 +524,9 @@ ifExpression returns[IfExp node] :
 
 ifExps[AbstractSyntaxTreeNode condition,AbstractSyntaxTreeNode then] returns [IfExp node]: 
 	'else' elseExp=expression  'endif' 			
-	{$node=new IfExp("if",$condition,$then,$elseExp.node);}
+	{$node=new IfExp("If",$condition,$then,$elseExp.node);}
 	|'endif'									
-	{$node=new IfExp("if",$condition,$then);}
+	{$node=new IfExp("If",$condition,$then);}
 	; 
 
 
@@ -536,11 +535,11 @@ enumLiteral : NAME '::' NAME ( '::' NAME )*;//未處理
 
 simpleTypeSpecifier returns [String name]: pn=pathName{$name=$pn.name;};//未處理
 
-literalCollection returns [AbstractSyntaxTreeNode node]: colKind=arrayKind{CollectionExp node1=new CollectionExp($colKind.type);} '{'( colItem=collectionItem[node1](',' collectionItem[node1] )*)?'}' '->' coMe=collectionMethod[node1] {if($coMe.node2 instanceof IterateExp) {$node=$coMe.node2;}else {((CollectionExp)$node).setMethodName(((PropertyCallExp)$coMe.node2).getVariable()); $node=node1;}};//未處理 
+literalCollection returns [AbstractSyntaxTreeNode node]: colKind=collectionKind{CollectionExp node1=new CollectionExp($colKind.type);} '{'( colItem=collectionItem[node1](',' collectionItem[node1] )*)?'}' '->' coMe=collectionMethod[node1] {if($coMe.node2 instanceof IterateExp) {$node=$coMe.node2;}else {((CollectionExp)$node).setMethodName(((PropertyCallExp)$coMe.node2).getVariable()); $node=node1;}};//未處理 
 
 collectionItem [AbstractSyntaxTreeNode node]: ex=expression {((CollectionExp)$node).setStart($ex.node);}('..' ex2=expression {((CollectionExp)$node).setEnd($ex2.node);})?;
 
-arrayKind returns[String type]: simpleTypeSpecifier'[]'{$type=$simpleTypeSpecifier.name+"[]";}|simpleTypeSpecifier'[][]'{$type=$simpleTypeSpecifier.name+"[][]";}|'ArrayList<'simpleTypeSpecifier'>'{$type="ArrayList"+"<"+$simpleTypeSpecifier.name+">";};//未處理
+collectionKind returns[String type]: 'Set' {$type="Set";}| 'Bag' {$type="Bag";}| 'Sequence'{$type="Sequence";} | 'OrderSet'{$type="OrderSet";}|'Integer[]'{$type="Intger[]";}|'Integer[][]'{$type="Intger[][]";};//未處理
 
 collectionMethod[AbstractSyntaxTreeNode node] returns [AbstractSyntaxTreeNode node2]:
 {	$node2=new IterateExp(((CollectionExp)$node).getType());}

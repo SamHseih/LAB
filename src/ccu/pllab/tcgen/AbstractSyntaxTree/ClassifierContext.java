@@ -29,10 +29,6 @@ public class ClassifierContext extends AbstractSyntaxTreeNode{
 	
 	public StereoType getInv()
 	{
-		//20200702 dai
-		OperatorExp inv_temp =  (OperatorExp) this.inv.getTreeNode();
-		inv_temp.changeAssignToEqual();
-		this.inv.addTreeChildNode(inv_temp);
 		return this.inv;
 	}
 	

@@ -12,11 +12,9 @@ import ccu.pllab.tcgen.AbstractCLG.*;
 import ccu.pllab.tcgen.AbstractConstraint.*;
 import ccu.pllab.tcgen.AbstractSyntaxTree.SymbolTable;
 import ccu.pllab.tcgen.AbstractSyntaxTree.VariableToken;
-import ccu.pllab.tcgen.AbstractType.*;
 import ccu.pllab.tcgen.clgGraph2Path.CLGPath;
 import ccu.pllab.tcgen.clgGraph2Path.CLGPathEnumerator;
 import ccu.pllab.tcgen.exe.main.Main;
-import ccu.pllab.tcgen.launcher.BlackBoxLauncher;
 
 
 public class CLPTranslator {
@@ -366,22 +364,6 @@ public class CLPTranslator {
 			bodyCLP=bodyCLP.replaceAll(",Size=Size_pre", "");
 		}
 		
-		
-		// 202008 call other method unfinished
-		if(bodyCLP.contains("T#=T_Next,")) {
-			bodyCLP=bodyCLP.replace("T#=T_Next,", "T_pre=[Th_pre,Tm_pre,Ts_pre],\r\n"+"timeNext(T_pre,[],[Th,Tm,Ts],[],[Result_T],[]),\r\n"+"T=Result_T,\r\n");
-			//+"T=Obj,\r\n");
-		}
-		
-		if(bodyCLP.contains("D#=D_Next,")) {
-			// bodyCLP=bodyCLP.replace("Now#=Time(H,M,S),", "Now=time(H,M,S),\r\n");
-			
-			bodyCLP=bodyCLP.replace("D#=D_Next,", "D_pre=[Dy_pre,Dm_pre,Dd_pre],\r\n"+"dateNext(D_pre,[],[Dy,Dm,Dd],[],[Result_D],[]),\r\n"+"D=Result_D,\r\n");
-			//+"D=Obj,\r\n");
-		}
-		
-		
-		
 //		若這個CLP有exception則修改head
 		if(bodyCLP.contains("Exception"))
 			containException=true;
@@ -443,7 +425,7 @@ public class CLPTranslator {
 				String temp = object.toLowerCase().charAt(0) + object.substring(1);
 				for (VariableToken variableToken : Main.symbolTable.getAttribute()) {
 					if (variableToken.getVariableName().equals(temp)) {
-						if (variableToken.getType() instanceof ArrayListType || variableToken.getType() instanceof ArrayType )
+						if (variableToken.getType().contains("["))
 							completeCLP=completeCLP.replaceAll(object.toUpperCase().charAt(0) + object.substring(1)+"#=", object.toUpperCase().charAt(0) + object.substring(1)+"=");
 					}
 				}
@@ -498,24 +480,17 @@ public class CLPTranslator {
 			temp = temp.toLowerCase().charAt(0) + temp.substring(1);
 			for (VariableToken variableToken : Main.symbolTable.getAttribute()) {
 				if (variableToken.getVariableName().equals(temp)) {
-					// 二維
-					if (variableToken.getType() instanceof ArrayType &&
-						((ArrayType)variableToken.getType()).getElement() instanceof ArrayType)
+					if (variableToken.getType().contains("]["))
 					{
-						// String temptype=variableToken.getType();
+						String temptype=variableToken.getType();
 						if (iterateTimes == -1)
 						{
-							// 設size >>> row col
-							String row_str=((ArrayType)variableToken.getType()).getSize();
-							String col_str=((ArrayType)((ArrayType)variableToken.getType()).getElement()).getSize();
-							
-							completeCLP+="Row_pre#="+row_str+",\n";
-							if(!row_str.contains("x"))
-								row=Integer.parseInt(row_str);
-							
-							completeCLP+="Col_pre#="+col_str+",\n";
-							if(!col_str.contains("x"))
-								col=Integer.parseInt(col_str);
+						completeCLP+="Row_pre#="+temptype.substring(temptype.indexOf("[")+1, temptype.indexOf("]"))+",\n";
+						if(!temptype.substring(temptype.indexOf("[")+1, temptype.indexOf("]")).contains("x"))
+						row=Integer.parseInt(temptype.substring(temptype.indexOf("[")+1, temptype.indexOf("]")));
+						completeCLP+="Col_pre#="+temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]"))+",\n";
+						if(!temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]")).contains("x"))
+						col=Integer.parseInt(temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]")));
 						}
 						else
 						{
@@ -525,14 +500,9 @@ public class CLPTranslator {
 							col=iterateTimes;
 						}
 					}
-				else if (variableToken.getType() instanceof ArrayListType || variableToken.getType() instanceof ArrayType) {
-					// String arraySize = variableToken.getType();
-					// arraySize = arraySize.substring(arraySize.indexOf("[") + 1, arraySize.indexOf("]"));
-					String arraySize="";
-					if(variableToken.getType() instanceof ArrayType)
-						arraySize = ((ArrayType)variableToken.getType()).getSize();
-					else arraySize="x";  // ArrayListType
-					
+				else if (variableToken.getType().contains("[")) {
+						String arraySize = variableToken.getType();
+						arraySize = arraySize.substring(arraySize.indexOf("[") + 1, arraySize.indexOf("]"));
 						if (iterateTimes == -1)
 							completeCLP += "Size_pre#=" + arraySize + ",\n";
 						else
@@ -796,21 +766,13 @@ public class CLPTranslator {
 				temp = temp.toLowerCase().charAt(0) + temp.substring(1);
 				for (VariableToken variableToken : Main.symbolTable.getAttribute()) {
 					if (variableToken.getVariableName().equals(temp)) {
-						if (!(variableToken.getType() instanceof ArrayType) && !(variableToken.getType() instanceof ArrayListType))
-							if(variableToken.getType() instanceof UserDefinedType ) {
-								//object_post_content += "," + object;
-								// domainPredicate += "Now=[Hour,Minute,Second],\r\n" +
-										//"[Hour]:: -32768..32767,\r\n"+
-										//"[Minute]:: -32768..32767,\r\n"+
-										//"[Second]:: -32768..32767,\r\n";
-								//domainPredicate += "testTimeTime(ObjTime_pre,ArgTime_pre,ObjTime,ArgTime,Result,Exception),\r\n";
-							}
-							else object_pre_content += "," + object;
+						if (!variableToken.getType().contains("["))
+							object_pre_content += "," + object;
 					}
 				}
 			}
 			if (object_pre_content != "") {
-				domainPredicate += "[" + object_pre_content.substring(1) + "]:: 0..32767,\n";
+				domainPredicate += "[" + object_pre_content.substring(1) + "]:: -32768..32767,\n";
 			}
 		}
 		if (this.arg_pre.size() > 0) {
@@ -819,15 +781,14 @@ public class CLPTranslator {
 				temp = temp.toLowerCase().charAt(0) + temp.substring(1);
 				for (VariableToken variableToken : Main.symbolTable.getArgument()) {
 					if (variableToken.getVariableName().equals(temp)) {
-						if (!(variableToken.getType() instanceof ArrayType) && !(variableToken.getType() instanceof ArrayListType))
+						if (!variableToken.getType().contains("["))
 							arg_pre_content += "," + object;
-							
 					}
 				}
 				
 			}
 			if (arg_pre_content != "") {
-				domainPredicate += "[" + arg_pre_content.substring(1) + "]:: 0..32767,\n";
+				domainPredicate += "[" + arg_pre_content.substring(1) + "]:: -32768..32767,\n";
 			}
 
 		}
@@ -837,36 +798,28 @@ public class CLPTranslator {
 				String temp = object.toLowerCase().charAt(0) + object.substring(1);
 				for (VariableToken variableToken : Main.symbolTable.getAttribute()) {
 					if (variableToken.getVariableName().equals(temp)) {
-						if (!(variableToken.getType() instanceof ArrayType) && !(variableToken.getType() instanceof ArrayListType))
-							if(variableToken.getType() instanceof UserDefinedType ) {
-								//object_post_content += "," + object;
-								// domainPredicate += "Now=[Hour,Minute,Second],\r\n" +
-										//"[Hour]:: -32768..32767,\r\n"+
-										//"[Minute]:: -32768..32767,\r\n"+
-										//"[Second]:: -32768..32767,\r\n";
-								//domainPredicate += "testTimeTime(ObjTime_pre,ArgTime_pre,ObjTime,ArgTime,Result,Exception),\r\n";
-							}
-							else object_post_content += "," + object;
+						if (!variableToken.getType().contains("["))
+							object_post_content += "," + object;
 					}
 				}
 				
 			}
 			if (object_post_content != "")
-				domainPredicate += "[" + object_post_content.substring(1) + "]:: 0..32767,\n";
+				domainPredicate += "[" + object_post_content.substring(1) + "]:: -32768..32767,\n";
 		}
 		if (this.arg_post.size() > 0) {
 			for (String object : this.arg_post) {
 				String temp = object.toLowerCase().charAt(0) + object.substring(1);
 				for (VariableToken variableToken : Main.symbolTable.getArgument()) {
 					if (variableToken.getVariableName().equals(temp)) {
-						if (!(variableToken.getType() instanceof ArrayType) && !(variableToken.getType() instanceof ArrayListType))
+						if (!variableToken.getType().contains("["))
 							arg_post_content += "," + object;
 					}
 				}
 				
 			}
 			if (arg_post_content != "")
-				domainPredicate += "[" + arg_post_content.substring(1) + "]:: 0..32767,\n";
+				domainPredicate += "[" + arg_post_content.substring(1) + "]:: -32768..32767,\n";
 		}
 		/*for (String object : this.result) {
 			if (object.contains("Result_"))
@@ -880,19 +833,16 @@ public class CLPTranslator {
 			temp = temp.toLowerCase().charAt(0) + temp.substring(1);
 			for (VariableToken variableToken : Main.symbolTable.getAttribute()) {
 				if (variableToken.getVariableName().equals(temp)) {
-					if (variableToken.getType() instanceof ArrayListType || variableToken.getType() instanceof ArrayType) {
-						String type = variableToken.getType().toString();
+					if (variableToken.getType().contains("[")) {
+						String type = variableToken.getType();
 						String size = type.substring(type.indexOf("[") + 1, type.length() - 1);
 						
 						if (size.contains("...")||size.contains("bound")||size.contains("x")) {
 							if (iterateTimes == -1)
 							{
-								if (variableToken.getType() instanceof ArrayType &&
-										((ArrayType)variableToken.getType()).getElement() instanceof ArrayType)
-									{
-								/*if (variableToken.getType().contains("]["))
-								{*/
-									String temptype=variableToken.getType().toString();
+								if (variableToken.getType().contains("]["))
+								{
+									String temptype=variableToken.getType();
 									domainPredicate+="Row_pre#="+temptype.substring(temptype.indexOf("[")+1, temptype.indexOf("]"))+",\n";
 									domainPredicate+="Col_pre#="+temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]"))+",\n";
 									twoD=true;
@@ -903,12 +853,9 @@ public class CLPTranslator {
 							}
 								else
 								{
-									if (variableToken.getType() instanceof ArrayType &&
-											((ArrayType)variableToken.getType()).getElement() instanceof ArrayType)
-										{
-									/*if (variableToken.getType().contains("]["))
-									{*/
-										//String temptype=variableToken.getType();
+									if (variableToken.getType().contains("]["))
+									{
+										String temptype=variableToken.getType();
 										domainPredicate+="Row_pre#="+this.iterateTimes+",\n";
 										domainPredicate+="Col_pre#="+this.iterateTimes+",\n";
 										twoD=true;
@@ -920,21 +867,11 @@ public class CLPTranslator {
 								}
 						} else
 						{
-							if (variableToken.getType() instanceof ArrayType &&
-									((ArrayType)variableToken.getType()).getElement() instanceof ArrayType)
-								{
-							/*if (variableToken.getType().contains("]["))
-							{*/
-								//String temptype=variableToken.getType();
-								// 設size >>> row col
-								String row_str=((ArrayType)variableToken.getType()).getSize();
-								String col_str=((ArrayType)((ArrayType)variableToken.getType()).getElement()).getSize();
-								
-								domainPredicate+="Row_pre#="+row_str+",\n";
-								domainPredicate+="Col_pre#="+col_str+",\n";
-								
-								//domainPredicate+="Row_pre#="+temptype.substring(temptype.indexOf("[")+1, temptype.indexOf("]"))+",\n";
-								//domainPredicate+="Col_pre#="+temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]"))+",\n";
+							if (variableToken.getType().contains("]["))
+							{
+								String temptype=variableToken.getType();
+								domainPredicate+="Row_pre#="+temptype.substring(temptype.indexOf("[")+1, temptype.indexOf("]"))+",\n";
+								domainPredicate+="Col_pre#="+temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]"))+",\n";
 								twoD=true;
 								Main.twoD=true;
 							}
@@ -991,30 +928,14 @@ public class CLPTranslator {
 			temp = temp.toLowerCase().charAt(0) + temp.substring(1);
 			for (VariableToken variableToken : Main.symbolTable.getArgument()) {
 				if (variableToken.getVariableName().equals(temp)) {
-					if (variableToken.getType() instanceof ArrayListType || variableToken.getType() instanceof ArrayType) {
-						String size = ((ArrayType)variableToken.getType()).getSize();
-						//String type = variableToken.getType();
-						//String size = type.substring(type.indexOf("[") + 1, type.length() - 1);
+					if (variableToken.getType().contains("[")) {
+						String type = variableToken.getType();
+						String size = type.substring(type.indexOf("[") + 1, type.length() - 1);
 						if (size.contains("...")||size.contains("x")) {
 							if (iterateTimes == -1)
 							{
-								if (variableToken.getType() instanceof ArrayType &&
-										((ArrayType)variableToken.getType()).getElement() instanceof ArrayType)
-									{
-								/*if (variableToken.getType().contains("]["))
-								{*/
-									// 設size >>> row col
-									String row_str=((ArrayType)variableToken.getType()).getSize();
-									String col_str=((ArrayType)((ArrayType)variableToken.getType()).getElement()).getSize();
-									
-									domainPredicate+="ArrayRow_pre#="+row_str+",\n";
-									if(!row_str.contains("x"))
-										arrayrow=Integer.parseInt(row_str);
-									domainPredicate+="ArrayCol_pre#="+col_str+",\n";
-									if(!col_str.contains("x"))
-										arraycol=Integer.parseInt(col_str);
-									
-									/*
+								if (variableToken.getType().contains("]["))
+								{
 									String temptype=variableToken.getType();
 									domainPredicate+="ArrayRow_pre#="+temptype.substring(temptype.indexOf("[")+1, temptype.indexOf("]"))+",\n";
 									if(!temptype.substring(temptype.indexOf("[")+1, temptype.indexOf("]")).contains("x"))
@@ -1022,7 +943,6 @@ public class CLPTranslator {
 									domainPredicate+="ArrayCol_pre#="+temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]"))+",\n";
 									if(!temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]")).contains("x"))
 										arraycol=Integer.parseInt(temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]")));
-									*/
 									twoD=true;
 									Main.twoD=true;
 								}
@@ -1033,12 +953,9 @@ public class CLPTranslator {
 							}
 								else
 								{
-									if (variableToken.getType() instanceof ArrayType &&
-											((ArrayType)variableToken.getType()).getElement() instanceof ArrayType)
-										{
-									/*if (variableToken.getType().contains("]["))
-									{*/
-										//String temptype=variableToken.getType();
+									if (variableToken.getType().contains("]["))
+									{
+										String temptype=variableToken.getType();
 										domainPredicate+="ArrayRow_pre#="+this.iterateTimes+",\n";
 										arrayrow=this.iterateTimes;
 										domainPredicate+="ArrayCol_pre#="+this.iterateTimes+",\n";
@@ -1052,32 +969,17 @@ public class CLPTranslator {
 						} else
 						{
 							//System.out.println("test"+variableToken.getType());
-							if (variableToken.getType() instanceof ArrayType &&
-									((ArrayType)variableToken.getType()).getElement() instanceof ArrayType)
-								{
-							/*if (variableToken.getType().contains("]["))
-							{*/
-								// 設size >>> row col
-								String row_str=((ArrayType)variableToken.getType()).getSize();
-								String col_str=((ArrayType)((ArrayType)variableToken.getType()).getElement()).getSize();
+							if (variableToken.getType().contains("]["))
+							{
 								
-								domainPredicate+="ArrayRow_pre#="+row_str+",\n";
-								if(!row_str.contains("x"))
-									arrayrow=Integer.parseInt(row_str);
-								domainPredicate+="ArrayCol_pre#="+col_str+",\n";
-								if(!col_str.contains("x"))
-									arraycol=Integer.parseInt(col_str);
-								/*
 								String temptype=variableToken.getType();
 								System.out.println("type:"+temptype);
-								
 								domainPredicate+="ArrayRow_pre#="+temptype.substring(temptype.indexOf("[")+1, temptype.indexOf("]"))+",\n";
 								if(!temptype.substring(temptype.indexOf("[")+1, temptype.indexOf("]")).contains("x"))
 									arrayrow=Integer.parseInt(temptype.substring(temptype.indexOf("[")+1, temptype.indexOf("]")));
 								domainPredicate+="ArrayCol_pre#="+temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]"))+",\n";
 								if(temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]")).contains("x"))
 									arraycol=Integer.parseInt(temptype.substring(temptype.lastIndexOf("[")+1, temptype.lastIndexOf("]")));
-								*/
 								twoD=true;
 								Main.twoD=true;
 							}
@@ -1171,7 +1073,7 @@ public class CLPTranslator {
 
 			for (VariableToken variableToken : Main.symbolTable.getAttribute()) {
 				if (variableToken.getVariableName().equals(temp))
-					if (variableToken.getType() instanceof ArrayListType || variableToken.getType() instanceof ArrayType)
+					if (variableToken.getType().contains("["))
 						isSet = true;
 			}
 		}
@@ -1181,7 +1083,7 @@ public class CLPTranslator {
 
 			for (VariableToken variableToken : Main.symbolTable.getArgument()) {
 				if (variableToken.getVariableName().equals(temp))
-					if (variableToken.getType() instanceof ArrayListType || variableToken.getType() instanceof ArrayType)
+					if (variableToken.getType().contains("["))
 						isSet2 = true;
 					else {
 						arg+=","+object;
@@ -1399,8 +1301,6 @@ public class CLPTranslator {
 					this.renameDefVar(((CLGOperatorNode) c).getLeftOperand());
 					String temp = c.getCLPInfo();
 					
-
-					//System.out.println(temp+"THIS a CONSTR");
 //					2020/3/4 ocl回傳值為class時，將標示的class關鍵字從產生的clp中去除
 					if(temp.contains("class"))
 						temp=temp.replaceAll("#=class", "=");
@@ -1409,75 +1309,6 @@ public class CLPTranslator {
 						continue;
 					if (c.getCLPInfo().contains("mod"))
 						usedMod = true;
-					
-					// 202008 Other Class Constructor Translation
-					else if ( temp.contains("#") && temp.contains("(")) {
-						String obj_post_name = temp.substring(0,temp.indexOf("#"));
-						String class_constructor_name = temp.substring(temp.indexOf("=")+1, temp.indexOf("("));
-						String[] para_list = temp.substring(temp.indexOf("(")+1, temp.indexOf(")")).split(",");
-						
-						// "D#=Date(Dy,Dm,Dd)" >> "dateDate([Dy_pre,Dm_pre,Dd_pre],D,[Dy,Dm,Dd],[],[])"						
-						//if(BlackBoxLauncher.typeTable.containsType(class_constructor_name, class_constructor_name)){
-						if(Main.typeTable.containsType(class_constructor_name, class_constructor_name)){	
-							temp = class_constructor_name.substring(0, 1).toLowerCase()+
-								   class_constructor_name.substring(1) + class_constructor_name + "([";
-							
-							// Arg_pre
-							for(int i = 0; i < para_list.length;i++) {
-								temp += para_list[i]+"_pre";
-								if(i!= para_list.length-1) temp+=",";
-							}
-							
-							// Obj_post
-							temp += "],"+obj_post_name+",[";
-							
-							// Arg_post
-							for(int i = 0; i < para_list.length;i++) {
-								temp += para_list[i];
-								if(i!= para_list.length-1) temp+=",";
-							}
-							
-							// Result & Exception
-							temp += "],[],[])";
-						}
-					} // else if
-					
-					// 202008 use other class method
-					// T#=T_next >> timeNext([Th_pre,Tm_pre,Ts_pre],[],[Th,Tm,Ts],[],[Result],[])
-					/*
-					else if ( temp.contains("#") && temp.contains("::")) {
-						String class_name = startNode.getClassName();
-						String obj_name = temp.substring(0,temp.indexOf("#"));
-						
-						String class_constructor_name = temp.substring(temp.indexOf("=")+1, temp.indexOf("("));
-						String[] para_list = temp.substring(temp.indexOf("(")+1, temp.indexOf(")")).split(",");
-						
-						// "D#=Date(Dy,Dm,Dd)" >> "dateDate([Dy_pre,Dm_pre,Dd_pre],D,[Dy,Dm,Dd],[],[])"						
-						if(BlackBoxLauncher.typeTable.containsType(class_constructor_name, class_constructor_name)){
-							temp = class_constructor_name.substring(0, 1).toLowerCase()+
-								   class_constructor_name.substring(1) + class_constructor_name + "([";
-							
-							// Arg_pre
-							for(int i = 0; i < para_list.length;i++) {
-								temp += para_list[i]+"_pre";
-								if(i!= para_list.length-1) temp+=",";
-							}
-							
-							// Obj_post
-							temp += "],"+obj_post_name+",[";
-							
-							// Arg_post
-							for(int i = 0; i < para_list.length;i++) {
-								temp += para_list[i];
-								if(i!= para_list.length-1) temp+=",";
-							}
-							
-							// Result & Exception
-							temp += "],[],[])";
-						}
-					}*/
-					else ;
-					
 					if (c.getCLPInfo().contains("method")) {
 						temp = temp.substring(temp.indexOf("method") + 6);
 						if (temp.contains("Remainder")) {
@@ -1967,141 +1798,6 @@ public class CLPTranslator {
 				}
 			}
 		}
-		this.body_count++;
-		return clpstr1;
-	}
-	
-	public String genMethodPathCLP_try(CLGPath path, int pathN) {
-		int clpcount = 1;
-		String clpstr1 = "", classn = "";
-		List<CLGNode> nodeli = path.getPathNodes();
-		clpstr1 += importLibraryCLP();
-		clpstr1 += "testpath" + (pathN) + "(SDObjPre, SDArgPre, SDObjPost, SDArgPost, SDResult,SDException):-\n\n";
-
-		CLGPathEnumerator clgPathEnumerator = new CLGPathEnumerator();
-		nodeli = clgPathEnumerator.filterConstraintNode(nodeli);
-
-		for (int i = 0; i < nodeli.size(); i++) {
-			if (nodeli.get(i) instanceof CLGConstraintNode) {
-				CLGConstraintNode c = (CLGConstraintNode) nodeli.get(i);
-
-				if (c.getConstraint() instanceof CLGOperatorNode) {
-					CLGOperatorNode clgop = (CLGOperatorNode) c.getConstraint();
-					if (clgop.getOperator().equals("=")) {
-						this.renameUseVar(clgop.getRightOperand());
-						this.renameDefVar(clgop.getLeftOperand());
-						clpstr1 += "ObjPost" + clpcount+ " = [P" + clpcount+ "],\n";
-						clpstr1 += "P" + clpcount+ " #=" + clgop.getRightOperand().getImgInfo() + ",\n";
-					} else {
-						this.renameUseVar(clgop.getLeftOperand());
-						this.renameUseVar(clgop.getRightOperand());
-						if (clgop.getOperator().equals("==")) {
-							clpstr1 += "ObjPost" + clpcount+ " = [P" + clpcount + "],\n";
-							clpstr1 += "P" + clpcount + " #= " + clgop.getRightOperand().getImgInfo() + ",\n\n";
-						} else {
-							clpstr1 += "ObjPost" + clpcount + " = [P" + clpcount + "],\n";
-							clpstr1 += "P" + clpcount + " #" + clgop.getOperator() + clgop.getRightOperand().getImgInfo() + ",\n";
-						}
-					}
-				} else if (c.getConstraint() instanceof CLGMethodInvocationNode) {
-					
-					CLGMethodInvocationNode clgme = (CLGMethodInvocationNode) c.getConstraint();
-					
-					if(!clgme.getMethodArgument().contains(" ")) {
-						
-						String argstring = "ArgPre" + clpcount + " = [";
-						for (int argCount = 0 ; argCount < clgme.getMethodArgument().size(); argCount++) {
-							String thisarg = clgme.getMethodArgument().get(argCount).toString();
-							thisarg = thisarg.substring(0, 1).toUpperCase() + thisarg.substring(1) + clpcount;
-							clpstr1 += thisarg;
-							clpstr1 += " :: 1 .. 32767,\n";
-							
-							if(argCount != clgme.getMethodArgument().size() -1)
-								argstring += thisarg +", ";
-							else
-								argstring += thisarg;
-						}
-						argstring += "],\n";
-						clpstr1 += argstring;
-					}
-					
-					clpstr1 += "ArgPre"+ clpcount + " = ArgPost" + clpcount + ",\n";
-					
-					if (clpcount == 1) {
-						classn = clgme.getMethodName();
-						if (nodeli.size() == 3) {
-							clpstr1 += classn.substring(0, 1).toLowerCase() +classn.substring(1) + clgme.getMethodName().substring(0, 1).toUpperCase() + clgme.getMethodName().substring(1, clgme.getMethodName().length()) 
-									+ "(ArgPre" + clpcount + ", ObjPost" + clpcount + ", ArgPre" + clpcount + ", Result" + clpcount+ ", Exception"+ clpcount +"),\n";
-							clpstr1 += "SDObjPre = [[]],\n";
-							clpstr1 += "SDArgPre = [ArgPre" + clpcount + "],\n";
-							clpstr1 += "SDObjPost = [ObjPost" + clpcount + "],\n";
-							clpstr1 += "SDArgPost = [ArgPost" + clpcount + "],\n";
-							clpstr1 += "SDResult = [[]],\n";
-							clpstr1 += "SDException = [Exception"+clpcount +"],\n\n";
-						} else {
-							clpstr1 += classn.substring(0, 1).toLowerCase() +classn.substring(1) + clgme.getMethodName().substring(0, 1).toUpperCase() + clgme.getMethodName().substring(1, clgme.getMethodName().length()) 
-									+ "(ArgPre" + clpcount + ", ObjPost" + clpcount + ", ArgPre" + clpcount + ", Result" + clpcount+ ", Exception"+ clpcount +"),\n";
-							clpstr1 += "SDObjPre = [[]|SDObjPre" + (clpcount + 1) + "],\n";
-							clpstr1 += "SDArgPre = [ArgPre" + clpcount + "|SDArgPre" + (clpcount + 1) + "],\n";
-							clpstr1 += "SDObjPost = [ObjPost" + clpcount + "|SDObjPost" + (clpcount + 1) + "],\n";
-							clpstr1 += "SDArgPost = [ArgPost" + clpcount + "|SDArgPost" + (clpcount + 1) + "],\n";
-							clpstr1 += "SDResult = [[] |SDResult" + (clpcount + 1) + "],\n";
-							clpstr1 += "SDException = [Exception"+ clpcount+ "|SDException" + (clpcount + 1) +"],\n\n";
-							
-							
-							clpstr1 += "ObjPre"+ (clpcount + 1 ) + " = ObjPost" + clpcount + ",\n";
-							//clpstr1 += "ArgPre"+ clpcount + " = ArgPost" + clpcount + ",\n";
-						}
-						clpcount++;
-					} else {
-						// check last op
-						if (i != nodeli.size() - 2) {
-							clpstr1 += classn.substring(0, 1).toLowerCase() +classn.substring(1) + clgme.getMethodName().substring(0, 1).toUpperCase() + clgme.getMethodName().substring(1, clgme.getMethodName().length()) 
-									+ "(ObjPre"+ clpcount+ ", ArgPre" + clpcount + ", ObjPost" + clpcount + ", ArgPre" + clpcount + ", Result" + clpcount + ", Exception" + clpcount +"),\n";
-							clpstr1 += "SDObjPre" +	clpcount + " = [ObjPre" + clpcount + "|SDObjPre" + (clpcount + 1) + "],\n";
-							clpstr1 += "SDArgPre" + clpcount+ " = [ArgPre" + clpcount + "|SDArgPre" + (clpcount + 1) + "],\n";
-							clpstr1 += "SDObjPost" + clpcount+ " = [ObjPost" + clpcount + "|SDObjPost" + (clpcount + 1) + "],\n";
-							clpstr1 += "SDArgPost" + clpcount+ " = [ArgPost" + clpcount + "|SDArgPost" + (clpcount + 1) + "],\n";
-							clpstr1 += "SDResult" + clpcount + " = " + "[Result" + clpcount + "|SDResult" + (clpcount + 1) + "],\n";
-							clpstr1 += "SDException" + clpcount + " = " + "[Exception" + clpcount + "|SDException" + (clpcount + 1) + "],\n\n";
-							
-							clpstr1 += "ObjPre"+ (clpcount + 1 ) + " = ObjPost" + clpcount + ",\n";
-							//clpstr1 += "ArgPre"+ clpcount + " = ArgPost" + clpcount + ",\n";
-							clpcount++;
-						} else {
-							clpstr1 += classn.substring(0, 1).toLowerCase() +classn.substring(1) + clgme.getMethodName().substring(0, 1).toUpperCase() + clgme.getMethodName().substring(1, clgme.getMethodName().length()) 
-									+ "(ObjPre"+ clpcount + ", ArgPre" + clpcount + ", ObjPost" + clpcount + ", ArgPre" + clpcount + ", Result" + clpcount + ", Exception" + clpcount +"),\n";
-							clpstr1 += "SDObjPre"+ clpcount + " = [ObjPre" + clpcount+ "],\n";
-							clpstr1 += "SDArgPre" + clpcount + " = [ArgPre" + clpcount + "],\n";
-							clpstr1 += "SDObjPost" + clpcount + " = [ObjPost" + clpcount + "],\n";
-							clpstr1 += "SDArgPost" + clpcount + " = [ArgPost" + clpcount + "],\n";
-							clpstr1 += "SDResult" + clpcount + " = " + "[Result" + clpcount + "],\n";
-							clpstr1 += "SDException" + clpcount + " = " + "[Exception" + clpcount + "],\n\n";
-							clpcount++;
-						}
-					} // end else
-				}
-			}
-		}
-		
-		for(int i = 1; i < clpcount; i++) {
-			
-			if(i != 1)
-				clpstr1 += "labeling(ObjPre" + i + "),\n";
-			
-			clpstr1 += "labeling(ArgPre" + i + "),\n";
-			clpstr1 += "labeling(ObjPost" + i + "),\n";
-			//clpstr1 += "labeling(ArgPost" + i + "),\n";
-			
-			if(i != clpcount - 1)
-				clpstr1 += "labeling(ArgPost" + i + "),\n\n";
-			else
-				clpstr1 += "labeling(ArgPost" + i + ").\n\n";
-			
-			//之後要將Result 和 exception 
-		}
-		
-		
 		this.body_count++;
 		return clpstr1;
 	}

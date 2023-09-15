@@ -30,11 +30,6 @@ public abstract class AbstractSyntaxTreeNode {
 		return this.id;
 	}
 	
-	//20200916 dai 
-	public static void reset()
-	{
-		node_count = 0;
-	}
 
 	public abstract String childNodeInfo();
 	public abstract String ASTInformation();

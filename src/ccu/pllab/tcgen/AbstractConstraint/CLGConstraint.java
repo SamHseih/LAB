@@ -21,12 +21,6 @@ public abstract class CLGConstraint {
 	{
 		return this.clone_id;
 	}
-	
-	//20200916 dai 
-	public static void reset() {
-		constraint_count=0;
-	}	
-	
 	public abstract String getImgInfo();
 	public abstract String getCLPInfo();
 	public abstract ArrayList<String> getInvCLPInfo();

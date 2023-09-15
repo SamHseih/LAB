@@ -26,7 +26,7 @@ public class CLGGraph {
 		this.endNode.addPredecessor(this.startNode);
 	}
 
-	/*public CLGGraph(int nums) {
+	public CLGGraph(int nums) {
 		for (int i = 1; i < (nums + 3); i++) {
 			connectionNodes.add(new CLGConnectionNode(i));
 		}
@@ -39,25 +39,6 @@ public class CLGGraph {
 			this.getConnectionNode(i).addSuccessor(this.getConnectionNode(i+1));
 		}
 		this.getConnectionNode(nums+2).addSuccessor(this.endNode);
-
-	}*/
-	
-	public CLGGraph(int nums) {
-		for (int i = 1; i < (nums+1); i++) {
-			connectionNodes.add(new CLGConnectionNode(i));
-		}
-		this.startNode = new CLGStartNode();
-		this.endNode = new CLGEndNode();
-		this.startNode.addSuccessor(this.getConnectionNode(1));
-		this.endNode.addPredecessor(this.getConnectionNode(2));
-		// this.endNode.addPredecessor(this.getConnectionNode(nums));
-		/*
-		for (int i = 1; i < nums; i++) {
-			this.getConnectionNode(i).addSuccessor(this.getConnectionNode(i+1));
-
-		}
-		*/
-		// this.getConnectionNode(nums).addSuccessor(this.endNode);
 
 	}
 
